@@ -43,6 +43,7 @@ body{
     background-color: rgb(51, 52, 53);
     position: relative;
     z-index: 2;
+    box-shadow: 0 0 10px rgba(255, 252, 252, 0.5);
     
 }
 form{
