@@ -39,9 +39,9 @@ body{
     min-width: 400px;
     margin: 0;
     padding: 40px 20px;
-    color: #f2f2f2;
+    color: #ffffff;
     border-radius: 20px;
-    background-color: rgba(51, 52, 53, 0.894);
+    background-color: rgba(8, 8, 8, 0.55);
     position: relative;
     z-index: 2;
     box-shadow: 0 0 10px rgba(255, 252, 252, 0.5);
@@ -62,32 +62,38 @@ h2{
 input{
     margin-bottom: 20px;
     padding: 12px 30px;
-    background-color: grey;
+    background-color: #156939 ;
     border-radius: 8px;
     text-align: left;
     transition-property: padding, border;
-     transition-duration: 0.5s;
+     transition-duration: 0.3s;
 }
 input::placeholder{
     color: white;
 }
 input:hover{
-    border: 2px solid #95c415;
+    border: 2px solid #27336f;
     color: white;
     padding: 14px 30px;
   
 }
 input:focus{
     outline: none;
-    border: 2px solid #f2f2f2;
+    border: 2px solid #156939;
     color: white;
     
 }
 button{
     padding: 15px 30px;
-    background-color: #f2f2f2;
+    background-color: #99a0be;
     border: none;
     border-radius: 8px;
     cursor: pointer;
 }
 
+fieldset{
+    border: 4px solid #99a0be;
+    border-radius: 20px;
+    padding: 20px;
+
+}

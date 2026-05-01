@@ -1,19 +1,27 @@
 html, body{
 	box-sizing: border-box;
 	margin: 0;
-	background-color: #F5f5f5;
+	background-color: #e7e7e7;
 	font-family: sans-serif;
 
 }
 
 nav{
+	display: flex;
 	width: 100vw;
 	padding: 15px 0px;
-	min-height: auto;
-	background-color: rgb(74, 167, 74);
+	max-height: 30px;
+	background-color: #25346b;
 	color: white;
-	margin: 0
+	align-items: center;
+	margin: 0;
 
+}
+.nav__logo{
+	height: 40px;
+	margin: 0;
+	margin-left: 20px;
+	margin-right: 20px;
 }
 a{
 	text-decoration: none;
@@ -21,92 +29,135 @@ a{
 	padding: 10px;
 	font-size: 1.5em;
 	padding-left: 10px;
-	padding-bottom: 3px;
+	padding-bottom:2px;
+	margin: 0;
 }
-.nav__link:hover{
-	border-bottom: #F5f5f5 solid 4px;
+.nav__link{
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	padding-bottom: 2px;
+}
+.nav__link::after{
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 4px;
+	background: #F5F5F5;
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform .2s ease;
+}
+.nav__link:hover::after{
+	transform: scaleX(1);
 	border-radius: 0 0 4px 4px;
-	
 }
 
 
 .container_padre{
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	min-height: 90vh;
 	max-width: 100vw;
-	overflow-x: hidden;
+	overflow-x: visible;
 	padding: 0;
 	margin: 0;
+	min-width: 0;
 }
 
 
 .tabla__container{
-	display: flex;
-
-	margin: 0;
+	display: block;
+	margin: 0 auto;
 	height: auto;
-	width: auto;
+	width: 100%;
+	max-width: 1100px;
+	background-color: #dcdde2;
+	box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+	padding: 24px;
+	border-radius: 20px;
 	
-	max-width:100%;
-	background-color: #46494d;
-	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-	padding: 20px;
-	 border-radius: 20px;
-
+	border: 2px solid #99a0be;
+	overflow-x: auto;
 }
 
-table{
+.tabla-planificacion{
 	border-collapse: collapse;
 	width: 100%;
-	color: rgb(24, 23, 23);
+	min-width: 1200px;
+	color: #222222;
+	font-size: 0.95rem;
+}
+
+.tabla-planificacion__caption{
+	caption-side: top;
+	text-align: left;
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: #156939;
+	margin-bottom: 12px;
+}
+
+thead th{
+	padding: 16px 18px;
+	text-align: left;
+	color: white;
+	background-color: #156939;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
 }
 
 td, th{
-	padding: 10px 20px;
-	border: none;
-
-	
-}
-.numero{
-    display: block;
-	background-color: rgb(161, 161, 161);
-	padding: 14px 0.65em;
-	margin: 0px;
-	height: 10px;
-	width: 10px
-	
+	padding: 16px 18px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 tr{
-	background-color: rgb(161, 161, 161);
+	background-color: #ffffff;
 }
 
-.numero__head{
-    display: block;
-	background-color: rgb(74, 167, 74);
-	padding: 14px 0.65em;
-	margin: 0px;
-	height: 10px;
-	width: 10px
-	
-}
-tr:nth-child(even) td:first-child{
-	background-color: gray;
+tbody tr:nth-child(even){
+	background-color: #dcdde2;
 }
 
-
-tr:nth-child(even){
-	background-color: gray;
+.planificacion{
+	width: 100%;
 }
 
-th{
-	text-align: left;
+.planificacion__title{
+	font-size: 2rem;
+	margin: 0 0 18px;
+	color: #156939;
+	text-align: center;
+}
+
+.estado{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 6px 12px;
+	border-radius: 999px;
+	font-size: 0.85rem;
+	font-weight: 700;
 	color: white;
-	background-color: rgb(74, 167, 74);
-	font-weight: bold;
-	
+}
+
+.estado-confirmado{
+	background-color: #156939;
+}
+
+.estado-en-proceso{
+	background-color: #99a0be;
+}
+
+.estado-pendiente{
+	background-color: #dcdde2;
+	color: #222222;
 }
 
 
