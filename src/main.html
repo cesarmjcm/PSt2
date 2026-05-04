@@ -3,7 +3,7 @@
 <head>
 	<title>Asistencia de visitantes y Planificacion</title>
 	<link rel="stylesheet" type="text/css" href="./css/main.css">
-	<link rel="icon" type="png" href="./assets/image.png">
+	<link rel="icon" type="png" href="./assets/icon__icey.png">
 </head>
 <body>
 <header>
@@ -14,11 +14,57 @@
 	</nav>
 	</header>
 	<section class="planificacion">
-		<div class="container_padre">
+		<div class="container__planificacion">
+		<div class="formulario-planificacion">
+			<form action="main.html" method="post" onsubmit="return validacion(this)">
+			<button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
+			
+				<div class="planificacion-grid">
+					<fieldset class="planificacion-group">
+						<legend>Maestro 1</legend>
+						
+						<label for="plan-tipo">Tipo de actividad</label>
+						<input type="text" id="plan-tipo" name="tipoActividad" placeholder="Ej. Conversatorio">
+						<label for="plan-dia">Día de la actividad</label>
+						<input type="text" id="plan-dia" name="diaActividad" placeholder="Ej. Lunes">
+						<label for="plan-fecha">Fecha de la actividad</label>
+						<input type="text" id="plan-fecha" name="fechaActividad" placeholder="Ej. 20/04/2026">
+						<label for="plan-hora">Hora de la actividad</label>
+						<input type="text" id="plan-hora" name="horaActividad" placeholder="Ej. 09:00">
+						<label for="plan-descripcion">Descripción de la actividad</label>
+						<textarea id="plan-descripcion" name="descripcionActividad" placeholder="Descripción breve"></textarea>
+						<label for="plan-objetivo">Objetivo / enfoque</label>
+						<input type="text" id="plan-objetivo" name="objetivoEnfoque" placeholder="Ej. Formativa">
+						<label for="plan-impacto">Nivel de impacto</label>
+						<input type="text" id="plan-impacto" name="nivelImpacto" placeholder="Ej. Comunal">
+						<label for="plan-participantes">Cant. participantes</label>
+						<input type="text" id="plan-participantes" name="cantidadParticipantes" placeholder="Ej. 40">
+					</fieldset>
+				<fieldset class="planificacion-group">
+						<legend>Maestro 2</legend>
+						<label for="plan-municipio">Municipio</label>
+						<input type="text" id="plan-municipio" name="municipio" placeholder="Ej. San Felipe">
+						<label for="plan-parroquia">Parroquia</label>
+						<input type="text" id="plan-parroquia" name="parroquia" placeholder="Ej. San Felipe">
+						<label for="plan-espacio">Espacio cultural</label>
+						<input type="text" id="plan-espacio" name="espacioCultural" placeholder="Ej. Biblioteca Pública">
+						<label for="plan-comuna">Comuna</label>
+						<input type="text" id="plan-comuna" name="comuna" placeholder="Ej. Comuna Cultural">
+						<label for="plan-responsable">Responsable</label>
+						<input type="text" id="plan-responsable" name="responsable" placeholder="Ej. Carlos Salas">
+						<label for="plan-telefono">Teléfono responsable</label>
+						<input type="text" id="plan-telefono" name="telefonoResponsable" placeholder="Ej. 0412-3456789">
+					</fieldset>
+				</div>
+			</form>
+			</div>
+		</div>
+			<div class="container_padre">
 			<div class="tabla__container">
 				<h1 class="planificacion__title">Planificación de Actividades Culturales</h1>
 				<table class="tabla-planificacion">
 					<thead>
+						<tr><th colspan="2"><button>Editar Planificación</button></th></tr>
 						<tr>
 							<th>N°</th>
 							<th>Tipo de actividad</th>
@@ -109,8 +155,8 @@
 					</tbody>
 				</table>
 			</div>
-		</section>
-	</div>
-
+		</div>
+	</section>
+<script src="app.js"></script>
 </body>
 </html>
