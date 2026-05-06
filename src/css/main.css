@@ -8,7 +8,7 @@ html, body{
 
 nav{
 	display: flex;
-	width: 100vw;
+	width: 100%;
 	padding: 15px 0px;
 	max-height: 30px;
 	background-color: #25346b;
@@ -257,6 +257,9 @@ fieldset{
 @media (max-width: 900px){
 	.planificacion-grid{
 		grid-template-columns: 1fr;
+	}
+	nav{
+		width: 100vw;
 	}
 }
 
