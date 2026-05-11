@@ -60,13 +60,12 @@ h2{
     margin-bottom: 20px;
 }
 input{
-    margin-bottom: 20px;
+    margin-bottom: 0px;
     padding: 12px 30px;
     background-color: #156939 ;
     border-radius: 8px;
     text-align: left;
-    transition-property: padding, border;
-     transition-duration: 0.3s;
+    
 }
 input::placeholder{
     color: white;
@@ -91,3 +90,81 @@ button{
     cursor: pointer;
 }
 
+.user {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #1a5c37;
+    justify-content: center;
+    border-radius: 5px;
+    /* Eliminamos el padding vertical para que no sume altura */
+    padding: 0 10px; 
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    transition-property: padding, border;
+     transition-duration: 0.3s;
+  }
+  
+  .input-icon {
+    width: 18px; /* Un pelo más pequeño para que no fuerce el alto */
+    height: 14px;
+    filter: invert(1);
+    margin-right: 5px;
+    flex-shrink: 0;
+    
+  }
+  
+  #username {
+    background: transparent;
+     display: flex;
+     align-items: center;
+    
+    border: none;
+    /* Ajusta este padding para que coincida con el input de abajo */
+    height: 100%; /* Que ocupe todo el alto del contenedor */
+    padding: 11px 10px; 
+    width: 100%;
+    height: 100%; /* Que ocupe todo el alto del contenedor */
+  
+  }
+  .pass{
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #1a5c37;
+    justify-content: center;
+    border-radius: 5px;
+    /* Eliminamos el padding vertical para que no sume altura */
+    padding: 0 10px; 
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    transition-property: padding, border;
+     transition-duration: 0.5s;
+
+  }
+  #password {
+    
+     display: flex;
+     align-items: center;
+    background-color: transparent;
+    border: none;
+    /* Ajusta este padding para que coincida con el input de abajo */
+    height: 100%; /* Que ocupe todo el alto del contenedor */
+    padding: 11px 10px; 
+    width: 100%;
+    height: 100%; /* Que ocupe todo el alto del contenedor */
+    
+  
+  }
+  .pass:hover, .user:hover{
+    
+    border: 2px solid #27336f;
+    color: white;
+    padding: 5px 12px;
+  }
+  button:hover{
+    background-color: #27336f;
+    color: white;
+  }

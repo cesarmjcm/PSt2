@@ -7,14 +7,21 @@
 	<title>Asistencia de visitantes y Planificacion</title>
 	<link rel="stylesheet" type="text/css" href="./css/main.css">
 	<link rel="icon" type="png" href="./assets/icon__icey.png">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 <header>
 	<nav>
 		<img src="./assets/image.png" alt="Logo" class="nav__logo">
-		
-		<a  href="" class="nav__link">Planificacion</a>
+		<div class="nav__links">
+			<a href="main2.html" class="nav__link">Inicio</a>
+			<a href="main.html" class="nav__link active">Planificación</a>
+			
+			<a href="#" class="nav__user-icon" title="Cerrar Sesión">
+				<i class="fas fa-user-circle"></i>
+		</div>
 	</nav>
+</header>
 	</header>
 	<section class="planificacion">
 		<div class="container__planificacion">
@@ -68,7 +75,7 @@
 				<fieldset class="planificacion-group">
 					
 						<fieldset>
-							<legend>Ubicación</legend>
+							<legend>Municipio</legend>
 						<label for="plan-municipio">Municipio</label>
 						<select name="Municipio" id="planificacion-municipios">
 							<option value="">Seleccione un municipio</option>
@@ -87,7 +94,9 @@
 							<option value="Arístides Bastidas">Arístides Bastidas</option>
 							<option value="José Antonio Páez">José Antonio Páez</option>
 						</select>
-
+						<fieldset>
+							<legend>Parroquia</legend>
+						
 						<label for="plan-parroquia">Parroquia</label>
 						<input list="planificacion-parroquias" id="plan-parroquia" name="parroquia" placeholder="Seleccione una parroquia">
 						<datalist size="5" name="parroquia" id="planificacion-parroquias">
@@ -114,14 +123,21 @@
 							<option value="El Guayabo">El Guayabo</option>
 							<option value="Farriar">Farriar</option>
 						</datalist>
+						</fieldset>
+						<fieldset>
+							<legend>Comuna</legend>
+							<label for="plan-comuna">Comuna</label>
+							<select name="comuna" id="planificacion-comunas">
+								<option value="">Seleccione una comuna</option>
+							</select>
+						</fieldset>
+						<fieldset>
+							<legend>Espacio cultural</legend>
 						<label for="plan-espacio">Espacio cultural</label>
 						<input type="text" id="plan-espacio" name="espacioCultural" placeholder="Ej. Biblioteca Pública">
 
-						<label for="plan-comuna">Comuna</label>
-						<select name="comuna" id="planificacion-comunas">
-							<option value="">Seleccione una comuna</option>
-						</select>
 						</fieldset>
+
 						<fieldset>
 							<legend>Responsable</legend>
 						<label for="plan-responsable">Nombre</label>
@@ -140,8 +156,13 @@
 				<h1 class="planificacion__title">Planificación de Actividades Culturales</h1>
 				<table class="tabla-planificacion">
 					<thead>
-						<tr><th colspan="2"><button>Editar Planificación</button></th></tr>
 						<tr>
+							<th colspan="2" class="editar-header">
+								<button class="btn-editar-tabla">
+									<i class="fas fa-edit"></i> Editar Planificación
+								</button>
+							</th>
+						</tr>
 							<th>N°</th>
 							<th>Tipo de actividad</th>
 							<th>Día de la actividad</th>

@@ -1,11 +1,35 @@
 function validacionesformulario(form) {
     const planTipo = document.getElementById('plan-tipo');
     if (!planTipo || planTipo.value === '') {
-         planTipo.focus();
+        planTipo.focus();
         alert('Ingresa el tipo de actividad.');
         return false;
     }
-
+    const planDescripcion = document.getElementById('plan-descripcion');
+    if (!planDescripcion || planDescripcion.value === '') {
+        planDescripcion.focus();
+        alert('Escribe una descripción de la actividad.');
+        return false;
+    }
+    const nivelImpacto = document.getElementById('nivel-impacto');
+    if (!nivelImpacto || nivelImpacto.value === '') {
+        nivelImpacto.focus();
+        alert('Selecciona el nivel de impacto.');
+        return false;
+    }
+    
+    const planParticipantes = document.getElementById('plan-participantes');
+    if (!planParticipantes || planParticipantes.value === '') {
+        planParticipantes.value = 0;
+        
+    }
+    const planObjetivo = document.getElementById('plan-objetivo');
+    if (!planObjetivo || planObjetivo.value === '') {
+         planObjetivo.focus();
+        alert('Ingresa el objetivo o enfoque.');
+        return false;
+    }
+    
     const planDia = document.getElementById('plan-dia');
     if (!planDia || planDia.value === '') {
          planDia.focus();
@@ -27,32 +51,8 @@ function validacionesformulario(form) {
         return false;
     }
 
-    const planDescripcion = document.getElementById('plan-descripcion');
-    if (!planDescripcion || planDescripcion.value === '') {
-         planDescripcion.focus();
-        alert('Escribe una descripción de la actividad.');
-        return false;
-    }
 
-    const planObjetivo = document.getElementById('plan-objetivo');
-    if (!planObjetivo || planObjetivo.value === '') {
-         planObjetivo.focus();
-        alert('Ingresa el objetivo o enfoque.');
-        return false;
-    }
 
-    const nivelImpacto = document.getElementById('nivel-impacto');
-    if (!nivelImpacto || nivelImpacto.value === '') {
-        nivelImpacto.focus();
-        alert('Selecciona el nivel de impacto.');
-        return false;
-    }
-
-    const planParticipantes = document.getElementById('plan-participantes');
-    if (!planParticipantes || planParticipantes.value === '') {
-        planParticipantes.value = 0;
-        
-    }
 
     const planMunicipios = document.getElementById('planificacion-municipios');
     if (!planMunicipios || planMunicipios.value === '') {
@@ -86,3 +86,24 @@ function validacionesformulario(form) {
 
     return true;
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById("modalPlanificacion");
+    const btnNuevaActividad = document.querySelector(".btn-primary"); 
+    const btnCerrar = document.querySelector(".close-button");
+
+    // Abrir al hacer clic en "Nueva Actividad"
+    btnNuevaActividad.addEventListener("click", (e) => {
+        e.preventDefault();
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden"; 
+    });
+
+
+    btnCerrar.addEventListener("click", () => {
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+    });
+
+    
+   
+});
