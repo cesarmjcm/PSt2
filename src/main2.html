@@ -120,9 +120,10 @@
 								<fieldset class="planificacion-group">
 									
 									<fieldset>
-										<legend>Actividad</legend>
+										
 										<label for="plan-tipo">Tipo de actividad</label>
 										<input type="text" id="plan-tipo" name="tipoActividad" placeholder="Ej. Conversatorio">
+										<div id="fields-hidden" class="hidden">
 										<label for="plan-descripcion">Descripción de la actividad</label>
 										<textarea id="plan-descripcion" name="descripcionActividad" placeholder="Descripción breve"></textarea>
 										<label for="plan-impacto">Nivel de impacto</label>
@@ -138,7 +139,7 @@
 												<input type="text" id="plan-objetivo" name="objetivoEnfoque" placeholder="Ej. Formativa">
 									</fieldset>
 									<fieldset>
-										<legend>Horario</legend>
+										
 									<label for="plan-dia">Día de la actividad</label>
 									<select name="diaActividad" id="plan-dia">
 									  <option value="">Seleccione un día</option>
@@ -162,7 +163,7 @@
 							<fieldset class="planificacion-group">
 								
 									<fieldset>
-										<legend>Municipio</legend>
+										
 									<label for="plan-municipio">Municipio</label>
 									<select name="Municipio" id="planificacion-municipios">
 										<option value="">Seleccione un municipio</option>
@@ -181,8 +182,9 @@
 										<option value="Arístides Bastidas">Arístides Bastidas</option>
 										<option value="José Antonio Páez">José Antonio Páez</option>
 									</select>
+									<div id="municipio-hidden" class="hidden">
 									<fieldset>
-										<legend>Parroquia</legend>
+										
 									
 									<label for="plan-parroquia">Parroquia</label>
 									<input list="planificacion-parroquias" id="plan-parroquia" name="parroquia" placeholder="Seleccione una parroquia">
@@ -212,19 +214,19 @@
 									</datalist>
 									</fieldset>
 									<fieldset>
-										<legend>Comuna</legend>
+									
 										<label for="plan-comuna">Comuna</label>
 										<select name="comuna" id="planificacion-comunas">
 											<option value="">Seleccione una comuna</option>
 										</select>
 									</fieldset>
 									<fieldset>
-										<legend>Espacio cultural</legend>
+									
 									<label for="plan-espacio">Espacio cultural</label>
 									<input type="text" id="plan-espacio" name="espacioCultural" placeholder="Ej. Biblioteca Pública">
 			
 									</fieldset>
-			
+									</div>
 									<fieldset>
 										<legend>Responsable</legend>
 									<label for="plan-responsable">Nombre</label>
@@ -235,6 +237,7 @@
 								</fieldset>
 								</fieldset>
 							</div>
+						</div>
 						</form>
 						</div>
 					</div>

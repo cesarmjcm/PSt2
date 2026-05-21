@@ -104,6 +104,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = "auto";
     });
 
-    
-   
+    const planTipo = document.getElementById('plan-tipo');
+    const fieldsHidden = document.getElementById('fields-hidden');
+
+    const toggleFields = () => {
+        if (!fieldsHidden || !planTipo) return;
+        const show = planTipo.value.trim().length > 0;
+        fieldsHidden.classList.toggle('hidden', !show);
+    };
+
+    if (planTipo) {
+        planTipo.addEventListener('input', toggleFields);
+        toggleFields();
+    }
+
+    const planMunicipio = document.getElementById('planificacion-municipios');
+    const municipioHidden = document.getElementById('municipio-hidden');
+
+    const toggleMunicipio = () => {
+        if (!municipioHidden || !planMunicipio) return;
+        const show = planMunicipio.value.trim().length > 0;
+        municipioHidden.classList.toggle('hidden', !show);
+    };
+
+    if (planMunicipio) {
+        planMunicipio.addEventListener('change', toggleMunicipio);
+        toggleMunicipio();
+    }
 });
