@@ -37,6 +37,15 @@ nav {
 .nav__link.active{
 	border-bottom: 2px solid white;
 }
+.nav__search {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    color: #25346b;
+    outline: none;
+}
 .nav__user-icon {
     margin-left: auto; /* EMPUJA EL ICONO AL FINAL DE LA DERECHA */
     text-decoration: none;

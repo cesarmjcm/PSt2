@@ -131,4 +131,54 @@ document.addEventListener('DOMContentLoaded', () => {
         planMunicipio.addEventListener('change', toggleMunicipio);
         toggleMunicipio();
     }
+
+    // Menú de usuario: abrir/cerrar y manejadores
+    const userMenuButton = document.getElementById('userMenuButton');
+    const userMenu = document.getElementById('userMenu');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const configBtn = document.getElementById('configBtn');
+
+    if (userMenuButton && userMenu) {
+        userMenuButton.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const expanded = userMenuButton.getAttribute('aria-expanded') === 'true';
+            userMenuButton.setAttribute('aria-expanded', String(!expanded));
+            if (userMenu.hasAttribute('hidden')) userMenu.removeAttribute('hidden');
+            else userMenu.setAttribute('hidden', '');
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (ev) => {
+            if (!userMenu.contains(ev.target) && ev.target !== userMenuButton) {
+                userMenu.setAttribute('hidden', '');
+                userMenuButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Cerrar con Escape
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') {
+                userMenu.setAttribute('hidden', '');
+                userMenuButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            // Redirigir a la página de login
+            if (userMenu) userMenu.setAttribute('hidden', '');
+            if (userMenuButton) userMenuButton.setAttribute('aria-expanded', 'false');
+            window.location.href = 'login.html';
+        });
+    }
+
+    if (configBtn) {
+        configBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            alert('Abrir configuración...');
+            // Abrir modal o navegar a la página de configuración
+        });
+    }
 });
