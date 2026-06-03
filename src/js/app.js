@@ -198,11 +198,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
 
+<<<<<<< HEAD
+=======
+            // Validaciones básicas
+            if (!username) {
+                event.preventDefault();
+                alert('Ingresa tu usuario.');
+                usernameInput.focus();
+                return;
+            }
+
+            if (!password) {
+                event.preventDefault();
+                alert('Ingresa tu contraseña.');
+                passwordInput.focus();
+                return;
+            }
+
+            // Validación de ejemplo (cliente) — quitar o reemplazar para validación real en servidor
+>>>>>>> 548e5dc (Describe los cambios realizados)
             if (username !== 'admin' || password !== '123456') {
                 event.preventDefault();
                 alert('Usuario o contraseña incorrectos. Usa admin / 123456.');
                 usernameInput.focus();
+<<<<<<< HEAD
             }
+=======
+                return;
+            }
+            // Si pasa, se permite el envío del formulario
+>>>>>>> 548e5dc (Describe los cambios realizados)
         });
     }
 });
