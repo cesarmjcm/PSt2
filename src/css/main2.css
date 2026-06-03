@@ -118,6 +118,13 @@ nav {
     margin-bottom: 20px;
 }
 
+.planificacion__title {
+    font-size: 2rem;
+    margin: 0 0 18px;
+    color: #156939;
+    text-align: center;
+}
+
 
 .metrics-grid {
     display: grid;
@@ -151,6 +158,19 @@ nav {
     
     margin-bottom: 20px;
 }
+.container_padre{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    max-width: 100%;
+    overflow-x: visible;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
 .tabla__container {
     background-color: #ffffff;
     box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
@@ -159,26 +179,90 @@ nav {
     border: 2px solid #99a0be;
     overflow-x: auto;
     margin-bottom: 30px;
+    width: 100%;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .tabla-planificacion {
     border-collapse: collapse;
     width: 100%;
+    min-width: 1200px;
+    table-layout: fixed;
     color: #222222;
 }
 
+.tabla-planificacion th,
+.tabla-planificacion td {
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    vertical-align: top;
+}
+
 .tabla-planificacion thead th {
-    padding: 16px;
-    text-align: left;
     background-color: #156939;
     color: white;
     text-transform: uppercase;
     font-size: 0.85rem;
+    letter-spacing: 0.04em;
 }
 
-.tabla-planificacion td {
-    padding: 14px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+.tabla-planificacion tbody tr:nth-child(even) {
+    background-color: #f7f9ff;
+}
+
+.tabla-planificacion tr:last-child td {
+    border-bottom: none;
+}
+
+.editar-header {
+    background-color: #156939;
+    color: #ffffff;
+}
+
+.editar-header .btn-editar-tabla {
+    background-color: #25346b;
+    color: #ffffff;
+    margin: 0;
+}
+
+.editar-header .btn-editar-tabla i {
+    margin-right: 8px;
+}
+
+.editar-header{
+    border-radius: 30px 30px 0 0;
+}
+
+.btn-editar-tabla {
+    background-color: #25346b; /* Azul institucional */
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-editar-tabla i {
+    font-size: 1rem;
+}
+
+.btn-editar-tabla:hover {
+    background-color: #65c20e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn-editar-tabla:active {
+    transform: translateY(0);
 }
 
 .tabla-planificacion tbody tr:nth-child(even) {

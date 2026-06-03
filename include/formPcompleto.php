@@ -1,8 +1,12 @@
 <section class="planificacion">
-    <div class="container__planificacion">
-        <div class="formulario-planificacion">
-            <form id="form-planificacion" action="main.html" method="post" onsubmit="return validacionesformulario(this)">
-            <button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
+	<div class="container__planificacion">
+		<div class="formulario-planificacion">
+			<!-- Botón que abre el modal de nueva actividad -->
+			<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+				<button class="btn-primary"><i class="fas fa-plus"></i> Nueva Actividad</button>
+			</div>
+			<form id="form-planificacion" action="main.html" method="post" onsubmit="return validacionesformulario(this)">
+			<button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
 			
 				<div class="planificacion-grid">
 					<fieldset class="planificacion-group">
@@ -125,3 +129,22 @@
 			</form>
 			</div>
 		</div>
+
+	<!-- Modal de creación/edición de planificación -->
+	<div id="modalPlanificacion" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+		<div class="modal-content-wrapper" style="background:#fff; border-radius:12px; max-width:920px; width:100%; margin:16px; padding:18px;">
+			<section class="formulario-planificacion">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+					<h2 class="section-title" style="margin: 0;">Nueva Planificación de Actividad</h2>
+					<span class="close-button" style="cursor:pointer; font-size: 1.5rem;">&times;</span>
+				</div>
+				<!-- Aquí podemos reutilizar campos del formulario si se desea -->
+				<p style="margin:0 0 12px;">Rellena los datos y presiona "Ingresar planificación".</p>
+				<div style="text-align:right;">
+					<button class="btn-ingresar-planificacion">Ingresar planificación</button>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	</section>

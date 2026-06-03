@@ -17,8 +17,16 @@
 			<a href="main2.html" class="nav__link">Inicio</a>
 			<a href="main.html" class="nav__link active">Planificación</a>
 			<input type="text" class="nav__search" placeholder="Buscar...">
-			<a href="#" class="nav__user-icon" title="Cerrar Sesión">
-				<i class="fas fa-user-circle"></i>
+			<div class="nav__user">
+				<button id="userMenuButton" class="nav__user-btn" aria-haspopup="true" aria-expanded="false" title="Usuario">
+					<i class="fas fa-user-circle"></i>
+				</button>
+				<div id="userMenu" class="nav__user-menu" hidden>
+					<a href="#" id="configBtn">Configuración</a>
+					<a href="login.html" id="logoutBtn">Cerrar sesión</a>
+				</div>
+			</div>
+		</div>
 		</div>
 	</nav>
 </header>

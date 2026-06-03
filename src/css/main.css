@@ -1,10 +1,11 @@
-html, body{
-	box-sizing: border-box;
-	margin: 0;
-	background-color: #e7e7e7;
-	font-family: sans-serif;
 
+html, body {
+    box-sizing: border-box;
+    margin: 0;
+    background-color: #e7e7e7;
+    font-family: sans-serif;
 }
+
 
 nav {
     display: flex;
@@ -20,13 +21,13 @@ nav {
     margin-left: 20px;
     margin-right: 20px;
 }
-
 .nav__links {
     display: flex;
     align-items: center;
     gap: 15px;
     flex: 1; /* Ocupa el espacio disponible */
 }
+
 .nav__links a {
     text-decoration: none;
     color: white;
@@ -35,7 +36,7 @@ nav {
     margin: 0 10px;
 }
 .nav__link.active{
-	border-bottom: 2px solid white;
+    border-bottom: 2px solid white;
 }
 .nav__search {
     padding: 8px 12px;
@@ -64,6 +65,55 @@ nav {
     transform: scale(1.1); /* Efecto de crecimiento */
 }
 
+/* Estilos menú de usuario */
+.nav__user {
+    position: relative;
+    margin-left: auto;
+    margin-right: 20px;
+}
+.nav__user-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.6rem;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+}
+.nav__user-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: #ffffff;
+    color: #25346b;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 160px;
+    overflow: hidden;
+    border: 1px solid #e6e9f2;
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+}
+.nav__user-menu a {
+    padding: 10px 14px;
+    text-decoration: none;
+    color: inherit;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(37,52,107,0.04);
+}
+.nav__user-menu a:last-child { border-bottom: none; }
+.nav__user-menu a:hover { background: #f4f6ff; }
+
+/* Oculto por defecto via atributo hidden */
+.nav__user-menu[hidden] { display: none; }
+.dashboard-container {
+    padding: 20px 40px;
+}
+
+
+
 .container_padre{
 	display: flex;
 	flex-direction: column;
@@ -76,7 +126,7 @@ nav {
 	padding: 0;
 	margin: 0;
 	min-width: 0;
-	;
+	
 }
 
 

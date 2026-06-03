@@ -4,13 +4,14 @@
 				<table class="tabla-planificacion">
 					<thead>
 						<tr>
-							<th colspan="2" class="editar-header">
+							<th colspan="15" class="editar-header">
 								<button class="btn-editar-tabla">
 									<i class="fas fa-edit"></i> Editar Planificación
 								</button>
 							</th>
 						</tr>
-							<th>N°</th>
+                        <tr>
+                            <th>N°</th>
 							<th>Tipo de actividad</th>
 							<th>Día de la actividad</th>
 							<th>Fecha de la actividad</th>

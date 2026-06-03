@@ -1,3 +1,4 @@
+
 function validacionesformulario(form) {
     const planTipo = document.getElementById('plan-tipo');
     if (!planTipo || planTipo.value === '') {
@@ -88,21 +89,27 @@ function validacionesformulario(form) {
 }
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("modalPlanificacion");
-    const btnNuevaActividad = document.querySelector(".btn-primary"); 
+    const btnNuevaActividad = document.querySelectorAll(".btn-primary");
     const btnCerrar = document.querySelector(".close-button");
 
     // Abrir al hacer clic en "Nueva Actividad"
-    btnNuevaActividad.addEventListener("click", (e) => {
-        e.preventDefault();
-        modal.style.display = "block";
-        document.body.style.overflow = "hidden"; 
-    });
+    if (btnNuevaActividad.length > 0 && modal) {
+        btnNuevaActividad.forEach((button) => {
+            button.setAttribute('type', 'button');
+            button.addEventListener("click", (e) => {
+                e.preventDefault();
+                modal.style.display = "flex";
+                document.body.style.overflow = "hidden";
+            });
+        });
+    }
 
-
-    btnCerrar.addEventListener("click", () => {
-        modal.style.display = "none";
-        document.body.style.overflow = "auto";
-    });
+    if (btnCerrar && modal) {
+        btnCerrar.addEventListener("click", () => {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto";
+        });
+    }
 
     const planTipo = document.getElementById('plan-tipo');
     const fieldsHidden = document.getElementById('fields-hidden');
@@ -179,6 +186,23 @@ document.addEventListener('DOMContentLoaded', () => {
             ev.preventDefault();
             alert('Abrir configuración...');
             // Abrir modal o navegar a la página de configuración
+        });
+    }
+
+    const loginForm = document.querySelector('form[name="login"]');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    if (loginForm && usernameInput && passwordInput) {
+        loginForm.addEventListener('submit', (event) => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            if (username !== 'admin' || password !== '123456') {
+                event.preventDefault();
+                alert('Usuario o contraseña incorrectos. Usa admin / 123456.');
+                usernameInput.focus();
+            }
         });
     }
 });
