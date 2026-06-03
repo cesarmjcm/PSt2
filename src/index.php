@@ -12,6 +12,7 @@
     <?php include '../include/header.php'; ?>
     <?php include '../include/formPcompleto.php'; ?>
     <?php include '../include/tabla.php'; ?>
+    
     <script src="./js/app.js"></script>
 </body>
 </html>

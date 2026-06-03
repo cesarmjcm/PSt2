@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else userMenu.setAttribute('hidden', '');
         });
 
-        // Cerrar al hacer clic fuera
+        
         document.addEventListener('click', (ev) => {
             if (!userMenu.contains(ev.target) && ev.target !== userMenuButton) {
                 userMenu.setAttribute('hidden', '');
