@@ -1,4 +1,4 @@
-
+* { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
     box-sizing: border-box;
     margin: 0;
@@ -7,7 +7,7 @@ html, body {
 }
 
 
-nav {
+header nav {
     display: flex;
     width: 100%;
     padding: 15px 0px;
@@ -112,19 +112,105 @@ nav {
     padding: 20px 40px;
 }
 
+.page-layout {
+    display: flex;
+    gap: 34px;
+    padding: 24px 40px 0px;
+    padding-left: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: flex-start;
+    margin-left: 0px;
+}
+
+.sidebar-menu {
+    flex: 0 0 280px;
+    width: 280px;
+    background: #ffffff;
+    border: 2px solid #99a0be;
+    border-radius: 20px;
+    padding: 24px;
+    margin-left: 0px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+	box-sizing: border-box;
+}
+
+.sidebar-menu h2 {
+    margin: 0 0 16px;
+    font-size: 1.15rem;
+    color: #156939;
+}
+
+.sidebar-nav {
+    display: block;
+    margin-left: 0px;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+	
+	width: 100%;
+}
+
+.sidebar-nav li {
+    margin: 0;
+}
+
+.sidebar-nav a {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: #f5f8ff;
+    border-radius: 12px;
+    color: #1e325c;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid rgba(37,52,107,0.08);
+    white-space: normal;
+	box-sizing: border-box;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: #e7f1ff;
+    border-color: #5792ff;
+}
+
+.page-content {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-content .tabla__container {
+    margin: 0;
+    margin-top: 0;
+    max-width: none;
+}
+
 
 
 .container_padre{
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: flex-start;
 	align-items: center;
-	min-height: 90vh;
+	min-height: auto;
 	max-width: 100%;
 	
 	overflow-x: visible;
 	padding: 0;
 	margin: 0;
+	margin-top: 5px;
 	min-width: 0;
 	
 }
@@ -138,9 +224,9 @@ nav {
 	max-width: 1100px;
 	background-color: #ffffff;
 	box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
-	padding: 24px;
+	padding: 0px 24px 24px;
 	border-radius: 20px;
-	
+margin-top: 15px;
 	border: 2px solid #99a0be;
 	overflow-x: auto;
 }
@@ -191,8 +277,9 @@ tbody tr:nth-child(even){
 }
 
 .planificacion__title{
-	font-size: 2rem;
-	margin: 0 0 18px;
+	font-size: 1.15rem;
+	line-height: 24px;
+	margin: 0 0 16px;
 	color: #156939;
 	text-align: center;
 }
@@ -208,6 +295,15 @@ tbody tr:nth-child(even){
 	margin: 0;
 	margin-top: 60px;
 	min-width: 0;
+}
+
+/* Dentro de un modal, .container__planificacion no debe reservar
+   90vh de alto ni un margen superior de 60px: eso es lo que dejaba
+   el hueco en blanco encima del formulario de "Editar Actividad". */
+.modal .container__planificacion,
+.maestro-modal .container__planificacion{
+	min-height: 0;
+	margin-top: 0;
 }
 .formulario-planificacion{
 	width: 100%;
@@ -229,6 +325,7 @@ tbody tr:nth-child(even){
 	font-size: 1rem;
 	font-weight: 700;
 	cursor: pointer;
+	margin-top: 43px;
 	margin-bottom: 18px;
 }
 
@@ -239,15 +336,28 @@ tbody tr:nth-child(even){
 .planificacion-grid{
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 18px;
+	gap: 12px;
 }
 
 .planificacion-group{
+	display: flex;
+	gap: 18px;
+	align-items: flex-start;
+	flex-wrap: wrap;
 	min-width: 0;
 	border: 1px solid #99a0be;
 	border-radius: 16px;
 	padding: 18px;
 	background-color: #f7f9ff;
+}
+
+.planificacion-group > fieldset{
+	flex: 1 1 280px;
+	min-width: 220px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: transparent;
 }
 
 .planificacion-group legend{
@@ -318,7 +428,7 @@ fieldset{
 	border-radius: 30px 30px 0 0;
 }
 .btn-editar-tabla {
-    background-color: #25346b; /* Azul institucional */
+    background-color: #25346b; 
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -328,7 +438,7 @@ fieldset{
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px; /* Espacio entre el icono y el texto */
+    gap: 8px; 
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -347,6 +457,41 @@ fieldset{
 .btn-editar-tabla:active {
     transform: translateY(0);
 }
+
+.planificacion-grid:has(> .planificacion-group:only-child) {
+	grid-template-columns: 1fr;
+}
+
+/* Estilos del modal de edición (traídos de main2.css) */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background-color: rgba(37, 52, 107, 0.6);
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    min-height: 100vh;
+}
+
+.modal-content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    width: fit-content;
+    max-width: min(760px, 100%);
+    margin: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.14);
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
 @media (max-width: 900px){
 	.planificacion-grid{
 		grid-template-columns: 1fr;

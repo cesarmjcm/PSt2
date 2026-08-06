@@ -1,0 +1,251 @@
+
+.maestro__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.maestro__header .planificacion__title {
+    margin: 0;
+}
+
+
+.maestro__alert {
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+.maestro__alert--success {
+    background-color: #e7f6ec;
+    color: #156939;
+    border: 1px solid #b7e3c5;
+}
+
+.maestro__alert--error {
+    background-color: #fdeceb;
+    color: #b3261e;
+    border: 1px solid #f3c2bd;
+}
+
+
+.col-acciones {
+    white-space: nowrap;
+    text-align: right;
+    width: 1%;
+}
+
+.btn-icon {
+    border: none;
+    background-color: #f4f6ff;
+    color: #25346b;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-icon:hover {
+    background-color: #25346b;
+    color: #ffffff;
+}
+
+.btn-icon.btn-delete:hover {
+    background-color: #b3261e;
+    color: #ffffff;
+
+}
+.btn-primary {
+    background-color: #156939;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 22px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(21, 105, 57, 0.24);
+}
+
+.btn-secondary {
+    background-color: #f4f6ff;
+    color: #25346b;
+    border: 1px solid #d8e1f3;
+    border-radius: 14px;
+    padding: 12px 22px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #e6ebf6;
+}
+
+.btn-danger {
+    background-color: #b3261e;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 22px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #8f1e18;
+}
+
+
+.maestro-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.maestro-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(20, 26, 51, 0.45);
+}
+
+.maestro-modal__dialog {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 460px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+}
+
+.maestro-modal__dialog--small {
+    max-width: 380px;
+}
+
+.maestro-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.maestro-modal__header h2 {
+    margin: 0;
+    color: #25346b;
+    font-size: 1.3rem;
+}
+
+.maestro-modal__close {
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: #4a587e;
+    cursor: pointer;
+}
+
+.maestro-modal__text {
+    color: #4a587e;
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.maestro-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+
+.maestro-modal .config-field {
+    margin-bottom: 16px;
+}
+
+.maestro-modal .config-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #25346b;
+    font-weight: 700;
+}
+
+.maestro-modal .config-field input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #cdd5e5;
+    background-color: #f9fbff;
+    color: #25346b;
+    font-size: 1rem;
+}
+
+.maestro-modal .config-field select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #cdd5e5;
+    background-color: #ffffff;
+    color: #25346b;
+    font-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 8'%3E%3Cpath fill='%2325346b' d='M1 1l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 12px 7px;
+}
+
+.maestro-modal .config-field select:focus {
+    outline: none;
+    border-color: #8aa1d5;
+    box-shadow: 0 0 0 4px rgba(53, 112, 216, 0.08);
+}
+
+.maestro-modal .config-field input,
+.maestro-modal .config-field select {
+    width: 100%;
+}
+
+.maestro-modal[hidden] {
+    display: none !important;
+}
+@media (max-width: 640px) {
+    .maestro__header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .maestro-modal__dialog {
+        margin: 16px;
+        max-width: none;
+    }
+}
+
+/* Evita que la tabla de maestros se estire a todo el ancho cuando tiene pocas columnas */
+#tablaMaestro {
+    width: auto;
+    min-width: 320px;
+    max-width: 100%;
+    display: inline-table;
+}
+
+#tablaMaestro th,
+#tablaMaestro td {
+    padding: 12px 28px;
+    white-space: nowrap;
+}

@@ -6,7 +6,7 @@
     <title>Dashboard - Red de Bibliotecas Yaracuy</title>
     <link rel="stylesheet" href="./css/main2.css">
     <link rel="icon" type="png" href="./assets/icon__icey.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
 <body>
     <header>
@@ -21,8 +21,8 @@
 						<i class="fas fa-user-circle"></i>
 					</button>
 					<div id="userMenu" class="nav__user-menu" hidden>
-						<a href="#" id="configBtn">Configuración</a>
-						<a href="login.html" id="logoutBtn">Cerrar sesión</a>
+					<a href="configUser.php" id="configBtn">Configuración</a>
+						<a href="login.php" id="logoutBtn">Cerrar sesión</a>
 					</div>
 				</div>
             </div>
@@ -63,7 +63,7 @@
      
         <div class="content-wrapper">
             <div class="actions-bar">
-                <button class="btn-primary"><i class="fas fa-plus"></i> Nueva Actividad</button>
+                <button type="button" class="btn-primary" id="btnNuevaActividad"><i class="fas fa-plus"></i> Nueva Actividad</button>
                 <div class="search-box">
                     
             </div>
@@ -118,7 +118,8 @@
 				</div>
 				<div class="container__planificacion">
 					
-						<form id="form-planificacion" action="main.html" method="post" onsubmit="return validacionesformulario(this)">
+						<form id="form-planificacion" action="../controladores/actividad_contr.php?action=crear" method="post" onsubmit="return validacionesformulario(this)">
+						<input type="hidden" name="id" id="actividad-id" value="">
 						<button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
 						
 							<div class="planificacion-grid">
@@ -238,7 +239,7 @@
 									<input type="text" id="plan-responsable" name="responsable" placeholder="Ej. Carlos Salas">
 			
 									<label for="plan-telefono">Teléfono responsable</label>
-									<input type="number" id="plan-telefono" name="telefonoResponsable" placeholder="Ej. 0412-3456789">
+									<input type="tel" id="plan-telefono" maxlength="15" name="telefonoResponsable" inputmode="tel" placeholder="Ej. 0412-3456789">
 								</fieldset>
 								</fieldset>
 							</div>

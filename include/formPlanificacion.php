@@ -7,19 +7,19 @@
 				</div>
 				<div class="container__planificacion">
 					
-						<form id="form-planificacion" action="main.html" method="post" onsubmit="return validacionesformulario(this)">
+						<form id="form-planificacion" action="../controladores/actividad_contr.php?action=crear" method="post" onsubmit="return validacionesformulario(this)">
+						<input type="hidden" name="id" id="actividad-id" value="">
 						<button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
 						
 							<div class="planificacion-grid">
-								<fieldset class="planificacion-group">
-									
+						<div class="planificacion-group">
 									<fieldset>
 										
 										<label for="plan-tipo">Tipo de actividad</label>
-										<input type="text" id="plan-tipo" name="tipoActividad" placeholder="Ej. Conversatorio">
+										<input type="text" id="plan-tipo" name="tipoActividad" maxlength="30" placeholder="Ej. Conversatorio">
 										<div id="fields-hidden" class="hidden">
 										<label for="plan-descripcion">Descripción de la actividad</label>
-										<textarea id="plan-descripcion" name="descripcionActividad" placeholder="Descripción breve"></textarea>
+										<textarea id="plan-descripcion" name="descripcionActividad" maxlength="200" placeholder="Descripción breve"></textarea>
 										<label for="plan-impacto">Nivel de impacto</label>
 										<select name="nivel__impacto" id="nivel-impacto">
 											<option value="">Nivel de Impacto</option>
@@ -28,9 +28,9 @@
 											<option value="Regional">Regional</option>
 										</select>
 										<label for="plan-participantes">Cant. participantes</label>
-										<input type="number" id="plan-participantes" name="cantidadParticipantes" placeholder="Ej. 40">
+										<input type="number" id="plan-participantes" maxlength="4" name="cantidadParticipantes" placeholder="Ej. 40">
 												<label for="plan-objetivo">Objetivo / enfoque</label>
-												<input type="text" id="plan-objetivo" name="objetivoEnfoque" placeholder="Ej. Formativa">
+												<input type="text" id="plan-objetivo" maxlength="30" name="objetivoEnfoque" placeholder="Ej. Formativa">
 									</fieldset>
 									    <fieldset>
 										
@@ -127,7 +127,7 @@
 									<input type="text" id="plan-responsable" name="responsable" placeholder="Ej. Carlos Salas">
 			
 									<label for="plan-telefono">Teléfono responsable</label>
-									<input type="number" id="plan-telefono" name="telefonoResponsable" placeholder="Ej. 0412-3456789">
+									<input type="tel" id="plan-telefono" maxlength="15" name="telefonoResponsable" inputmode="tel" placeholder="Ej. 0412-3456789">
 								</fieldset>
 								</fieldset>
 							</div>
@@ -138,7 +138,6 @@
 				
 						
 					
-				</form>
 			</section>
 		</div>
 	</div>

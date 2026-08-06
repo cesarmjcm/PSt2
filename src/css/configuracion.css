@@ -1,0 +1,252 @@
+.config-page {
+    min-height: calc(100vh - 80px);
+    padding: 30px 40px 40px;
+    background-color: #e7e7e7;
+}
+
+.config-container {
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+.config-card {
+    background-color: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+    border: 2px solid #d8e1f3;
+    overflow: hidden;
+}
+
+.config-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 30px 34px;
+    background-color: #f7f9ff;
+    border-bottom: 1px solid #e6ebf6;
+}
+
+.config-badge {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #156939;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+}
+
+.config-card__header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: #25346b;
+}
+
+.config-card__header p {
+    margin: 12px 0 0;
+    color: #4a587e;
+    line-height: 1.6;
+}
+
+.config-card__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+    background-color: #156939;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 1.8rem;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    padding: 32px;
+}
+
+.config-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #fff;
+    border: 1px solid #d8e1f3;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.config-menu__item {
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 16px 18px;
+    border-radius: 16px;
+    color: #25346b;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.config-menu__item:hover,
+.config-menu__item.active {
+    background-color: #25346b;
+    color: #ffffff;
+}
+
+.config-details {
+    background-color: #ffffff;
+    border: 1px solid #d8e1f3;
+    border-radius: 20px;
+    padding: 26px;
+}
+
+.config-panel {
+    display: none;
+}
+
+.config-panel.active {
+    display: block;
+}
+
+.config-panel h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: #25346b;
+    margin-bottom: 18px;
+}
+
+.config-field {
+    margin-bottom: 18px;
+}
+
+.config-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #25346b;
+    font-weight: 700;
+}
+
+.config-details input[type="text"],
+.config-details input[type="email"],
+.config-details input[type="tel"],
+.config-details input[type="password"],
+.config-details input[type="number"],
+.config-details select,
+.config-details textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #cdd5e5;
+    background-color: #f9fbff;
+    color: #25346b;
+    font-size: 1rem;
+}
+
+.config-field input[type="text"],
+.config-field input[type="email"],
+.config-field input[type="tel"],
+.config-field input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #cdd5e5;
+    background-color: #f9fbff;
+    color: #25346b;
+    font-size: 1rem;
+}
+
+.config-field input[type="checkbox"] {
+    width: auto;
+    margin-left: 10px;
+    transform: scale(1.1);
+}
+
+.config-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background-color: #f7f9ff;
+    border: 1px solid #e6ebf6;
+}
+
+.config-note {
+    padding: 18px 20px;
+    background-color: #f4f6ff;
+    border-radius: 16px;
+    border: 1px solid #d8e1f3;
+    color: #4a587e;
+}
+.tabla-container{
+    margin-top: 10px;
+}
+.config-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 0 32px 32px;
+}
+
+.btn-save,
+.btn-secondary {
+    border-radius: 14px;
+    padding: 14px 24px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-save {
+    background-color: #156939;
+    color: #ffffff;
+}
+
+.btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(21, 105, 57, 0.24);
+}
+
+.btn-secondary {
+    background-color: #f4f6ff;
+    color: #25346b;
+    border: 1px solid #d8e1f3;
+}
+
+.btn-secondary:hover {
+    background-color: #e6ebf6;
+}
+
+@media (max-width: 980px) {
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .config-page {
+        padding: 20px 16px 30px;
+    }
+
+    .config-card__header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .config-card__icon {
+        width: 64px;
+        height: 64px;
+        font-size: 1.5rem;
+    }
+
+    .config-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

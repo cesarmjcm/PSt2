@@ -1,115 +1,294 @@
 
+function calcularDiaSemana(fechaString) {
+    const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    if (!fechaString) return '';
+
+    const [year, month, day] = fechaString.split('-').map(Number);
+    if (!year || !month || !day) return '';
+
+    const fecha = new Date(year, month - 1, day);
+    if (Number.isNaN(fecha.getTime())) return '';
+    return dias[fecha.getDay()];
+}
+
+const REGEX_TEXTO_VALIDO = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 '\-.]+$/u;
+const REGEX_NOMBRE_PROPIO = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü '\-]+$/u;
+const REGEX_TELEFONO = /^[0-9\-\+ ]{11}$/;
+
+const MAXLEN_ACTIVIDAD_NOMBRE = 30;
+const MAXLEN_DESCRIPCION = 200;
+const MAXLEN_PARROQUIA = 30;
+const MAXLEN_ESPACIO = 30;
+const MAXLEN_RESPONSABLE = 30;
+
+function esRepetitivo(valor) {
+    const v = valor.trim();
+    if (v.length < 2) return false;
+
+    if (/(.)\1{2,}/.test(v)) return true;
+
+    if (/^(.)\1+$/.test(v)) return true;
+
+    for (let len = 1; len <= Math.floor(v.length / 2); len++) {
+        if (v.length % len !== 0) continue;
+        const chunk = v.substring(0, len);
+        if (chunk.repeat(v.length / len) === v) return true;
+    }
+
+    return false;
+}
+
+function esVacio(valor) {
+    return valor === null || valor === undefined || valor.trim() === '';
+}
+
+function marcarCampoInvalido(campo) {
+    if (campo) campo.style.borderColor = '#dc3545';
+}
+
+function limpiarCamposInvalidos(form) {
+    if (!form) return;
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+        el.style.borderColor = '';
+    });
+}
+
+function mostrarAvisoFormulario(mensaje, campoAEnfocar) {
+    const aviso = document.getElementById('form-planificacion-aviso');
+    if (aviso) {
+        aviso.textContent = mensaje;
+        aviso.style.visibility = 'visible';
+        aviso.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        alert(mensaje);
+    }
+    if (campoAEnfocar) {
+        marcarCampoInvalido(campoAEnfocar);
+        campoAEnfocar.focus();
+    }
+}
+
+function ocultarAvisoFormulario() {
+    const aviso = document.getElementById('form-planificacion-aviso');
+    if (aviso) {
+        aviso.style.visibility = 'hidden';
+        aviso.textContent = '';
+    }
+}
+
 function validacionesformulario(form) {
+    ocultarAvisoFormulario();
+    limpiarCamposInvalidos(form);
+
     const planTipo = document.getElementById('plan-tipo');
-    if (!planTipo || planTipo.value === '') {
-        planTipo.focus();
-        alert('Ingresa el tipo de actividad.');
+    const nombre = planTipo ? planTipo.value.trim() : '';
+    if (esVacio(nombre)) {
+        mostrarAvisoFormulario('El nombre de la actividad no puede quedar vacío.', planTipo);
         return false;
     }
+    if (nombre.length < 2) {
+        mostrarAvisoFormulario('El nombre de la actividad debe tener al menos 2 caracteres.', planTipo);
+        return false;
+    }
+    if (nombre.length > MAXLEN_ACTIVIDAD_NOMBRE) {
+        mostrarAvisoFormulario('El nombre de la actividad no puede tener más de ' + MAXLEN_ACTIVIDAD_NOMBRE + ' caracteres.', planTipo);
+        return false;
+    }
+    if (!REGEX_TEXTO_VALIDO.test(nombre)) {
+        mostrarAvisoFormulario('El nombre de la actividad solo puede contener letras, números, espacios y los signos \' - .', planTipo);
+        return false;
+    }
+    if (esRepetitivo(nombre)) {
+        mostrarAvisoFormulario('El nombre de la actividad no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planTipo);
+        return false;
+    }
+
     const planDescripcion = document.getElementById('plan-descripcion');
-    if (!planDescripcion || planDescripcion.value === '') {
-        planDescripcion.focus();
-        alert('Escribe una descripción de la actividad.');
+    const descripcion = planDescripcion ? planDescripcion.value.trim() : '';
+    if (esVacio(descripcion)) {
+        mostrarAvisoFormulario('Escribe una descripción de la actividad.', planDescripcion);
         return false;
     }
-    const nivelImpacto = document.getElementById('nivel-impacto');
-    if (!nivelImpacto || nivelImpacto.value === '') {
-        nivelImpacto.focus();
-        alert('Selecciona el nivel de impacto.');
-        return false;
-    }
-    
-    const planParticipantes = document.getElementById('plan-participantes');
-    if (!planParticipantes || planParticipantes.value === '') {
-        planParticipantes.value = 0;
-        
-    }
-    const planObjetivo = document.getElementById('plan-objetivo');
-    if (!planObjetivo || planObjetivo.value === '') {
-         planObjetivo.focus();
-        alert('Ingresa el objetivo o enfoque.');
-        return false;
-    }
-    
-    const planDia = document.getElementById('plan-dia');
-    if (!planDia || planDia.value === '') {
-         planDia.focus();
-        alert('Selecciona el día de la actividad.');
+    if (descripcion.length > MAXLEN_DESCRIPCION) {
+        mostrarAvisoFormulario('La descripción no puede tener más de ' + MAXLEN_DESCRIPCION + ' caracteres.', planDescripcion);
         return false;
     }
 
     const planFecha = document.getElementById('plan-fecha');
     if (!planFecha || planFecha.value === '') {
-        planFecha.focus();
-        alert('Selecciona la fecha de la actividad.');
+        mostrarAvisoFormulario('Selecciona la fecha de la actividad.', planFecha);
         return false;
+    }
+
+    const planDia = document.getElementById('plan-dia');
+    if (planDia && planFecha) {
+        planDia.value = calcularDiaSemana(planFecha.value);
     }
 
     const planHora = document.getElementById('plan-hora');
     if (!planHora || planHora.value === '') {
-      planHora.focus();
-        alert('Selecciona la hora de la actividad.');
+        mostrarAvisoFormulario('Selecciona la hora de la actividad.', planHora);
         return false;
     }
 
-
-
-
     const planMunicipios = document.getElementById('planificacion-municipios');
     if (!planMunicipios || planMunicipios.value === '') {
-     planMunicipios.focus();
-        alert('Selecciona un municipio.');
+        mostrarAvisoFormulario('Selecciona un municipio.', planMunicipios);
         return false;
     }
 
     const planParroquia = document.getElementById('plan-parroquia');
-    if (!planParroquia || planParroquia.value === '') {
-        planParroquia.focus();
-        alert('Selecciona o escribe una parroquia.');
+    const parroquia = planParroquia ? planParroquia.value.trim() : '';
+    if (esVacio(parroquia)) {
+        mostrarAvisoFormulario('Selecciona o escribe una parroquia.', planParroquia);
+        return false;
+    }
+    if (parroquia.length > MAXLEN_PARROQUIA) {
+        mostrarAvisoFormulario('La parroquia no puede tener más de ' + MAXLEN_PARROQUIA + ' caracteres.', planParroquia);
+        return false;
+    }
+    if (!REGEX_NOMBRE_PROPIO.test(parroquia)) {
+        mostrarAvisoFormulario('La parroquia solo puede contener letras y espacios (sin números).', planParroquia);
+        return false;
+    }
+    if (esRepetitivo(parroquia)) {
+        mostrarAvisoFormulario('La parroquia no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planParroquia);
         return false;
     }
 
     const planEspacio = document.getElementById('plan-espacio');
-    if (!planEspacio || planEspacio.value === '') {
-         planEspacio.focus();
-        alert('Ingresa el espacio cultural.');
+    const espacio = planEspacio ? planEspacio.value.trim() : '';
+    if (esVacio(espacio)) {
+        mostrarAvisoFormulario('Ingresa un espacio cultural.', planEspacio);
+        return false;
+    }
+    if (espacio.length > MAXLEN_ESPACIO) {
+        mostrarAvisoFormulario('El espacio cultural no puede tener más de ' + MAXLEN_ESPACIO + ' caracteres.', planEspacio);
+        return false;
+    }
+    if (!REGEX_TEXTO_VALIDO.test(espacio)) {
+        mostrarAvisoFormulario('El espacio cultural solo puede contener letras, números, espacios y los signos \' - .', planEspacio);
+        return false;
+    }
+    if (esRepetitivo(espacio)) {
+        mostrarAvisoFormulario('El espacio cultural no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planEspacio);
+        return false;
+    }
+
+    const planBiblioteca = document.getElementById('plan-biblioteca');
+    if (!planBiblioteca || planBiblioteca.value === '') {
+        mostrarAvisoFormulario('Selecciona una biblioteca.', planBiblioteca);
         return false;
     }
 
     const planComunas = document.getElementById('planificacion-comunas');
-    if (!planComunas || planComunas.value === '') {
-            planComunas.focus();
-        alert('Selecciona una comuna.');
+    const comuna = planComunas ? planComunas.value.trim() : '';
+    if (comuna !== '' && !REGEX_TEXTO_VALIDO.test(comuna)) {
+        mostrarAvisoFormulario('La comuna seleccionada no tiene un formato válido.', planComunas);
         return false;
     }
 
-   
+    const planResponsable = document.getElementById('plan-responsable');
+    const responsable = planResponsable ? planResponsable.value.trim() : '';
+    if (responsable !== '') {
+        if (responsable.length < 2) {
+            mostrarAvisoFormulario('El nombre del responsable debe tener al menos 2 caracteres.', planResponsable);
+            return false;
+        }
+        if (responsable.length > MAXLEN_RESPONSABLE) {
+            mostrarAvisoFormulario('El nombre del responsable no puede tener más de ' + MAXLEN_RESPONSABLE + ' caracteres.', planResponsable);
+            return false;
+        }
+        if (!REGEX_NOMBRE_PROPIO.test(responsable)) {
+            mostrarAvisoFormulario('El nombre del responsable solo puede contener letras y espacios (sin números).', planResponsable);
+            return false;
+        }
+        if (esRepetitivo(responsable)) {
+            mostrarAvisoFormulario('El nombre del responsable no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planResponsable);
+            return false;
+        }
+    }
+
+    const planTelefono = document.getElementById('plan-telefono');
+    const telefono = planTelefono ? planTelefono.value.trim() : '';
+    if (telefono !== '' && !REGEX_TELEFONO.test(telefono)) {
+        mostrarAvisoFormulario('El teléfono debe tener exactamente 11 caracteres, usando solo números, espacios, guiones (-) o el signo +. Ejemplo: 04123456789', planTelefono);
+        return false;
+    }
 
     return true;
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById("modalPlanificacion");
-    const btnNuevaActividad = document.querySelectorAll(".btn-primary");
-    const btnCerrar = document.querySelector(".close-button");
+document.addEventListener("DOMContentLoaded", () => {
+    const selectMunicipios = document.getElementById("planificacion-municipios");
 
-    // Abrir al hacer clic en "Nueva Actividad"
-    if (btnNuevaActividad.length > 0 && modal) {
-        btnNuevaActividad.forEach((button) => {
-            button.setAttribute('type', 'button');
-            button.addEventListener("click", (e) => {
-                e.preventDefault();
-                modal.style.display = "flex";
-                document.body.style.overflow = "hidden";
+    fetch("../controladores/municipio_contr.php?action=listar")
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                selectMunicipios.innerHTML = '<option value="">Seleccione un municipio</option>';
+                
+                res.data.forEach(mun => {
+                    const option = document.createElement("option");
+                    option.value = mun.id;
+                    option.textContent = mun.nombre;
+                    selectMunicipios.appendChild(option);
+                });
+            }
+        })
+        .catch(error => console.error("Error cargando municipios:", error));
+});
+document.addEventListener('DOMContentLoaded', () => {
+    const modals = document.querySelectorAll('#modalPlanificacion');
+    const btnNuevaActividad = document.getElementById('btnNuevaActividad');
+    const btnCerrar = document.querySelectorAll('.close-button');
+
+    const openModals = () => {
+        if (modals.length === 0) return;
+        modals.forEach(m => {
+            m.style.display = 'flex';
+        });
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100vh';
+    };
+
+    const closeModals = () => {
+        if (modals.length === 0) return;
+        modals.forEach(m => {
+            m.style.display = 'none';
+        });
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        document.body.style.height = '';
+    };
+
+    if (btnNuevaActividad && modals.length > 0) {
+        btnNuevaActividad.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetFormularioPlanificacion();
+            openModals();
+        });
+    }
+
+    if (btnCerrar.length > 0 && modals.length > 0) {
+        btnCerrar.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                closeModals();
             });
         });
     }
 
-    if (btnCerrar && modal) {
-        btnCerrar.addEventListener("click", () => {
-            modal.style.display = "none";
-            document.body.style.overflow = "auto";
+    if (modals.length > 0) {
+        modals.forEach(m => {
+            m.addEventListener('click', (ev) => {
+                if (ev.target === m) closeModals();
+            });
         });
     }
+
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') closeModals();
+    });
 
     const planTipo = document.getElementById('plan-tipo');
     const fieldsHidden = document.getElementById('fields-hidden');
@@ -127,6 +306,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const planMunicipio = document.getElementById('planificacion-municipios');
     const municipioHidden = document.getElementById('municipio-hidden');
+    const planFechaInput = document.getElementById('plan-fecha');
+    const planDiaInput = document.getElementById('plan-dia');
+    const editarFecha = document.getElementById('editar-fecha');
+    const editarDia = document.getElementById('editar-dia');
 
     const toggleMunicipio = () => {
         if (!municipioHidden || !planMunicipio) return;
@@ -139,7 +322,105 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleMunicipio();
     }
 
-    // Menú de usuario: abrir/cerrar y manejadores
+    if (planFechaInput && planDiaInput) {
+        if (planFechaInput.value) {
+            planDiaInput.value = calcularDiaSemana(planFechaInput.value);
+        }
+        planFechaInput.addEventListener('change', () => {
+            planDiaInput.value = calcularDiaSemana(planFechaInput.value);
+        });
+    }
+
+    if (editarFecha && editarDia) {
+        if (editarFecha.value) {
+            editarDia.value = calcularDiaSemana(editarFecha.value);
+        }
+        editarFecha.addEventListener('change', () => {
+            editarDia.value = calcularDiaSemana(editarFecha.value);
+        });
+    }
+
+    function resetFormularioPlanificacion() {
+        const form = document.getElementById('form-planificacion');
+        const titulo = document.getElementById('planModalTitulo');
+        const planAction = document.getElementById('plan-action');
+        const actividadId = document.getElementById('actividad-id');
+
+        if (form) form.reset();
+        if (titulo) titulo.textContent = 'Nueva Planificación de Actividad';
+        if (planAction) planAction.value = 'crear';
+        if (actividadId) actividadId.value = '';
+
+        limpiarCamposInvalidos(form);
+        ocultarAvisoFormulario();
+
+        toggleFields();
+        toggleMunicipio();
+    }
+
+    const modalEditar = document.getElementById('modalEditarActividad');
+    const btnCerrarEditar = document.querySelectorAll('.close-button-editar');
+
+    function openModalEditar() {
+        if (!modalEditar) return;
+        modalEditar.style.display = 'flex';
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100vh';
+    }
+
+    function closeModalEditar() {
+        if (!modalEditar) return;
+        modalEditar.style.display = 'none';
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+        document.body.style.height = '';
+    }
+
+    btnCerrarEditar.forEach((btn) => {
+        btn.addEventListener('click', () => closeModalEditar());
+    });
+
+    if (modalEditar) {
+        modalEditar.addEventListener('click', (ev) => {
+            if (ev.target === modalEditar) closeModalEditar();
+        });
+    }
+
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') closeModalEditar();
+    });
+
+    function setValue(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.value = value || '';
+    }
+
+    function abrirEditarActividad(btn) {
+        setValue('editar-id', btn.dataset.id);
+        setValue('editar-nombre', btn.dataset.nombre);
+        setValue('editar-descripcion', btn.dataset.descripcion);
+        setValue('editar-objetivo', btn.dataset.objetivo);
+        setValue('editar-participantes', btn.dataset.participantes);
+        setValue('editar-fecha', btn.dataset.fecha);
+        setValue('editar-dia', btn.dataset.dia);
+
+        setValue('editar-nivel-impacto', btn.dataset.nivelImpacto);
+        setValue('editar-municipio-id', btn.dataset.municipioId);
+        setValue('editar-parroquia', btn.dataset.parroquia);
+        setValue('editar-comuna', btn.dataset.comuna);
+        setValue('editar-espacio', btn.dataset.espacio);
+        setValue('editar-biblioteca', btn.dataset.idBiblioteca);
+        setValue('editar-responsable', btn.dataset.responsable);
+        setValue('editar-telefono', btn.dataset.telefono);
+
+        openModalEditar();
+    }
+
+    document.querySelectorAll('.btn-edit-actividad').forEach((btn) => {
+        btn.addEventListener('click', () => abrirEditarActividad(btn));
+    });
+
     const userMenuButton = document.getElementById('userMenuButton');
     const userMenu = document.getElementById('userMenu');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -154,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
             else userMenu.setAttribute('hidden', '');
         });
 
-        // Cerrar al hacer clic fuera
         document.addEventListener('click', (ev) => {
             if (!userMenu.contains(ev.target) && ev.target !== userMenuButton) {
                 userMenu.setAttribute('hidden', '');
@@ -162,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Cerrar con Escape
         document.addEventListener('keydown', (ev) => {
             if (ev.key === 'Escape') {
                 userMenu.setAttribute('hidden', '');
@@ -174,18 +453,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (ev) => {
             ev.preventDefault();
-            // Redirigir a la página de login
             if (userMenu) userMenu.setAttribute('hidden', '');
             if (userMenuButton) userMenuButton.setAttribute('aria-expanded', 'false');
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
         });
     }
 
     if (configBtn) {
         configBtn.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            alert('Abrir configuración...');
-            // Abrir modal o navegar a la página de configuración
         });
     }
 
@@ -194,14 +469,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
 
     if (loginForm && usernameInput && passwordInput) {
-        loginForm.addEventListener('submit', (event) => {
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
 
-            if (username !== 'admin' || password !== '123456') {
-                event.preventDefault();
-                alert('Usuario o contraseña incorrectos. Usa admin / 123456.');
+            if (!username) {
+                alert('Ingresa tu usuario.');
                 usernameInput.focus();
+                return;
+            }
+
+            if (!password) {
+                alert('Ingresa tu contraseña.');
+                passwordInput.focus();
+                return;
+            }
+
+            try {
+                const resp = await fetch('auth.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ username, password })
+                });
+                const data = await resp.json();
+                if (data && data.success) {
+                    window.location.href = data.redirect || 'main2.php';
+                } else {
+                    alert(data && data.message ? data.message : 'Usuario o contraseña incorrectos.');
+                    usernameInput.focus();
+                }
+            } catch (err) {
+                console.error('Error en petición de autenticación', err);
+                alert('No se pudo conectar con el servidor. Intenta de nuevo.');
             }
         });
     }

@@ -1,147 +1,171 @@
+<?php
+require_once __DIR__ . '/../modelos/municipio.php';
+require_once __DIR__ . '/../modelos/comuna.php';
+require_once __DIR__ . '/../modelos/parroquia.php';
+require_once __DIR__ . '/../modelos/espacio.php';
+require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../modelos/biblioteca.php';
+require_once __DIR__ . '/../modelos/tipo_actividad.php';
+
+$municipioModel = new Municipio();
+$comunaModel = new Comuna();
+$parroquiaModel = new Parroquia();
+$espacioModel = new Espacio();
+$empleadoModel = new Empleado();
+$bibliotecaModel = new Biblioteca();
+$tipoActividadModel = new TipoActividad();
+
+$municipios = $municipioModel->mostrarMunicipios();
+$comunas = $comunaModel->mostrarComunas();
+$parroquias = $parroquiaModel->mostrarParroquias();
+$espacios = $espacioModel->mostrarEspacios();
+$empleados = $empleadoModel->mostrarEmpleados();
+$bibliotecas = $bibliotecaModel->mostrarBibliotecas();
+$tiposActividad = $tipoActividadModel->mostrarTipos();
+$empleado=$empleadoModel->mostrarEmpleados();
+?>
+
 <section>
-	
-	
-	<div id="modalPlanificacion" class="modal" style="display:none;">
-		<div class="modal-content-wrapper">
-			<section class="formulario-planificacion">
-				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-					<h2 class="section-title" style="margin: 0;">Nueva Planificación de Actividad</h2>
-					<span class="close-button" style="cursor:pointer; font-size: 1.5rem;">&times;</span>
-				</div>
-				<div class="container__planificacion">
-					
-						<form id="form-planificacion" action="main.html" method="post" onsubmit="return validacionesformulario(this)">
-						<button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
-						
-							<div class="planificacion-grid">
-								<fieldset class="planificacion-group">
-									
-									<fieldset>
-										
-										<label for="plan-tipo">Tipo de actividad</label>
-										<input type="text" id="plan-tipo" name="tipoActividad" placeholder="Ej. Conversatorio">
-										<div id="fields-hidden" class="hidden">
-										<label for="plan-descripcion">Descripción de la actividad</label>
-										<textarea id="plan-descripcion" name="descripcionActividad" placeholder="Descripción breve"></textarea>
-										<label for="plan-impacto">Nivel de impacto</label>
-										<select name="nivel__impacto" id="nivel-impacto">
-											<option value="">Nivel de Impacto</option>
-											<option value="Local">Local</option>
-											<option value="Comunal">Comunal</option>
-											<option value="Regional">Regional</option>
-										</select>
-										<label for="plan-participantes">Cant. participantes</label>
-										<input type="number" id="plan-participantes" name="cantidadParticipantes" placeholder="Ej. 40">
-												<label for="plan-objetivo">Objetivo / enfoque</label>
-												<input type="text" id="plan-objetivo" name="objetivoEnfoque" placeholder="Ej. Formativa">
-									</fieldset>
-									<fieldset>
-										
-									<label for="plan-dia">Día de la actividad</label>
-									<select name="diaActividad" id="plan-dia">
-									  <option value="">Seleccione un día</option>
-									  <option value="Lunes">Lunes</option>
-									  <option value="Martes">Martes</option>
-									  <option value="Miércoles">Miércoles</option>
-									  <option value="Jueves">Jueves</option>
-									  <option value="Viernes">Viernes</option>
-									</select>
-			
-									<label for="plan-fecha">Fecha de la actividad</label>
-									<input type="date" id="plan-fecha" name="fechaActividad" placeholder="Ej. 20/04/2026">
-			
-									<label for="plan-hora">Hora de la actividad</label>
-									<input type="time" id="plan-hora" name="horaActividad" placeholder="Ej. 09:00">
-								</fieldset>
-			
-			
-			
-								</fieldset>
-							<fieldset class="planificacion-group">
-								
-									<fieldset>
-										
-									<label for="plan-municipio">Municipio</label>
-									<select name="Municipio" id="planificacion-municipios">
-										<option value="">Seleccione un municipio</option>
-										<option value="San Felipe">San Felipe</option>
-										<option value="Sucre">Sucre</option>
-										<option value="Independencia">Independencia</option>
-										<option value="Bruzual">Bruzual</option>
-										<option value="Cocorote">Cocorote</option>
-										<option value="Urachiche">Urachiche</option>
-										<option value="Veroes">Veroes</option>
-										<option value="Nirgua">Nirgua</option>
-										<option value="Manuel Monge">Manuel Monge</option>
-										<option value="La Trinidad">La Trinidad</option>
-										<option value="Peña">Peña</option>
-										<option value="Bolívar">Bolívar</option>
-										<option value="Arístides Bastidas">Arístides Bastidas</option>
-										<option value="José Antonio Páez">José Antonio Páez</option>
-									</select>
-									<div id="municipio-hidden" class="hidden">
-									<fieldset>
-										
-									
-									<label for="plan-parroquia">Parroquia</label>
-									<input list="planificacion-parroquias" id="plan-parroquia" name="parroquia" placeholder="Seleccione una parroquia">
-									<datalist size="5" name="parroquia" id="planificacion-parroquias">
-										<option value="">Seleccione una parroquia</option>
-										<option value="Arístides Bastidas">Arístides Bastidas</option>
-										<option value="Bolívar">Bolívar</option>
-										<option value="Chivacoa">Chivacoa</option>
-										<option value="Campo Elías">Campo Elías</option>
-										<option value="Cocorote">Cocorote</option>
-										<option value="Independencia">Independencia</option>
-										<option value="José Antonio Páez">José Antonio Páez</option>
-										<option value="La Trinidad">La Trinidad</option>
-										<option value="Manuel Monge">Manuel Monge</option>
-										<option value="Salóm">Salóm</option>
-										<option value="Temerla">Temerla</option>
-										<option value="Nirgua">Nirgua</option>
-										<option value="San Andrés">San Andrés</option>
-										<option value="Yaritagua">Yaritagua</option>
-										<option value="San Javier">San Javier</option>
-										<option value="Albarico">Albarico</option>
-										<option value="San Felipe">San Felipe</option>
-										<option value="Sucre">Sucre</option>
-										<option value="Urachiche">Urachiche</option>
-										<option value="El Guayabo">El Guayabo</option>
-										<option value="Farriar">Farriar</option>
-									</datalist>
-									</fieldset>
-									<fieldset>
-									
-										<label for="plan-comuna">Comuna</label>
-										<select name="comuna" id="planificacion-comunas">
-											<option value="">Seleccione una comuna</option>
-										</select>
-									</fieldset>
-									<fieldset>
-									
-									<label for="plan-espacio">Espacio cultural</label>
-									<input type="text" id="plan-espacio" name="espacioCultural" placeholder="Ej. Biblioteca Pública">
-			
-									</fieldset>
-									</div>
-									<fieldset>
-										<legend>Responsable</legend>
-									<label for="plan-responsable">Nombre</label>
-									<input type="text" id="plan-responsable" name="responsable" placeholder="Ej. Carlos Salas">
-			
-									<label for="plan-telefono">Teléfono responsable</label>
-									<input type="number" id="plan-telefono" name="telefonoResponsable" placeholder="Ej. 0412-3456789">
-								</fieldset>
-								</fieldset>
-							</div>
-						</div>
-						</form>
-						</div>
-					</div>
-				
-						
-					
-				</form>
-			</div>
-		</div>
-	</section>
+
+    
+    <div id="modalPlanificacion" class="modal" style="display:none;">
+        <div class="modal-content-wrapper">
+            <section class="formulario-planificacion">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                    <h2 class="section-title" id="planModalTitulo" style="margin: 0;">Nueva Planificación de Actividad</h2>
+                    <span class="close-button" style="cursor:pointer; font-size: 1.5rem;">&times;</span>
+                </div>
+                <div class="container__planificacion">
+                    <form id="form-planificacion" action="../controladores/actividad_contr.php?action=crear" method="post" onsubmit="return validacionesformulario(this)" novalidate>
+                        <input type="hidden" name="action" id="plan-action" value="crear">
+                        <input type="hidden" name="id" id="actividad-id" value="">
+                        <input type="hidden" id="plan-dia" name="dia_semana" value="">
+                        <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? 'main2.php', ENT_QUOTES, 'UTF-8'); ?>">
+
+                        <div id="form-planificacion-aviso" class="form-aviso" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
+
+                        <div class="planificacion-grid">
+                            <fieldset class="planificacion-group">
+                                <fieldset>
+                                    <label for="plan-tipo">Nombre de la actividad</label>
+                                    <input type="text" id="plan-tipo" maxlength="30" name="nombre" placeholder="Nombre de la actividad">
+
+                                    <div id="fields-hidden" class="hidden">
+                                        <label for="plan-descripcion">Descripción de la actividad</label>
+                                        <textarea id="plan-descripcion" maxlength="200" name="descripcion" placeholder="Descripción breve"></textarea>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <label for="plan-fecha">Fecha de la actividad</label>
+                                    <input type="date" id="plan-fecha" name="fecha" placeholder="Ej. 20/04/2026">
+
+                                    <label for="plan-hora">Hora de la actividad</label>
+                                    <input type="time" id="plan-hora" name="horaActividad" placeholder="Ej. 09:00">
+                                </fieldset>
+                            </fieldset>
+
+                            <fieldset class="planificacion-group">
+                                <fieldset>
+                                    <label for="plan-municipio">Municipio</label>
+                                    <select name="municipio_id" id="planificacion-municipios">
+                                        <option value="">Seleccione un municipio</option>
+                                        <?php foreach ($municipios as $m): ?>
+                                            <option value="<?= htmlspecialchars($m['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($m['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                    <div id="municipio-hidden" class="hidden">
+                                        <fieldset>
+                                            <label for="plan-parroquia">Parroquia</label>
+                                            <input list="planificacion-parroquias" id="plan-parroquia" name="parroquia" maxlength="30" placeholder="Seleccione una parroquia">
+                                            <datalist size="5" name="parroquia" id="planificacion-parroquias">
+                                                <option value="">Seleccione una parroquia</option>
+                                                <?php foreach ($parroquias as $p): ?>
+                                                    <option value="<?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php endforeach; ?>
+                                            </datalist>
+                                        </fieldset>
+
+                                        <fieldset>
+                                            <label for="plan-comuna">Comuna</label>
+                                            <select name="comuna" id="planificacion-comunas">
+                                                <option value="">Seleccione una comuna</option>
+                                                <?php foreach ($comunas as $c): ?>
+                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </fieldset>
+
+                                        <fieldset>
+                                            <label for="plan-biblioteca">Biblioteca</label>
+                                            <select name="id_biblioteca" id="plan-biblioteca">
+                                                <option value="">Seleccione una biblioteca</option>
+                                                <?php foreach ($bibliotecas as $b): ?>
+                                                    <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+
+                                            <label for="plan-espacio">Espacio cultural</label>
+                                            <select name="id_espacio_cultural" id="plan-espacio">
+                                                <option value="">Seleccione un espacio cultural</option>
+                                                <?php foreach ($espacios as $e): ?>
+                                                    <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <fieldset>
+                                        <label for="plan-tipo-actividad">Tipo de actividad</label>
+                                        <select name="id_tipo_actividad" id="plan-tipo-actividad">
+                                            <option value="">Seleccione un tipo de actividad</option>
+                                            <?php foreach ($tiposActividad as $t): ?>
+                                                <option value="<?= htmlspecialchars($t['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </fieldset>
+
+                                    <fieldset>
+                                        <legend>Responsable</legend>
+                                        <label for="plan-responsable">Nombre</label>
+                                        <select name="id_responsable" id="plan-responsable">
+                                            <option value="">Seleccione un responsable</option>
+                                            <?php foreach ($empleados as $e): ?>
+                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre']." ".$e['apellido'], ENT_QUOTES, 'UTF-8') ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <label for="plan-telefono">Teléfono responsable</label>
+                                        <input type="tel" id="plan-telefono" maxlength="11" name="telefono_responsable" inputmode="tel" placeholder="Ej. 04123456789" readonly>
+                                    </fieldset>
+                                </fieldset>
+                            </fieldset>
+                        </div>
+
+                        <button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const selectResponsable = document.getElementById('plan-responsable');
+        const inputTelefono = document.getElementById('plan-telefono');
+
+        if (selectResponsable && inputTelefono) {
+            selectResponsable.addEventListener('change', () => {
+                const opcion = selectResponsable.options[selectResponsable.selectedIndex];
+                if (opcion && opcion.value !== '') {
+                    inputTelefono.value = opcion.dataset.telefono || '';
+                    inputTelefono.readOnly = true;
+                } else {
+                    inputTelefono.value = '';
+                    inputTelefono.readOnly = false;
+                }
+            });
+        }
+    })();
+</script>
