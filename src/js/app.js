@@ -474,35 +474,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
 
-            if (!username) {
-                alert('Ingresa tu usuario.');
+            if (username !== 'admin' || password !== '123456') {
+                event.preventDefault();
+                alert('Usuario o contraseña incorrectos. Usa admin / 123456.');
                 usernameInput.focus();
-                return;
             }
-
-            if (!password) {
-                alert('Ingresa tu contraseña.');
-                passwordInput.focus();
-                return;
-            }
-
-            try {
-                const resp = await fetch('auth.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({ username, password })
-                });
-                const data = await resp.json();
-                if (data && data.success) {
-                    window.location.href = data.redirect || 'main2.php';
-                } else {
-                    alert(data && data.message ? data.message : 'Usuario o contraseña incorrectos.');
-                    usernameInput.focus();
-                }
-            } catch (err) {
-                console.error('Error en petición de autenticación', err);
-                alert('No se pudo conectar con el servidor. Intenta de nuevo.');
-            }
+            // Si pasa, se permite el envío del formulario
+>>>>>>> 548e5dc (Describe los cambios realizados)
         });
     }
 });
