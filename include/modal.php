@@ -42,6 +42,18 @@ $empleado=$empleadoModel->mostrarEmpleados();
                         <input type="hidden" id="plan-dia" name="dia_semana" value="">
                         <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? 'main2.php', ENT_QUOTES, 'UTF-8'); ?>">
 
+                        <fieldset class="tipo-formulario-selector" style="border:none; padding:0; margin:0 0 16px; display:flex; gap:24px;">
+                            <legend style="font-weight:600; margin-bottom:6px; padding:0;">Tipo de planificación</legend>
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                <input type="radio" name="tipo_formulario" id="tipo-formulario-simple" value="simple" checked>
+                                Actividad simple
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                <input type="radio" name="tipo_formulario" id="tipo-formulario-completa" value="completa">
+                                Actividad completa
+                            </label>
+                        </fieldset>
+
                         <div id="form-planificacion-aviso" class="form-aviso" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
 
                         <div class="planificacion-grid">
@@ -62,6 +74,19 @@ $empleado=$empleadoModel->mostrarEmpleados();
 
                                     <label for="plan-hora">Hora de la actividad</label>
                                     <input type="time" id="plan-hora" name="horaActividad" placeholder="Ej. 09:00">
+                                </fieldset>
+
+                                <fieldset id="campos-completa" class="hidden">
+                                    <legend>Detalles de actividad completa</legend>
+
+                                    <label for="plan-objetivo">Objetivo / enfoque</label>
+                                    <input type="text" id="plan-objetivo" maxlength="50" name="objetivo" placeholder="Objetivo de la actividad">
+
+                                    <label for="plan-participantes">Cantidad de participantes</label>
+                                    <input type="number" id="plan-participantes" name="participantes" min="0" max="99999" placeholder="Ej. 25">
+
+                                    <label for="plan-nivel-impacto">Nivel de impacto</label>
+                                    <input type="text" id="plan-nivel-impacto" maxlength="20" name="nivel_impacto" placeholder="Ej. Comunal, Regional, Nacional">
                                 </fieldset>
                             </fieldset>
 

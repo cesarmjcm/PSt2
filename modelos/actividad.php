@@ -69,6 +69,24 @@ class Actividad {
             $errors[] = 'Descripción inválida.';
         }
 
+        // 'objetivo' llega con el valor por defecto 'No definido' cuando el
+        // usuario elige "Actividad simple" y deja el campo vacío (ver
+        // ActividadController::collectInput). Solo se valida el formato
+        // cuando trae texto real escrito por el usuario.
+        $objetivo = trim($d['objetivo'] ?? '');
+        if ($objetivo !== '' && $objetivo !== 'No definido' && !Validador::esTextoValido($objetivo, 2, 50)) {
+            $errors[] = 'Objetivo inválido.';
+        }
+
+        if (!Validador::esEnteroNoNegativo($d['participantes'] ?? 0, 99999)) {
+            $errors[] = 'Cantidad de participantes inválida.';
+        }
+
+        $nivelImpacto = trim($d['nivel_impacto'] ?? '');
+        if ($nivelImpacto !== '' && !Validador::esNombrePropioValido($nivelImpacto, 2, 20)) {
+            $errors[] = 'Nivel de impacto inválido.';
+        }
+
         if (!Validador::esFechaValida(trim($d['fecha'] ?? ''))) {
             $errors[] = 'Fecha inválida.';
         }

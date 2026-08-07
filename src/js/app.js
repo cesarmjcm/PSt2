@@ -20,6 +20,9 @@ const MAXLEN_DESCRIPCION = 200;
 const MAXLEN_PARROQUIA = 30;
 const MAXLEN_ESPACIO = 30;
 const MAXLEN_RESPONSABLE = 30;
+const MAXLEN_OBJETIVO = 50;
+const MAXLEN_NIVEL_IMPACTO = 20;
+const MAX_PARTICIPANTES = 99999;
 
 function esRepetitivo(valor) {
     const v = valor.trim();
@@ -216,6 +219,65 @@ function validacionesformulario(form) {
         return false;
     }
 
+    const tipoFormularioCompleta = document.getElementById('tipo-formulario-completa');
+    const esCompleta = tipoFormularioCompleta ? tipoFormularioCompleta.checked : false;
+
+    if (esCompleta) {
+        const planObjetivo = document.getElementById('plan-objetivo');
+        const objetivo = planObjetivo ? planObjetivo.value.trim() : '';
+        if (esVacio(objetivo)) {
+            mostrarAvisoFormulario('Escribe el objetivo o enfoque de la actividad.', planObjetivo);
+            return false;
+        }
+        if (objetivo.length < 2) {
+            mostrarAvisoFormulario('El objetivo debe tener al menos 2 caracteres.', planObjetivo);
+            return false;
+        }
+        if (objetivo.length > MAXLEN_OBJETIVO) {
+            mostrarAvisoFormulario('El objetivo no puede tener más de ' + MAXLEN_OBJETIVO + ' caracteres.', planObjetivo);
+            return false;
+        }
+        if (!REGEX_TEXTO_VALIDO.test(objetivo)) {
+            mostrarAvisoFormulario('El objetivo solo puede contener letras, números, espacios y los signos \' - .', planObjetivo);
+            return false;
+        }
+        if (esRepetitivo(objetivo)) {
+            mostrarAvisoFormulario('El objetivo no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planObjetivo);
+            return false;
+        }
+
+        const planParticipantes = document.getElementById('plan-participantes');
+        const participantesStr = planParticipantes ? planParticipantes.value.trim() : '';
+        if (esVacio(participantesStr)) {
+            mostrarAvisoFormulario('Indica la cantidad de participantes.', planParticipantes);
+            return false;
+        }
+        const participantes = Number(participantesStr);
+        if (!Number.isInteger(participantes) || participantes < 0 || participantes > MAX_PARTICIPANTES) {
+            mostrarAvisoFormulario('La cantidad de participantes debe ser un número entero entre 0 y ' + MAX_PARTICIPANTES + '.', planParticipantes);
+            return false;
+        }
+
+        const planNivelImpacto = document.getElementById('plan-nivel-impacto');
+        const nivelImpacto = planNivelImpacto ? planNivelImpacto.value.trim() : '';
+        if (esVacio(nivelImpacto)) {
+            mostrarAvisoFormulario('Indica el nivel de impacto de la actividad.', planNivelImpacto);
+            return false;
+        }
+        if (nivelImpacto.length > MAXLEN_NIVEL_IMPACTO) {
+            mostrarAvisoFormulario('El nivel de impacto no puede tener más de ' + MAXLEN_NIVEL_IMPACTO + ' caracteres.', planNivelImpacto);
+            return false;
+        }
+        if (!REGEX_NOMBRE_PROPIO.test(nivelImpacto)) {
+            mostrarAvisoFormulario('El nivel de impacto solo puede contener letras y espacios (sin números).', planNivelImpacto);
+            return false;
+        }
+        if (esRepetitivo(nivelImpacto)) {
+            mostrarAvisoFormulario('El nivel de impacto no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planNivelImpacto);
+            return false;
+        }
+    }
+
     return true;
 }
 document.addEventListener("DOMContentLoaded", () => {
@@ -322,6 +384,21 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleMunicipio();
     }
 
+    const tipoFormularioRadios = document.querySelectorAll('input[name="tipo_formulario"]');
+    const camposCompleta = document.getElementById('campos-completa');
+
+    const toggleTipoFormulario = () => {
+        if (!camposCompleta) return;
+        const completaRadio = document.getElementById('tipo-formulario-completa');
+        const show = completaRadio ? completaRadio.checked : false;
+        camposCompleta.classList.toggle('hidden', !show);
+    };
+
+    if (tipoFormularioRadios.length > 0) {
+        tipoFormularioRadios.forEach((radio) => radio.addEventListener('change', toggleTipoFormulario));
+        toggleTipoFormulario();
+    }
+
     if (planFechaInput && planDiaInput) {
         if (planFechaInput.value) {
             planDiaInput.value = calcularDiaSemana(planFechaInput.value);
@@ -356,6 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toggleFields();
         toggleMunicipio();
+        toggleTipoFormulario();
     }
 
     const modalEditar = document.getElementById('modalEditarActividad');
@@ -480,7 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 usernameInput.focus();
             }
             // Si pasa, se permite el envío del formulario
->>>>>>> 548e5dc (Describe los cambios realizados)
         });
     }
 });
