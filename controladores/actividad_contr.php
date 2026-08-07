@@ -171,7 +171,7 @@ class ActividadController
             'comuna'               => Validador::normalizarTexto($_POST['comuna'] ?? ''),
             'id_espacio_cultural'  => intval($_POST['id_espacio_cultural'] ?? 0),
             'id_tipo_actividad'    => intval($_POST['id_tipo_actividad'] ?? 0),
-            'responsable'          => Validador::normalizarTexto($_POST['responsable'] ?? ''),
+            'responsable'          => Validador::normalizarTexto($_POST['responsable'] ?? $_POST['id_responsable'] ?? ''),
             'telefono_responsable' => Validador::normalizarTexto($_POST['telefono_responsable'] ?? $_POST['telefonoResponsable'] ?? ''),
         ];
     }

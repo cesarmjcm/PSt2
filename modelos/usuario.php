@@ -67,10 +67,24 @@ ORDER BY u.nombre";
     }
 
     public function obtenerUsuarioPorNombre(string $nombre) {
-        $sql = "SELECT id, nombre, clave, rol FROM usuario WHERE nombre = ?";
+        $sql = "SELECT id, nombre, clave FROM usuario WHERE nombre = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$nombre]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            $user['rol'] = 'usuario';
+        }
+
+        return $user;
+    }
+
+    public function actualizarClave(int $id, string $clave): bool
+    {
+        $hash = password_hash($clave, PASSWORD_DEFAULT);
+        $sql = 'UPDATE usuario SET clave = ? WHERE id = ?';
+        $stmt = Conexion::conectar()->prepare($sql);
+        return $stmt->execute([$hash, $id]);
     }
 
     public function existeUsuario(string $nombre, ?int $idExcluir = null): bool

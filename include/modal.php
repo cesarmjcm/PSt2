@@ -154,7 +154,7 @@ $empleado=$empleadoModel->mostrarEmpleados();
                                     <fieldset>
                                         <legend>Responsable</legend>
                                         <label for="plan-responsable">Nombre</label>
-                                        <select name="id_responsable" id="plan-responsable">
+                                        <select name="responsable" id="plan-responsable">
                                             <option value="">Seleccione un responsable</option>
                                             <?php foreach ($empleados as $e): ?>
                                                 <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre']." ".$e['apellido'], ENT_QUOTES, 'UTF-8') ?></option>

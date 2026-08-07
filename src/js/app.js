@@ -192,21 +192,25 @@ function validacionesformulario(form) {
     }
 
     const planResponsable = document.getElementById('plan-responsable');
-    const responsable = planResponsable ? planResponsable.value.trim() : '';
-    if (responsable !== '') {
-        if (responsable.length < 2) {
+    const responsableValor = planResponsable ? planResponsable.value.trim() : '';
+    if (responsableValor !== '') {
+        const responsableTexto = planResponsable && planResponsable.tagName === 'SELECT'
+            ? (planResponsable.options[planResponsable.selectedIndex]?.textContent || '').trim()
+            : (planResponsable ? planResponsable.value.trim() : '');
+
+        if (responsableTexto.length < 2) {
             mostrarAvisoFormulario('El nombre del responsable debe tener al menos 2 caracteres.', planResponsable);
             return false;
         }
-        if (responsable.length > MAXLEN_RESPONSABLE) {
+        if (responsableTexto.length > MAXLEN_RESPONSABLE) {
             mostrarAvisoFormulario('El nombre del responsable no puede tener más de ' + MAXLEN_RESPONSABLE + ' caracteres.', planResponsable);
             return false;
         }
-        if (!REGEX_NOMBRE_PROPIO.test(responsable)) {
+        if (!REGEX_NOMBRE_PROPIO.test(responsableTexto)) {
             mostrarAvisoFormulario('El nombre del responsable solo puede contener letras y espacios (sin números).', planResponsable);
             return false;
         }
-        if (esRepetitivo(responsable)) {
+        if (esRepetitivo(responsableTexto)) {
             mostrarAvisoFormulario('El nombre del responsable no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planResponsable);
             return false;
         }
@@ -549,15 +553,48 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm && usernameInput && passwordInput) {
         loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
 
-            if (username !== 'admin' || password !== '123456') {
-                event.preventDefault();
-                alert('Usuario o contraseña incorrectos. Usa admin / 123456.');
+            if (username === '' || password === '') {
+                alert('Debes ingresar usuario y contraseña.');
                 usernameInput.focus();
+                return;
             }
-            // Si pasa, se permite el envío del formulario
+
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+
+            const submitBtn = loginForm.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('auth.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Respuesta no válida del servidor (' + response.status + ').');
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = data.redirect || 'main2.php';
+                } else {
+                    alert(data.message || 'Usuario o contraseña incorrectos.');
+                    passwordInput.value = '';
+                    usernameInput.focus();
+                }
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error);
+                alert('No se pudo conectar con el servidor. Inténtalo de nuevo.');
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
         });
     }
 });

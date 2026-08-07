@@ -16,14 +16,30 @@ if ($username !== '' && $password !== '') {
     $userModel = new Usuario();
     $user = $userModel->obtenerUsuarioPorNombre($username);
 
-    if ($user && password_verify($password, $user['clave'])) {
-        $_SESSION['user'] = $user['nombre'];
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_rol'] = $user['rol'] ?? 'usuario';
-        $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';
-        unset($_SESSION['redirect_after_login']);
-        $ok = true;
-        $message = 'Autenticación correcta.';
+    if ($user) {
+        $storedPassword = $user['clave'] ?? '';
+        $passwordInfo = password_get_info($storedPassword);
+        $validPassword = false;
+
+        if ($passwordInfo['algo'] !== 0) {
+            $validPassword = password_verify($password, $storedPassword);
+        } else {
+            $validPassword = hash_equals($storedPassword, $password);
+        }
+
+        if ($validPassword) {
+            if ($passwordInfo['algo'] === 0) {
+                $userModel->actualizarClave((int) $user['id'], $password);
+            }
+
+            $_SESSION['user'] = $user['nombre'];
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_rol'] = $user['rol'] ?? 'usuario';
+            $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';
+            unset($_SESSION['redirect_after_login']);
+            $ok = true;
+            $message = 'Autenticación correcta.';
+        }
     }
 }
 
