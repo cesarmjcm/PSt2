@@ -32,17 +32,12 @@ if ($username !== '' && $password !== '') {
                 $userModel->actualizarClave((int) $user['id'], $password);
             }
 
-            $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';
-
-            session_regenerate_id(true);
-            session_unset();
-
             $_SESSION['user'] = $user['nombre'];
             $_SESSION['user_id'] = $user['id'];
             $rol = trim(strtolower($user['rol'] ?? 'usuario'));
             $_SESSION['user_rol'] = $rol === 'administrador' ? 'administrador' : 'usuario';
-            $_SESSION['ultima_actividad'] = time();
-            $_SESSION['creada_en'] = time();
+            $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';
+            unset($_SESSION['redirect_after_login']);
             $ok = true;
             $message = 'Autenticación correcta.';
         }

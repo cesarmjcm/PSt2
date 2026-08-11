@@ -37,22 +37,26 @@ $empleado=$empleadoModel->mostrarEmpleados();
                 </div>
                 <div class="container__planificacion">
                     <form id="form-planificacion" action="../controladores/actividad_contr.php?action=crear" method="post" onsubmit="return validacionesformulario(this)" novalidate>
-                        <input type="hidden" name="action" id="plan-action" value="crear">
+                                <input type="hidden" name="action" id="plan-action" value="crear">
                         <input type="hidden" name="id" id="actividad-id" value="">
                         <input type="hidden" id="plan-dia" name="dia_semana" value="">
                         <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? 'main2.php', ENT_QUOTES, 'UTF-8'); ?>">
 
-                        <fieldset class="tipo-formulario-selector" style="border:none; padding:0; margin:0 0 16px; display:flex; gap:24px;">
-                            <legend style="font-weight:600; margin-bottom:6px; padding:0;">Tipo de planificación</legend>
-                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
-                                <input type="radio" name="tipo_formulario" id="tipo-formulario-simple" value="simple" checked>
-                                Actividad simple
-                            </label>
-                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
-                                <input type="radio" name="tipo_formulario" id="tipo-formulario-completa" value="completa">
-                                Actividad completa
-                            </label>
-                        </fieldset>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin:0 0 16px;">
+                            <fieldset class="tipo-formulario-selector" style="border:none; padding:0; margin:0; display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
+                                <legend style="font-weight:600; margin-bottom:6px; padding:0; width:100%;">Tipo de planificación</legend>
+                                <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                    <input type="radio" name="tipo_formulario" id="tipo-formulario-simple" value="simple" checked>
+                                    Actividad simple
+                                </label>
+                                <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                    <input type="radio" name="tipo_formulario" id="tipo-formulario-completa" value="completa">
+                                    Actividad completa
+                                </label>
+                            </fieldset>
+                            <button type="button" class="btn-secondary" id="btnCargarSolicitud" style="white-space:nowrap;">Cargar solicitud</button>
+                        </div>
+                        <div id="solicitudesSelector" class="solicitudes-selector" hidden></div>
 
                         <div id="form-planificacion-aviso" class="form-aviso" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
 
@@ -157,7 +161,8 @@ $empleado=$empleadoModel->mostrarEmpleados();
                                         <select name="responsable" id="plan-responsable">
                                             <option value="">Seleccione un responsable</option>
                                             <?php foreach ($empleados as $e): ?>
-                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre']." ".$e['apellido'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php $nombreCompleto = trim($e['nombre'].' '.$e['apellido']); ?>
+                                                <option value="<?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <label for="plan-telefono">Teléfono responsable</label>

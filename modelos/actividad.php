@@ -83,7 +83,7 @@ class Actividad {
         }
 
         $nivelImpacto = trim($d['nivel_impacto'] ?? '');
-        if ($nivelImpacto !== '' && !Validador::esNombrePropioValido($nivelImpacto, 2, 20)) {
+        if ($nivelImpacto !== '' && !Validador::esTextoValido($nivelImpacto, 2, 20)) {
             $errors[] = 'Nivel de impacto inválido.';
         }
 
@@ -244,7 +244,7 @@ class Actividad {
      * Busca el id de un registro por nombre en una tabla; si no existe, lo crea.
      */
     private function buscarOCrearId(PDO $pdo, string $tabla, string $columnaNombre, string $valor): ?int {
-        $valor = trim($valor);
+        $valor = Validador::normalizarTexto($valor);
         if ($valor === '') return null;
 
         $stmt = $pdo->prepare("SELECT id FROM {$tabla} WHERE {$columnaNombre} = ? LIMIT 1");

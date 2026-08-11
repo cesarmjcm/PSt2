@@ -56,6 +56,16 @@ function limpiarCamposInvalidos(form) {
     });
 }
 
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function mostrarAvisoFormulario(mensaje, campoAEnfocar) {
     const aviso = document.getElementById('form-planificacion-aviso');
     if (aviso) {
@@ -108,11 +118,14 @@ function validacionesformulario(form) {
 
     const planDescripcion = document.getElementById('plan-descripcion');
     const descripcion = planDescripcion ? planDescripcion.value.trim() : '';
-    if (esVacio(descripcion)) {
+    const tipoFormularioCompleta = document.getElementById('tipo-formulario-completa');
+    const esCompleta = tipoFormularioCompleta ? tipoFormularioCompleta.checked : false;
+
+    if (esCompleta && esVacio(descripcion)) {
         mostrarAvisoFormulario('Escribe una descripción de la actividad.', planDescripcion);
         return false;
     }
-    if (descripcion.length > MAXLEN_DESCRIPCION) {
+    if (!esVacio(descripcion) && descripcion.length > MAXLEN_DESCRIPCION) {
         mostrarAvisoFormulario('La descripción no puede tener más de ' + MAXLEN_DESCRIPCION + ' caracteres.', planDescripcion);
         return false;
     }
@@ -222,9 +235,6 @@ function validacionesformulario(form) {
         mostrarAvisoFormulario('El teléfono debe tener exactamente 11 caracteres, usando solo números, espacios, guiones (-) o el signo +. Ejemplo: 04123456789', planTelefono);
         return false;
     }
-
-    const tipoFormularioCompleta = document.getElementById('tipo-formulario-completa');
-    const esCompleta = tipoFormularioCompleta ? tipoFormularioCompleta.checked : false;
 
     if (esCompleta) {
         const planObjetivo = document.getElementById('plan-objetivo');
@@ -426,11 +436,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const titulo = document.getElementById('planModalTitulo');
         const planAction = document.getElementById('plan-action');
         const actividadId = document.getElementById('actividad-id');
+        const solicitudesSelector = document.getElementById('solicitudesSelector');
 
         if (form) form.reset();
         if (titulo) titulo.textContent = 'Nueva Planificación de Actividad';
         if (planAction) planAction.value = 'crear';
         if (actividadId) actividadId.value = '';
+        if (solicitudesSelector) solicitudesSelector.hidden = true;
 
         limpiarCamposInvalidos(form);
         ocultarAvisoFormulario();
@@ -442,6 +454,120 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const modalEditar = document.getElementById('modalEditarActividad');
     const btnCerrarEditar = document.querySelectorAll('.close-button-editar');
+    const btnCargarSolicitud = document.getElementById('btnCargarSolicitud');
+    const solicitudesSelector = document.getElementById('solicitudesSelector');
+    let solicitudesCache = [];
+
+    async function cargarSolicitudesDeServidor() {
+        try {
+            const response = await fetch('../controladores/solicitud_contr.php?action=listar');
+            if (!response.ok) throw new Error('Error cargando solicitudes');
+            const data = await response.json();
+            if (data.success) {
+                solicitudesCache = data.data || [];
+            } else {
+                solicitudesCache = [];
+            }
+        } catch (error) {
+            console.error(error);
+            solicitudesCache = [];
+        }
+    }
+
+    function renderSolicitudesSelector() {
+        if (!solicitudesSelector) return;
+        if (!solicitudesCache.length) {
+            solicitudesSelector.innerHTML = '<div class="solicitudes-selector__empty">No hay solicitudes disponibles.</div>';
+            return;
+        }
+        solicitudesSelector.innerHTML = solicitudesCache.map(solicitud => {
+            const nombre = solicitud.descripcion ? solicitud.descripcion : solicitud.lugar;
+            const subtitle = solicitud.responsable ? `${solicitud.responsable} · ${solicitud.fecha_solicitud} ${solicitud.hora_solicitud}` : `${solicitud.fecha_solicitud} ${solicitud.hora_solicitud}`;
+            return `
+                <button type="button" class="solicitudes-selector__item" data-id="${solicitud.id}">
+                    <strong>${escapeHtml(nombre)}</strong>
+                    <span>${escapeHtml(subtitle)}</span>
+                </button>
+            `;
+        }).join('');
+
+        solicitudesSelector.querySelectorAll('.solicitudes-selector__item').forEach(button => {
+            button.addEventListener('click', () => {
+                const solicitudId = button.dataset.id;
+                const solicitud = solicitudesCache.find(item => String(item.id) === String(solicitudId));
+                if (solicitud) {
+                    aplicarSolicitudAlFormulario(solicitud);
+                }
+            });
+        });
+    }
+
+    function aplicarSolicitudAlFormulario(solicitud) {
+        const planTipo = document.getElementById('plan-tipo');
+        const planDescripcion = document.getElementById('plan-descripcion');
+        const planFecha = document.getElementById('plan-fecha');
+        const planHora = document.getElementById('plan-hora');
+        const planParticipantes = document.getElementById('plan-participantes');
+        const planObjetivo = document.getElementById('plan-objetivo');
+        const planResponsable = document.getElementById('plan-responsable');
+
+        if (planTipo) {
+            planTipo.value = solicitud.lugar || solicitud.descripcion || '';
+        }
+        if (planDescripcion) {
+            planDescripcion.value = solicitud.descripcion || '';
+        }
+        if (planFecha) {
+            planFecha.value = solicitud.fecha_solicitud || '';
+        }
+        if (planHora) {
+            planHora.value = solicitud.hora_solicitud || '';
+        }
+        if (planParticipantes) {
+            planParticipantes.value = solicitud.participantes || '';
+        }
+        if (planObjetivo) {
+            planObjetivo.value = solicitud.responsable || '';
+        }
+
+        if (planResponsable) {
+            const opciones = Array.from(planResponsable.options);
+            const encontrado = opciones.find(opt => opt.textContent.trim().toLowerCase() === (solicitud.responsable || '').trim().toLowerCase());
+            if (encontrado) {
+                planResponsable.value = encontrado.value;
+                planResponsable.dispatchEvent(new Event('change'));
+            }
+        }
+
+        if (solicitudesSelector) {
+            solicitudesSelector.hidden = true;
+        }
+    }
+
+    function toggleSolicitudesSelector() {
+        if (!solicitudesSelector || !btnCargarSolicitud) return;
+        if (solicitudesSelector.hidden) {
+            if (!solicitudesCache.length) {
+                cargarSolicitudesDeServidor().then(renderSolicitudesSelector);
+            } else {
+                renderSolicitudesSelector();
+            }
+            solicitudesSelector.hidden = false;
+        } else {
+            solicitudesSelector.hidden = true;
+        }
+    }
+
+    function ocultarSolicitudesSelector() {
+        if (solicitudesSelector) solicitudesSelector.hidden = true;
+    }
+
+    if (btnCargarSolicitud) {
+        btnCargarSolicitud.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleSolicitudesSelector();
+        });
+    }
 
     function openModalEditar() {
         if (!modalEditar) return;

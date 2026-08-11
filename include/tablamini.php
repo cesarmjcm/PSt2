@@ -29,22 +29,22 @@ try {
                 <table class="tabla-planificacion">
                     <thead>
                         <tr>
-                            <th>N°</th>
-                            <th>Actividad</th>
-                            <th>descripcion</th>
-                            <th>fecha</th>
-                            <th>dia semana</th>
+                            <th class="col-index">N°</th>
+                            <th class="col-actividad">Actividad</th>
+                            <th class="col-descripcion">Descripción</th>
+                            <th class="col-fecha">Fecha</th>
+                            <th class="col-dia">Día Semana</th>
                             <th class="col-acciones">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (!empty($errorMessage)): ?>
                             <tr>
-                                <td colspan="8">Error: <?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td colspan="6">Error: <?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></td>
                             </tr>
                         <?php elseif (empty($actividades)): ?>
                             <tr>
-                                <td colspan="8">No hay actividades registradas.</td>
+                                <td colspan="6">No hay actividades registradas.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($actividades as $index => $actividad): ?>
@@ -104,4 +104,5 @@ try {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                
             </div>

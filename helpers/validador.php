@@ -93,7 +93,7 @@ class Validador
         if ($len < $min || $len > $max) {
             return false;
         }
-        return (bool) preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 \'\-\.]+$/u', $valor);
+        return (bool) preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 \'\-\.,\(\)\?\!\:\/]+$/u', $valor);
     }
 
   

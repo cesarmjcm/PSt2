@@ -67,14 +67,13 @@ ORDER BY u.nombre";
     }
 
     public function obtenerUsuarioPorNombre(string $nombre) {
-        $sql = "SELECT id, nombre, clave, rol FROM usuario WHERE nombre = ?";
+        $sql = "SELECT id, nombre, clave FROM usuario WHERE nombre = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$nombre]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            $rol = trim(strtolower($user['rol'] ?? 'usuario'));
-            $user['rol'] = $rol === 'administrador' ? 'administrador' : 'usuario';
+            $user['rol'] = 'usuario';
         }
 
         return $user;

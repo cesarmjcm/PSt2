@@ -146,7 +146,7 @@ class ActividadController
         // recibe la cadena en una codificación distinta de UTF-8 (por
         // mbstring deshabilitada o locale del sistema), lo cual hacía que
         // las regex con acentos/ñ de validador.php fallaran solo ahí.
-        $fecha = trim($_POST['fecha'] ?? $_POST['fechaActividad'] ?? '');
+        $fecha = Validador::normalizarTexto($_POST['fecha'] ?? $_POST['fechaActividad'] ?? '');
         $diaSemana = Validador::normalizarTexto($_POST['dia_semana'] ?? $_POST['diaActividad'] ?? '');
 
         if ($diaSemana === '' && $fecha !== '') {
