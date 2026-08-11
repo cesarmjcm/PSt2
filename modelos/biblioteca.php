@@ -13,7 +13,7 @@ public function mostrarBibliotecas() {
                 b.redes_sociales,
                 b.Direccion AS direccion
             FROM biblioteca b
-            JOIN parroquia p ON b.id_parroquia = p.id
+            LEFT JOIN parroquia p ON b.id_parroquia = p.id
             ORDER BY b.nombre";
 
     $stmt = Conexion::conectar()->prepare($sql);

@@ -100,11 +100,17 @@ class BibliotecaController
                 return;
             }
         } catch (PDOException $e) {
-            if ($e->getCode() === '23000') {
+            // CORRECCIÓN: antes cualquier SQLSTATE 23000 (que incluye NOT NULL,
+            // FK inválida, etc., no solo duplicados) se reportaba como "ya
+            // existe", ocultando el error real. Ahora solo se asume duplicado
+            // si el código de error de MySQL es 1062 (Duplicate entry).
+            $mysqlErrorCode = $e->errorInfo[1] ?? null;
+            if ($mysqlErrorCode === 1062) {
                 $this->error('Ya existe una biblioteca con ese nombre en esta parroquia.');
                 return;
             }
-            $this->error('No se pudo crear la biblioteca.');
+            error_log('[BibliotecaController::crear] PDOException: ' . $e->getMessage());
+            $this->error('No se pudo crear la biblioteca. Error de base de datos.');
             return;
         }
 
@@ -175,11 +181,13 @@ $direccion = trim($_POST['direccion'] ?? '');
                 return;
             }
         } catch (PDOException $e) {
-            if ($e->getCode() === '23000') {
+            $mysqlErrorCode = $e->errorInfo[1] ?? null;
+            if ($mysqlErrorCode === 1062) {
                 $this->error('Ya existe otra biblioteca con ese nombre en esta parroquia.');
                 return;
             }
-            $this->error('No se pudo actualizar la biblioteca.');
+            error_log('[BibliotecaController::actualizar] PDOException: ' . $e->getMessage());
+            $this->error('No se pudo actualizar la biblioteca. Error de base de datos.');
             return;
         }
 

@@ -137,7 +137,6 @@ require_once __DIR__ . '/../include/guardian.php';
             modalTitulo.textContent = 'Nueva solicitud';
             solicitudForm.reset();
             ocultarErrorModal();
-            cerrarSelectorSolicitudes();
             llenarInstituciones();
             modal.hidden = false;
         }
