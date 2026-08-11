@@ -76,8 +76,20 @@ require_once __DIR__ . '/../include/guardian.php';
                     <input type="time" id="campo_hora_solicitud" name="hora_solicitud" required>
                 </div>
                 <div class="config-field">
+                    <label for="campo_biblioteca">Biblioteca</label>
+                    <select id="campo_biblioteca" name="biblioteca">
+                        <option value="">-- Seleccione --</option>
+                    </select>
+                </div>
+                <div class="config-field">
                     <label for="campo_lugar">Lugar</label>
                     <input type="text" id="campo_lugar" name="lugar" maxlength="100" required>
+                </div>
+                <div class="config-field">
+                    <label for="campo_empleado">Empleado</label>
+                    <select id="campo_empleado" name="empleado">
+                        <option value="">-- Seleccione --</option>
+                    </select>
                 </div>
                 <div class="config-field">
                     <label for="campo_responsable">Responsable</label>
@@ -113,7 +125,11 @@ require_once __DIR__ . '/../include/guardian.php';
         const formId = document.getElementById('formId');
         const modalErrorBox = document.getElementById('modalError');
         const btnNuevaSolicitud = document.getElementById('btnNuevaSolicitud');
+        const campoBiblioteca = document.getElementById('campo_biblioteca');
+        const campoEmpleado = document.getElementById('campo_empleado');
         let instituciones = [];
+        let bibliotecas = [];
+        let empleados = [];
 
         function mostrarAlerta(mensaje, tipo) {
             alertBox.textContent = mensaje;
@@ -138,6 +154,8 @@ require_once __DIR__ . '/../include/guardian.php';
             solicitudForm.reset();
             ocultarErrorModal();
             llenarInstituciones();
+            llenarBibliotecas();
+            llenarEmpleados();
             modal.hidden = false;
         }
 
@@ -147,6 +165,8 @@ require_once __DIR__ . '/../include/guardian.php';
             solicitudForm.reset();
             ocultarErrorModal();
             llenarInstituciones(solicitud.id_institucion);
+            llenarBibliotecas();
+            llenarEmpleados();
             document.getElementById('campo_fecha_solicitud').value = solicitud.fecha_solicitud;
             document.getElementById('campo_hora_solicitud').value = solicitud.hora_solicitud;
             document.getElementById('campo_lugar').value = solicitud.lugar;
@@ -174,6 +194,50 @@ require_once __DIR__ . '/../include/guardian.php';
             });
         }
 
+        function llenarBibliotecas(seleccionado = '') {
+            const select = document.getElementById('campo_biblioteca');
+            select.innerHTML = '<option value="">-- Seleccione --</option>';
+            bibliotecas.forEach(bib => {
+                const option = document.createElement('option');
+                option.value = bib.id;
+                option.textContent = bib.nombre;
+                if (String(bib.id) === String(seleccionado)) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function llenarEmpleados(seleccionado = '') {
+            const select = document.getElementById('campo_empleado');
+            select.innerHTML = '<option value="">-- Seleccione --</option>';
+            empleados.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = `${emp.nombre} ${emp.apellido}`.trim();
+                if (String(emp.id) === String(seleccionado)) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function sincronizarLugarDesdeBiblioteca() {
+            const selected = bibliotecas.find(b => String(b.id) === String(campoBiblioteca.value));
+            const campoLugar = document.getElementById('campo_lugar');
+            if (selected && selected.nombre) {
+                campoLugar.value = selected.nombre;
+            }
+        }
+
+        function sincronizarResponsableDesdeEmpleado() {
+            const selected = empleados.find(e => String(e.id) === String(campoEmpleado.value));
+            const campoResponsable = document.getElementById('campo_responsable');
+            if (selected) {
+                campoResponsable.value = `${selected.nombre} ${selected.apellido}`.trim();
+            }
+        }
+
         async function cargarInstituciones() {
             try {
                 const resp = await fetch('../controladores/institucion_contr.php?action=listar');
@@ -184,6 +248,32 @@ require_once __DIR__ . '/../include/guardian.php';
                 }
             } catch (e) {
                 console.error('No se pudieron cargar las instituciones', e);
+            }
+        }
+
+        async function cargarBibliotecas() {
+            try {
+                const resp = await fetch('../controladores/biblioteca_contr.php?action=listar');
+                const json = await resp.json();
+                if (json.success) {
+                    bibliotecas = json.data;
+                    llenarBibliotecas();
+                }
+            } catch (e) {
+                console.error('No se pudieron cargar las bibliotecas', e);
+            }
+        }
+
+        async function cargarEmpleados() {
+            try {
+                const resp = await fetch('../controladores/empleado_contr.php?action=listar');
+                const json = await resp.json();
+                if (json.success) {
+                    empleados = json.data;
+                    llenarEmpleados();
+                }
+            } catch (e) {
+                console.error('No se pudieron cargar los empleados', e);
             }
         }
 
@@ -309,6 +399,9 @@ require_once __DIR__ . '/../include/guardian.php';
             }
         });
 
+        campoBiblioteca.addEventListener('change', sincronizarLugarDesdeBiblioteca);
+        campoEmpleado.addEventListener('change', sincronizarResponsableDesdeEmpleado);
+
         btnNuevaSolicitud.addEventListener('click', abrirModalNuevo);
         modalClose.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);
@@ -321,6 +414,8 @@ require_once __DIR__ . '/../include/guardian.php';
         });
 
         cargarInstituciones();
+        cargarBibliotecas();
+        cargarEmpleados();
         cargarSolicitudes();
     })();
     </script>

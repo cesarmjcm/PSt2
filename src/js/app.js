@@ -173,28 +173,27 @@ function validacionesformulario(form) {
     }
 
     const planEspacio = document.getElementById('plan-espacio');
-    const espacio = planEspacio ? planEspacio.value.trim() : '';
-    if (esVacio(espacio)) {
-        mostrarAvisoFormulario('Ingresa un espacio cultural.', planEspacio);
-        return false;
-    }
-    if (espacio.length > MAXLEN_ESPACIO) {
-        mostrarAvisoFormulario('El espacio cultural no puede tener más de ' + MAXLEN_ESPACIO + ' caracteres.', planEspacio);
-        return false;
-    }
-    if (!REGEX_TEXTO_VALIDO.test(espacio)) {
-        mostrarAvisoFormulario('El espacio cultural solo puede contener letras, números, espacios y los signos \' - .', planEspacio);
-        return false;
-    }
-    if (esRepetitivo(espacio)) {
-        mostrarAvisoFormulario('El espacio cultural no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planEspacio);
-        return false;
-    }
-
     const planBiblioteca = document.getElementById('plan-biblioteca');
-    if (!planBiblioteca || planBiblioteca.value === '') {
-        mostrarAvisoFormulario('Selecciona una biblioteca.', planBiblioteca);
-        return false;
+    const tipoUbicacionSeleccionado = document.querySelector('input[name="tipo_ubicacion"]:checked');
+    const tipoUbicacion = tipoUbicacionSeleccionado ? tipoUbicacionSeleccionado.value : 'biblioteca';
+
+    if (tipoUbicacion === 'espacio') {
+        const espacio = planEspacio ? planEspacio.value.trim() : '';
+        if (esVacio(espacio)) {
+            mostrarAvisoFormulario('Selecciona un espacio cultural.', planEspacio);
+            return false;
+        }
+        if (planBiblioteca) {
+            planBiblioteca.value = '';
+        }
+    } else {
+        if (!planBiblioteca || planBiblioteca.value === '') {
+            mostrarAvisoFormulario('Selecciona una biblioteca.', planBiblioteca);
+            return false;
+        }
+        if (planEspacio) {
+            planEspacio.value = '';
+        }
     }
 
     const planComunas = document.getElementById('planificacion-comunas');
@@ -400,6 +399,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tipoFormularioRadios = document.querySelectorAll('input[name="tipo_formulario"]');
     const camposCompleta = document.getElementById('campos-completa');
+    const tipoUbicacionRadios = document.querySelectorAll('input[name="tipo_ubicacion"]');
+    const ubicacionBiblioteca = document.getElementById('ubicacion-biblioteca');
+    const ubicacionEspacio = document.getElementById('ubicacion-espacio');
 
     const toggleTipoFormulario = () => {
         if (!camposCompleta) return;
@@ -408,9 +410,26 @@ document.addEventListener('DOMContentLoaded', () => {
         camposCompleta.classList.toggle('hidden', !show);
     };
 
+    const toggleTipoUbicacion = () => {
+        const radioSeleccionado = document.querySelector('input[name="tipo_ubicacion"]:checked');
+        const tipo = radioSeleccionado ? radioSeleccionado.value : 'biblioteca';
+
+        if (ubicacionBiblioteca) {
+            ubicacionBiblioteca.classList.toggle('hidden', tipo !== 'biblioteca');
+        }
+        if (ubicacionEspacio) {
+            ubicacionEspacio.classList.toggle('hidden', tipo !== 'espacio');
+        }
+    };
+
     if (tipoFormularioRadios.length > 0) {
         tipoFormularioRadios.forEach((radio) => radio.addEventListener('change', toggleTipoFormulario));
         toggleTipoFormulario();
+    }
+
+    if (tipoUbicacionRadios.length > 0) {
+        tipoUbicacionRadios.forEach((radio) => radio.addEventListener('change', toggleTipoUbicacion));
+        toggleTipoUbicacion();
     }
 
     if (planFechaInput && planDiaInput) {
@@ -450,6 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleFields();
         toggleMunicipio();
         toggleTipoFormulario();
+        toggleTipoUbicacion();
     }
 
     const modalEditar = document.getElementById('modalEditarActividad');
@@ -509,7 +529,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const planHora = document.getElementById('plan-hora');
         const planParticipantes = document.getElementById('plan-participantes');
         const planObjetivo = document.getElementById('plan-objetivo');
+        const planBiblioteca = document.getElementById('plan-biblioteca');
         const planResponsable = document.getElementById('plan-responsable');
+        const planTelefono = document.getElementById('plan-telefono');
 
         if (planTipo) {
             planTipo.value = solicitud.lugar || solicitud.descripcion || '';
@@ -530,12 +552,31 @@ document.addEventListener('DOMContentLoaded', () => {
             planObjetivo.value = solicitud.responsable || '';
         }
 
+        if (planBiblioteca) {
+            const bibliotecaNombre = (solicitud.lugar || '').trim();
+            const opcionesBiblioteca = Array.from(planBiblioteca.options);
+            const bibliotecaEncontrada = opcionesBiblioteca.find(opt =>
+                opt.textContent.trim().toLowerCase() === bibliotecaNombre.toLowerCase()
+            ) || opcionesBiblioteca.find(opt => String(opt.value) === String(solicitud.id_biblioteca || ''));
+
+            if (bibliotecaEncontrada) {
+                planBiblioteca.value = bibliotecaEncontrada.value;
+                planBiblioteca.dispatchEvent(new Event('change'));
+            }
+        }
+
         if (planResponsable) {
+            const nombreResponsable = (solicitud.responsable || '').trim();
             const opciones = Array.from(planResponsable.options);
-            const encontrado = opciones.find(opt => opt.textContent.trim().toLowerCase() === (solicitud.responsable || '').trim().toLowerCase());
+            const encontrado = opciones.find(opt =>
+                opt.textContent.trim().toLowerCase() === nombreResponsable.toLowerCase()
+            ) || opciones.find(opt => opt.value.trim().toLowerCase() === nombreResponsable.toLowerCase());
+
             if (encontrado) {
                 planResponsable.value = encontrado.value;
                 planResponsable.dispatchEvent(new Event('change'));
+            } else if (planTelefono) {
+                planTelefono.value = '';
             }
         }
 
