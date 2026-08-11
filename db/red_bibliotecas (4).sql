@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 09-08-2026 a las 21:47:03
+-- Tiempo de generación: 11-08-2026 a las 21:36:11
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -26,8 +26,7 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-CREATE database red_bibliotecas;
-use red_bibliotecas;
+
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_biblioteca` int(10) NOT NULL,
@@ -46,7 +45,8 @@ CREATE TABLE `actividad` (
 --
 
 INSERT INTO `actividad` (`id`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `descripcion`, `objetivo`, `participantes`, `fecha`, `dia_semana`) VALUES
-(21, 1, 4, 'Arístides Bastidas', 4, 'cosas', 'No definido', 0, '2026-07-25', 'Sábado');
+(23, 15, 5, 'Biblioteca 1', 4, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', 'Domingo'),
+(24, 15, 5, 'zona2', 4, '2', 'carlos', 222, '2026-08-12', 'Miércoles');
 
 -- --------------------------------------------------------
 
@@ -65,7 +65,8 @@ CREATE TABLE `actividad_comuna` (
 --
 
 INSERT INTO `actividad_comuna` (`id`, `id_comuna`, `id_actividad`) VALUES
-(14, 8, 21);
+(16, 8, 23),
+(17, 8, 24);
 
 -- --------------------------------------------------------
 
@@ -92,7 +93,7 @@ CREATE TABLE `biblioteca` (
   `Correo` varchar(30) NOT NULL DEFAULT '',
   `redes_sociales` varchar(30) NOT NULL DEFAULT '',
   `Direccion` varchar(30) NOT NULL DEFAULT '',
-  `id_solicitud_actividad` int(10) NOT NULL
+  `id_solicitud_actividad` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -100,8 +101,7 @@ CREATE TABLE `biblioteca` (
 --
 
 INSERT INTO `biblioteca` (`id`, `nombre`, `id_parroquia`, `Correo`, `redes_sociales`, `Direccion`, `id_solicitud_actividad`) VALUES
-(1, 'Biblioteca 1', 4, '', '', '', 1),
-(3, 'Biblioteca 3', 3, '', '', '', 1);
+(15, 'biblioteca', 54, 'cesarmcontre28@gmail.com', 'cesarm2', 'calle 4', NULL);
 
 -- --------------------------------------------------------
 
@@ -120,7 +120,7 @@ CREATE TABLE `cargo` (
 --
 
 INSERT INTO `cargo` (`id`, `nombre`, `Descripcion`) VALUES
-(1, 'coordinador', '22222222222222222222222222222222');
+(1, 'coordinador', '2');
 
 -- --------------------------------------------------------
 
@@ -364,7 +364,10 @@ INSERT INTO `responsable` (`id`, `id_actividad`, `nombre`, `telefono`) VALUES
 (12, 17, 'cesar contreras', 2147483647),
 (13, 18, 'carlos', 2147483647),
 (14, 19, 'responsable', 2147483647),
-(15, 21, 'cesar contreras', 2147483647);
+(15, 21, 'cesar contreras', 2147483647),
+(16, 22, 'jesus serrano', 2147483647),
+(17, 23, 'jesus serrano', 2147483647),
+(18, 24, 'jesus serrano', 2147483647);
 
 -- --------------------------------------------------------
 
@@ -388,7 +391,9 @@ CREATE TABLE `solicitud` (
 --
 
 INSERT INTO `solicitud` (`id`, `id_institucion`, `fecha_solicitud`, `hora_solicitud`, `lugar`, `responsable`, `participantes`, `descripcion`) VALUES
-(1, 1, '2026-08-09', '08:00:00', 'Biblioteca 1', 'Responsable 1', 20, 'Solicitud 1');
+(1, 1, '2026-08-09', '08:00:00', 'Biblioteca 1', 'Responsable 1', 20, 'Solicitud 1'),
+(2, 1, '2026-08-06', '14:16:00', 'zona', 'cesar contreras', 2, '1'),
+(3, 1, '2026-08-12', '15:36:00', 'zona2', 'carlos', 222, '2');
 
 -- --------------------------------------------------------
 
@@ -407,7 +412,7 @@ CREATE TABLE `tipo_actividad` (
 --
 
 INSERT INTO `tipo_actividad` (`id`, `nombre`, `Descripcion`) VALUES
-(4, 'eduativa', '000444444444444444444444444444'),
+(4, 'eduativa', '0004'),
 (5, 'educativa', '');
 
 -- --------------------------------------------------------
@@ -598,13 +603,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `actividad_comuna`
 --
 ALTER TABLE `actividad_comuna`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `actividad_espaciocultural`
@@ -616,7 +621,7 @@ ALTER TABLE `actividad_espaciocultural`
 -- AUTO_INCREMENT de la tabla `biblioteca`
 --
 ALTER TABLE `biblioteca`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -676,13 +681,13 @@ ALTER TABLE `parroquia`
 -- AUTO_INCREMENT de la tabla `responsable`
 --
 ALTER TABLE `responsable`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `solicitud`
 --
 ALTER TABLE `solicitud`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_actividad`
