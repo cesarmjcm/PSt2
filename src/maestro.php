@@ -9,6 +9,7 @@ $maestros = [
     'parroquia' => 'Parroquias',
     'comuna' => 'Comunas',
     'biblioteca' => 'Bibliotecas',
+    'institucion' => 'Instituciones',
     'cargo' => 'Cargos',
     'empleado' => 'Empleados',
     'nv_act' => 'Niveles de impacto',
@@ -95,6 +96,21 @@ $camposPorMaestro = [
             'opcional' => true
         ],
     ],
+    'institucion' => [
+        'id_municipio' => [
+            'label'       => 'Municipio',
+            'type'        => 'select',
+            'fuente'      => '../controladores/municipio_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        ],
+        'nombre' => [
+            'label' => 'Nombre',
+            'type' => 'text',
+            'maxLength' => 40,
+            'noNumeros' => true,
+        ],
+    ],
     
     'cargo'      => [
         'nombre'      => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 36, 'noNumeros' => true],
@@ -128,6 +144,7 @@ $controladorPorMaestro = [
     'parroquia'  => '../controladores/parroquia_contr.php',
     'comuna'     => '../controladores/comuna_contr.php',
     'biblioteca' => '../controladores/biblioteca_contr.php',
+    'institucion' => '../controladores/institucion_contr.php',
     'cargo'      => '../controladores/cargo_contr.php',
     'empleado'   => '../controladores/empleado_contr.php',
     'nv_act'     => '../controladores/nv_act_contr.php',

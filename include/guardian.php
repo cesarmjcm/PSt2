@@ -64,7 +64,8 @@ if (empty($_SESSION['user_id'])) {
  */
 function esAdministrador(): bool
 {
-    return ($_SESSION['user_rol'] ?? '') === 'administrador';
+    $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
+    return $rol === 'administrador';
 }
 
 /**

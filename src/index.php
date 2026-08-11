@@ -23,6 +23,7 @@ require_once __DIR__ . '/../include/guardian.php';
                     <li><a href="./maestro.php?tabla=parroquia">Parroquias</a></li>
                     <li><a href="./maestro.php?tabla=comuna">Comunas</a></li>
                     <li><a href="./maestro.php?tabla=biblioteca">Bibliotecas</a></li>
+                    <li></li><a href="./maestro.php?tabla=institucion">Instituciones</a></li>
                     <li><a href="./maestro.php?tabla=cargo">Cargos</a></li>
                     <li><a href="./maestro.php?tabla=empleado">Empleados</a></li>
                     <li><a href="./maestro.php?tabla=nv_act">Niveles de impacto</a></li>

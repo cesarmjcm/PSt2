@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-07-2026 a las 21:17:09
+-- Tiempo de generación: 09-08-2026 a las 21:47:03
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -26,7 +26,8 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-
+CREATE database red_bibliotecas;
+use red_bibliotecas;
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_biblioteca` int(10) NOT NULL,
@@ -40,6 +41,13 @@ CREATE TABLE `actividad` (
   `dia_semana` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+--
+-- Volcado de datos para la tabla `actividad`
+--
+
+INSERT INTO `actividad` (`id`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `descripcion`, `objetivo`, `participantes`, `fecha`, `dia_semana`) VALUES
+(21, 1, 4, 'Arístides Bastidas', 4, 'cosas', 'No definido', 0, '2026-07-25', 'Sábado');
+
 -- --------------------------------------------------------
 
 --
@@ -51,6 +59,13 @@ CREATE TABLE `actividad_comuna` (
   `id_comuna` int(10) NOT NULL,
   `id_actividad` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Volcado de datos para la tabla `actividad_comuna`
+--
+
+INSERT INTO `actividad_comuna` (`id`, `id_comuna`, `id_actividad`) VALUES
+(14, 8, 21);
 
 -- --------------------------------------------------------
 
@@ -76,17 +91,17 @@ CREATE TABLE `biblioteca` (
   `id_parroquia` int(10) NOT NULL,
   `Correo` varchar(30) NOT NULL DEFAULT '',
   `redes_sociales` varchar(30) NOT NULL DEFAULT '',
-  `Direccion` varchar(30) NOT NULL DEFAULT ''
+  `Direccion` varchar(30) NOT NULL DEFAULT '',
+  `id_solicitud_actividad` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `biblioteca`
 --
 
-INSERT INTO `biblioteca` (`id`, `nombre`, `id_parroquia`, `Correo`, `redes_sociales`, `Direccion`) VALUES
-(1, 'Biblioteca 1', 4, '', '', ''),
-(3, 'Biblioteca 3', 3, '', '', ''),
-(7, 'felix pifano', 50, '', '', '000000000000000000000000000000');
+INSERT INTO `biblioteca` (`id`, `nombre`, `id_parroquia`, `Correo`, `redes_sociales`, `Direccion`, `id_solicitud_actividad`) VALUES
+(1, 'Biblioteca 1', 4, '', '', '', 1),
+(3, 'Biblioteca 3', 3, '', '', '', 1);
 
 -- --------------------------------------------------------
 
@@ -118,6 +133,13 @@ CREATE TABLE `comuna` (
   `nombre` varchar(30) NOT NULL,
   `id_parroquia` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Volcado de datos para la tabla `comuna`
+--
+
+INSERT INTO `comuna` (`id`, `nombre`, `id_parroquia`) VALUES
+(8, 'comuna', 54);
 
 -- --------------------------------------------------------
 
@@ -186,6 +208,25 @@ INSERT INTO `impacto_actividad` (`id`, `id_impacto`, `id_actividad`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `institucion`
+--
+
+CREATE TABLE `institucion` (
+  `id` int(10) NOT NULL,
+  `id_municipio` int(10) NOT NULL,
+  `nombre` varchar(40) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `institucion`
+--
+
+INSERT INTO `institucion` (`id`, `id_municipio`, `nombre`) VALUES
+(1, 4, 'Institucion 1');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `municipio`
 --
 
@@ -199,11 +240,13 @@ CREATE TABLE `municipio` (
 --
 
 INSERT INTO `municipio` (`id`, `nombre`) VALUES
+(22, 'Arístides Bastida'),
+(21, 'Arístides Bastidas'),
 (13, 'Bolívar'),
 (5, 'Bruzual'),
 (6, 'Cocorote'),
 (4, 'Independencia'),
-(15, 'José Antonio Pá'),
+(15, 'José Antonio Páez'),
 (11, 'La Trinidad'),
 (10, 'Manuel Monge'),
 (9, 'Nirgua'),
@@ -229,7 +272,8 @@ CREATE TABLE `nivel_impacto` (
 --
 
 INSERT INTO `nivel_impacto` (`id`, `nombre_impacto`) VALUES
-(3, 'Comunal');
+(3, 'Comunal'),
+(4, 'estadal');
 
 -- --------------------------------------------------------
 
@@ -250,29 +294,44 @@ CREATE TABLE `parroquia` (
 INSERT INTO `parroquia` (`id`, `nombre`, `id_municipio`) VALUES
 (17, 'Albarico', 0),
 (3, 'Albarico', 2),
-(50, 'Arístides Bastidas', 13),
+(54, 'Arístides Bastidas', 21),
+(55, 'Bolivar', 13),
 (5, 'Campo Elías', 0),
+(56, 'Campo Elias', 5),
 (4, 'Chivacoa', 0),
 (49, 'Chivacoa', 5),
 (6, 'Cocorote', 0),
 (46, 'Cocorote', 6),
 (21, 'El Guayabo', 0),
+(52, 'El Guayabo', 8),
 (22, 'Farriar', 0),
+(53, 'Farriar', 8),
 (7, 'Independencia', 0),
+(57, 'Independencia', 4),
+(58, 'José Antonio Paez', 15),
 (9, 'La Trinidad', 0),
+(59, 'La Trinidad', 11),
 (10, 'Manuel Monge', 0),
+(60, 'Manuel Monge', 10),
 (13, 'Nirgua', 0),
+(62, 'Nirgua', 9),
 (11, 'Salóm', 0),
+(61, 'Salom', 9),
 (14, 'San Andrés', 0),
+(65, 'San Andres', 12),
 (51, 'San Andres', 13),
 (18, 'San Felipe', 0),
 (47, 'San Felipe', 2),
 (16, 'San Javier', 0),
 (48, 'San Javier', 2),
 (19, 'Sucre', 0),
+(66, 'Sucre', 3),
+(63, 'Temeria', 9),
 (12, 'Temerla', 0),
 (20, 'Urachiche', 0),
-(15, 'Yaritagua', 0);
+(67, 'Urachiche', 7),
+(15, 'Yaritagua', 0),
+(64, 'Yaritagua', 12);
 
 -- --------------------------------------------------------
 
@@ -304,7 +363,32 @@ INSERT INTO `responsable` (`id`, `id_actividad`, `nombre`, `telefono`) VALUES
 (11, 16, 'cesar contreras', 2147483647),
 (12, 17, 'cesar contreras', 2147483647),
 (13, 18, 'carlos', 2147483647),
-(14, 19, 'responsable', 2147483647);
+(14, 19, 'responsable', 2147483647),
+(15, 21, 'cesar contreras', 2147483647);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `solicitud`
+--
+
+CREATE TABLE `solicitud` (
+  `id` int(10) NOT NULL,
+  `id_institucion` int(10) NOT NULL,
+  `fecha_solicitud` date NOT NULL,
+  `hora_solicitud` time NOT NULL,
+  `lugar` varchar(100) NOT NULL,
+  `responsable` varchar(50) NOT NULL,
+  `participantes` int(10) NOT NULL DEFAULT 0,
+  `descripcion` varchar(250) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `solicitud`
+--
+
+INSERT INTO `solicitud` (`id`, `id_institucion`, `fecha_solicitud`, `hora_solicitud`, `lugar`, `responsable`, `participantes`, `descripcion`) VALUES
+(1, 1, '2026-08-09', '08:00:00', 'Biblioteca 1', 'Responsable 1', 20, 'Solicitud 1');
 
 -- --------------------------------------------------------
 
@@ -323,7 +407,8 @@ CREATE TABLE `tipo_actividad` (
 --
 
 INSERT INTO `tipo_actividad` (`id`, `nombre`, `Descripcion`) VALUES
-(4, 'eduativa', '000444444444444444444444444444');
+(4, 'eduativa', '000444444444444444444444444444'),
+(5, 'educativa', '');
 
 -- --------------------------------------------------------
 
@@ -352,16 +437,16 @@ CREATE TABLE `usuario` (
   `nombre` varchar(15) NOT NULL,
   `clave` varchar(255) NOT NULL,
   `telefono` varchar(15) DEFAULT NULL,
-  `id_empleado` int(11) DEFAULT NULL
+  `id_empleado` int(11) DEFAULT NULL,
+  `rol` enum('administrador','usuario') NOT NULL DEFAULT 'usuario'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`id`, `nombre`, `clave`, `telefono`, `id_empleado`) VALUES
-(6, 'jesus', '32435609', NULL, NULL),
-(11, 'cheddar', '$2y$10$gDEMnG9XXqwiKvUQNP95BOzYUQ/KcRkmZcCqfzHi.WvkowTeqRjwq', '04127168235', NULL);
+INSERT INTO `usuario` (`id`, `nombre`, `clave`, `telefono`, `id_empleado`, `rol`) VALUES
+(11, 'cheddar', '$2y$10$gDEMnG9XXqwiKvUQNP95BOzYUQ/KcRkmZcCqfzHi.WvkowTeqRjwq', '04125240489', 15, 'administrador');
 
 --
 -- Índices para tablas volcadas
@@ -398,7 +483,8 @@ ALTER TABLE `actividad_espaciocultural`
 ALTER TABLE `biblioteca`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_biblioteca_nombre_parroquia` (`nombre`,`id_parroquia`),
-  ADD KEY `id_parroquia` (`id_parroquia`);
+  ADD KEY `id_parroquia` (`id_parroquia`),
+  ADD KEY `id_solicitud` (`id_solicitud_actividad`);
 
 --
 -- Indices de la tabla `cargo`
@@ -439,6 +525,13 @@ ALTER TABLE `impacto_actividad`
   ADD KEY `id_actividad` (`id_actividad`);
 
 --
+-- Indices de la tabla `institucion`
+--
+ALTER TABLE `institucion`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_municipio` (`id_municipio`);
+
+--
 -- Indices de la tabla `municipio`
 --
 ALTER TABLE `municipio`
@@ -466,6 +559,13 @@ ALTER TABLE `parroquia`
 ALTER TABLE `responsable`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_actividad` (`id_actividad`);
+
+--
+-- Indices de la tabla `solicitud`
+--
+ALTER TABLE `solicitud`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_institucion` (`id_institucion`);
 
 --
 -- Indices de la tabla `tipo_actividad`
@@ -498,13 +598,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `actividad_comuna`
 --
 ALTER TABLE `actividad_comuna`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `actividad_espaciocultural`
@@ -528,7 +628,7 @@ ALTER TABLE `cargo`
 -- AUTO_INCREMENT de la tabla `comuna`
 --
 ALTER TABLE `comuna`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `empleado`
@@ -549,34 +649,46 @@ ALTER TABLE `impacto_actividad`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `institucion`
+--
+ALTER TABLE `institucion`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de la tabla `municipio`
 --
 ALTER TABLE `municipio`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `nivel_impacto`
 --
 ALTER TABLE `nivel_impacto`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `parroquia`
 --
 ALTER TABLE `parroquia`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT de la tabla `responsable`
 --
 ALTER TABLE `responsable`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT de la tabla `solicitud`
+--
+ALTER TABLE `solicitud`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_actividad`
 --
 ALTER TABLE `tipo_actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
@@ -607,7 +719,8 @@ ALTER TABLE `actividad_comuna`
 -- Filtros para la tabla `biblioteca`
 --
 ALTER TABLE `biblioteca`
-  ADD CONSTRAINT `biblioteca_ibfk_1` FOREIGN KEY (`id_parroquia`) REFERENCES `parroquia` (`id`);
+  ADD CONSTRAINT `biblioteca_ibfk_1` FOREIGN KEY (`id_parroquia`) REFERENCES `parroquia` (`id`),
+  ADD CONSTRAINT `biblioteca_ibfk_2` FOREIGN KEY (`id_solicitud_actividad`) REFERENCES `solicitud` (`id`);
 
 --
 -- Filtros para la tabla `comuna`
@@ -620,6 +733,18 @@ ALTER TABLE `comuna`
 --
 ALTER TABLE `empleado`
   ADD CONSTRAINT `empleado_ibfk_1` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`);
+
+--
+-- Filtros para la tabla `institucion`
+--
+ALTER TABLE `institucion`
+  ADD CONSTRAINT `institucion_ibfk_1` FOREIGN KEY (`id_municipio`) REFERENCES `municipio` (`id`);
+
+--
+-- Filtros para la tabla `solicitud`
+--
+ALTER TABLE `solicitud`
+  ADD CONSTRAINT `solicitud_ibfk_1` FOREIGN KEY (`id_institucion`) REFERENCES `institucion` (`id`);
 
 --
 -- Filtros para la tabla `usuario`

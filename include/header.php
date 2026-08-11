@@ -10,6 +10,7 @@
             <div class="nav__links">
                 <a href="main2.php" class="nav__link<?= $inicioActive ? ' active' : '' ?>">Inicio</a>
                 <a href="index.php" class="nav__link<?= $planActive ? ' active' : '' ?>">Planificación</a>
+                <a href="solicitud.php" class="nav__link<?= stripos($uri, 'solicitud.php') !== false ? ' active' : '' ?>">Solicitudes</a>
                 <input type="text" class="nav__search" placeholder="Buscar...">
                 <div class="nav__user">
                     <button id="userMenuButton" class="nav__user-btn" aria-haspopup="true" aria-expanded="false" title="Usuario" type="button">
