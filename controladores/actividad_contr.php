@@ -1,6 +1,12 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/../helpers/validador.php';
 require_once __DIR__ . '/../modelos/actividad.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 
 class ActividadController
 {
@@ -57,6 +63,10 @@ class ActividadController
         try {
             $id = $this->model->crearActividadCompleta($data);
             if ($id) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Actividad', 'Actividad registrada: ' . $data['nombre']);
+                }
                 header('Location: ' . $this->getReturnUrl());
                 exit;
             }
@@ -96,6 +106,10 @@ class ActividadController
         try {
             $updated = $this->model->actualizarActividadCompleta($id, $data);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Actividad', "Actividad #$id actualizada: " . $data['nombre']);
+                }
                 header('Location: ' . $this->getReturnUrl());
                 exit;
             }
@@ -123,6 +137,10 @@ class ActividadController
 
         $deleted = $this->model->eliminarActividad($id);
         if ($deleted) {
+            if (!empty($_SESSION['user_id'])) {
+                $conex = Conexion::conectar();
+                registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Actividad', "Actividad #$id eliminada");
+            }
             header('Location: ' . $this->getReturnUrl());
             exit;
         }

@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/tipo_actividad.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class TipoActividadController
 {
@@ -71,6 +78,10 @@ class TipoActividadController
         try {
             $created = $this->model->crearTipo($nombre, $descripcion);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: ' . $nombre);
+                }
                 $this->success('Tipo de actividad creado correctamente.');
                 return;
             }
@@ -124,6 +135,10 @@ class TipoActividadController
         try {
             $updated = $this->model->actualizarTipo($id, $nombre, $descripcion);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Tipo de actividad', "Tipo de actividad #$id actualizado: " . $nombre);
+                }
                 $this->success('Tipo de actividad actualizado correctamente.');
                 return;
             }
@@ -155,6 +170,10 @@ class TipoActividadController
         try {
             $deleted = $this->model->eliminarTipo($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Tipo de actividad', "Tipo de actividad #$id eliminado");
+                }
                 $this->success('Tipo de actividad eliminado correctamente.');
                 return;
             }

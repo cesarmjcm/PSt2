@@ -1,0 +1,259 @@
+/* =========================================================
+   BITACORA.CSS
+   Estilos específicos de la página de Bitácora (historial de acciones).
+   Reutiliza la paleta y patrones visuales de main.css:
+   - Header azul #25346b
+   - Acentos verdes #156939 / #65c20e
+   - Tarjetas blancas con borde #99a0be y sombra suave
+   - Tabla con encabezado verde y filas cebra
+   Este archivo se carga DESPUÉS de main.css.
+   ========================================================= */
+
+.container__bitacora {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 100vw;
+    padding: 0 40px;
+    margin: 0;
+    margin-top: 40px;
+    box-sizing: border-box;
+}
+
+.bitacora__title {
+    font-size: 1.15rem;
+    line-height: 24px;
+    margin: 0 0 6px;
+    color: #156939;
+    text-align: center;
+}
+
+.bitacora__subtitle {
+    font-size: 0.95rem;
+    color: #5c6584;
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+/* --- Formulario de filtros: mismo lenguaje visual que .formulario-planificacion --- */
+.bitacora__filtros {
+    width: 100%;
+    max-width: 1100px;
+    background-color: #ffffff;
+    padding: 20px 24px;
+    border-radius: 20px;
+    border: 2px solid #99a0be;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.bitacora__filtros .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 180px;
+    min-width: 160px;
+}
+
+.bitacora__filtros label {
+    font-size: 0.85rem;
+    color: #25346b;
+    font-weight: 600;
+}
+
+.bitacora__filtros select,
+.bitacora__filtros input[type="date"] {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #bbc1d6;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    color: #222222;
+}
+
+.bitacora__filtros select:focus,
+.bitacora__filtros input[type="date"]:focus {
+    outline: none;
+    border-color: #5792ff;
+    box-shadow: 0 0 0 3px rgba(87, 146, 255, 0.15);
+}
+
+.bitacora__filtros button[type="submit"] {
+    background-color: #156939;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.bitacora__filtros button[type="submit"]:hover {
+    background-color: #114d29;
+    transform: translateY(-1px);
+}
+
+.bitacora__limpiar {
+    display: inline-flex;
+    align-items: center;
+    padding: 11px 16px;
+    border-radius: 12px;
+    border: 1px solid #99a0be;
+    color: #25346b;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background-color: #f5f8ff;
+    transition: background-color 0.2s ease;
+}
+
+.bitacora__limpiar:hover {
+    background-color: #e7f1ff;
+    border-color: #5792ff;
+}
+
+/* --- Tabla: reutiliza el patrón visual de .tabla__container / thead th / tbody nth-child --- */
+.tabla__container.bitacora__tabla-wrap {
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 0;
+}
+
+.bitacora__tabla {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    color: #222222;
+    font-size: 0.92rem;
+}
+
+.bitacora__tabla th.col-fecha { width: 11%; }
+.bitacora__tabla th.col-dia { width: 10%; }
+.bitacora__tabla th.col-hora { width: 9%; }
+.bitacora__tabla th.col-usuario { width: 14%; }
+.bitacora__tabla th.col-accion { width: 12%; }
+.bitacora__tabla th.col-modulo { width: 14%; }
+.bitacora__tabla th.col-detalle { width: 30%; }
+
+.bitacora__tabla thead th {
+    padding: 16px 18px;
+    text-align: left;
+    color: white;
+    background-color: #156939;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.bitacora__tabla td {
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.bitacora__tabla tr {
+    background-color: #ffffff;
+}
+
+.bitacora__tabla tbody tr:nth-child(even) {
+    background-color: #dcdde2;
+}
+
+.bitacora__tabla tbody tr:hover {
+    background-color: #e7f1ff;
+}
+
+.bitacora__vacio {
+    text-align: center;
+    color: #5c6584;
+    font-style: italic;
+    padding: 24px 18px !important;
+}
+
+/* --- Badges de acción, usando la misma paleta del sitio --- */
+.bitacora__badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #ffffff;
+}
+
+.bitacora__badge--crear {
+    background-color: #156939; /* verde: acorde a btn-ingresar-planificacion */
+}
+
+.bitacora__badge--editar {
+    background-color: #25346b; /* azul: acorde al header/nav */
+}
+
+.bitacora__badge--eliminar {
+    background-color: #ff4d4d; /* rojo: mismo tono usado en hover de logout */
+}
+
+.bitacora__badge--login {
+    background-color: #99a0be; /* gris-azulado neutro */
+}
+
+@media (max-width: 900px) {
+    .container__bitacora {
+        padding: 0 12px;
+    }
+
+    .bitacora__filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .bitacora__tabla,
+    .bitacora__tabla thead,
+    .bitacora__tabla tbody,
+    .bitacora__tabla th,
+    .bitacora__tabla td,
+    .bitacora__tabla tr {
+        display: block;
+    }
+
+    .bitacora__tabla thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .bitacora__tabla tr {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        padding: 8px 0;
+    }
+
+    .bitacora__tabla td {
+        border-bottom: none;
+        padding: 6px 18px;
+        position: relative;
+    }
+
+    .bitacora__tabla td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        color: #25346b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+}

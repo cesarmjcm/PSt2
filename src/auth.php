@@ -3,6 +3,8 @@ session_start();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../modelos/usuario.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
@@ -40,6 +42,10 @@ if ($username !== '' && $password !== '') {
             unset($_SESSION['redirect_after_login']);
             $ok = true;
             $message = 'Autenticación correcta.';
+
+            // --- Registro en bitácora ---
+            $conex = Conexion::conectar();
+            registrar_bitacora($_SESSION['user_id'], 'Login', 'Usuario', 'Inicio de sesión: ' . $_SESSION['user']);
         }
     }
 }

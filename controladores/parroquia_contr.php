@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/parroquia.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class ParroquiaController
 {
@@ -63,6 +70,10 @@ class ParroquiaController
         try {
             $created = $this->model->crearParroquia($nombre, $id_municipio);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Parroquia', 'Parroquia registrada: ' . $nombre);
+                }
                 $this->success('Parroquia creada correctamente.');
                 return;
             }
@@ -104,6 +115,10 @@ class ParroquiaController
         try {
             $updated = $this->model->actualizarParroquia($id, $nombre, $id_municipio);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Parroquia', "Parroquia #$id actualizada: " . $nombre);
+                }
                 $this->success('Parroquia actualizada correctamente.');
                 return;
             }
@@ -135,6 +150,10 @@ class ParroquiaController
         try {
             $deleted = $this->model->eliminarParroquia($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Parroquia', "Parroquia #$id eliminada");
+                }
                 $this->success('Parroquia eliminada correctamente.');
                 return;
             }

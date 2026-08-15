@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/espacio.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class EspacioController
 {
@@ -73,6 +80,10 @@ class EspacioController
         try {
             $created = $this->model->crearEspacio($nombre, intval($capacidadRaw), $direccion, $metodo_contactar);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Espacio cultural', 'Espacio cultural registrado: ' . $nombre);
+                }
                 $this->success('Espacio cultural creado correctamente.');
                 return;
             }
@@ -128,6 +139,10 @@ class EspacioController
         try {
             $updated = $this->model->actualizarEspacio($id, $nombre, intval($capacidadRaw), $direccion, $metodo_contactar);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Espacio cultural', "Espacio cultural #$id actualizado: " . $nombre);
+                }
                 $this->success('Espacio cultural actualizado correctamente.');
                 return;
             }
@@ -158,6 +173,10 @@ class EspacioController
 
         $deleted = $this->model->eliminarEspacio($id);
         if ($deleted) {
+            if (!empty($_SESSION['user_id'])) {
+                $conex = Conexion::conectar();
+                registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Espacio cultural', "Espacio cultural #$id eliminado");
+            }
             $this->success('Espacio cultural eliminado correctamente.');
             return;
         }

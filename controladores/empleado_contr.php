@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class EmpleadoController
 {
@@ -86,6 +93,10 @@ class EmpleadoController
         try {
             $created = $this->model->crearEmpleado($nombre, $apellido, $telefono, $id_cargo, $cedula);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Empleado', 'Empleado registrado: ' . $nombre . ' ' . $apellido);
+                }
                 $this->success('Empleado creado correctamente.');
                 return;
             }
@@ -136,6 +147,10 @@ class EmpleadoController
         try {
             $updated = $this->model->actualizarEmpleado($id, $nombre, $apellido, $telefono, $id_cargo, $cedula);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Empleado', "Empleado #$id actualizado: " . $nombre . ' ' . $apellido);
+                }
                 $this->success('Empleado actualizado correctamente.');
                 return;
             }
@@ -167,6 +182,10 @@ class EmpleadoController
         try {
             $deleted = $this->model->eliminarEmpleado($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Empleado', "Empleado #$id eliminado");
+                }
                 $this->success('Empleado eliminado correctamente.');
                 return;
             }

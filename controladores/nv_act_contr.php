@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/nv_act.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class NvActController
 {
@@ -58,6 +65,10 @@ class NvActController
         try {
             $created = $this->model->crearNivel($nombre);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Nivel de impacto', 'Nivel de impacto registrado: ' . $nombre);
+                }
                 $this->success('Nivel de impacto creado correctamente.');
                 return;
             }
@@ -98,6 +109,10 @@ class NvActController
         try {
             $updated = $this->model->actualizarNivel($id, $nombre);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Nivel de impacto', "Nivel de impacto #$id actualizado: " . $nombre);
+                }
                 $this->success('Nivel de impacto actualizado correctamente.');
                 return;
             }
@@ -129,6 +144,10 @@ class NvActController
         try {
             $deleted = $this->model->eliminarNivel($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Nivel de impacto', "Nivel de impacto #$id eliminado");
+                }
                 $this->success('Nivel de impacto eliminado correctamente.');
                 return;
             }

@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/comuna.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class ComunaController
 {
@@ -63,6 +70,10 @@ class ComunaController
         try {
             $created = $this->model->crearComuna($nombre, $id_parroquia);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Comuna', 'Comuna registrada: ' . $nombre);
+                }
                 $this->success('Comuna creada correctamente.');
                 return;
             }
@@ -104,6 +115,10 @@ class ComunaController
         try {
             $updated = $this->model->actualizarComuna($id, $nombre, $id_parroquia);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Comuna', "Comuna #$id actualizada: " . $nombre);
+                }
                 $this->success('Comuna actualizada correctamente.');
                 return;
             }
@@ -135,6 +150,10 @@ class ComunaController
         try {
             $deleted = $this->model->eliminarComuna($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Comuna', "Comuna #$id eliminada");
+                }
                 $this->success('Comuna eliminada correctamente.');
                 return;
             }

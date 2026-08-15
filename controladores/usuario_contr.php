@@ -1,8 +1,15 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../helpers/validador.php';
 require_once __DIR__ . '/../modelos/usuario.php';
 require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class UsuarioController
 {
@@ -112,6 +119,10 @@ class UsuarioController
         try {
             $created = $this->model->crearUsuario($nombre, $clave, $telefono, $id_empleado, $rol);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Usuario', 'Usuario registrado: ' . $nombre);
+                }
                 $this->success('Usuario creado correctamente.');
                 return;
             }
@@ -213,6 +224,10 @@ class UsuarioController
                 $rol
             );
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Usuario', "Usuario #$id actualizado: " . $nombre);
+                }
                 $this->success('Usuario actualizado correctamente.');
                 return;
             }
@@ -244,6 +259,10 @@ class UsuarioController
 
         $deleted = $this->model->eliminarUsuario($id);
         if ($deleted) {
+            if (!empty($_SESSION['user_id'])) {
+                $conex = Conexion::conectar();
+                registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Usuario', "Usuario #$id eliminado");
+            }
             $this->success('Usuario eliminado correctamente.');
             return;
         }

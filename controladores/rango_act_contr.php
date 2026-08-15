@@ -1,5 +1,12 @@
 ﻿<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/rango_act.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class RangoActController
 {
@@ -49,6 +56,10 @@ class RangoActController
 
         $created = $this->model->crearRangoAct($nombre, $descripcion);
         if ($created) {
+            if (!empty($_SESSION['user_id'])) {
+                $conex = Conexion::conectar();
+                registrar_bitacora($_SESSION['user_id'], 'Crear', 'Rango de actividad', 'Rango de actividad registrado: ' . $nombre);
+            }
             $this->success('Rango de actividad creado correctamente.');
             return;
         }
@@ -73,6 +84,10 @@ class RangoActController
 
         $updated = $this->model->actualizarRangoAct($id, $nombre, $descripcion);
         if ($updated) {
+            if (!empty($_SESSION['user_id'])) {
+                $conex = Conexion::conectar();
+                registrar_bitacora($_SESSION['user_id'], 'Editar', 'Rango de actividad', "Rango de actividad #$id actualizado: " . $nombre);
+            }
             $this->success('Rango de actividad actualizado correctamente.');
             return;
         }
@@ -95,6 +110,10 @@ class RangoActController
 
         $deleted = $this->model->eliminarRangoAct($id);
         if ($deleted) {
+            if (!empty($_SESSION['user_id'])) {
+                $conex = Conexion::conectar();
+                registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Rango de actividad', "Rango de actividad #$id eliminado");
+            }
             $this->success('Rango de actividad eliminado correctamente.');
             return;
         }

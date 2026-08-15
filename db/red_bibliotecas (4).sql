@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 11-08-2026 a las 21:36:11
+-- Tiempo de generación: 15-08-2026 a las 21:35:00
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -106,6 +106,36 @@ INSERT INTO `biblioteca` (`id`, `nombre`, `id_parroquia`, `Correo`, `redes_socia
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `bitacora`
+--
+
+CREATE TABLE `bitacora` (
+  `id` int(10) NOT NULL,
+  `nom_dia` varchar(15) NOT NULL,
+  `fecha` date NOT NULL,
+  `hora` time NOT NULL,
+  `id_usu` int(10) NOT NULL,
+  `accion` varchar(30) NOT NULL,
+  `descripcion` varchar(50) NOT NULL,
+  `detalle` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Volcado de datos para la tabla `bitacora`
+--
+
+INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `descripcion`, `detalle`) VALUES
+(1, 'Sabado', '2026-08-15', '20:02:49', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(2, 'Sabado', '2026-08-15', '21:32:57', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(3, 'Sabado', '2026-08-15', '21:33:05', 11, 'Editar', 'Municipio', 'Municipio #21 actualizado: Arístides Bastida'),
+(4, 'Sabado', '2026-08-15', '21:33:24', 11, 'Editar', 'Municipio', 'Municipio #21 actualizado: Arístides Bastidas'),
+(5, 'Sabado', '2026-08-15', '21:33:27', 11, 'Crear', 'Municipio', 'Municipio registrado: hola'),
+(6, 'Sabado', '2026-08-15', '21:33:34', 11, 'Eliminar', 'Municipio', 'Municipio #24 eliminado'),
+(7, 'Sabado', '2026-08-15', '21:34:46', 11, 'Editar', 'Solicitud', 'Solicitud #4 actualizada');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `cargo`
 --
 
@@ -120,7 +150,8 @@ CREATE TABLE `cargo` (
 --
 
 INSERT INTO `cargo` (`id`, `nombre`, `Descripcion`) VALUES
-(1, 'coordinador', '2');
+(1, 'coordinador', '2'),
+(3, 'hola', 'peso');
 
 -- --------------------------------------------------------
 
@@ -222,7 +253,8 @@ CREATE TABLE `institucion` (
 --
 
 INSERT INTO `institucion` (`id`, `id_municipio`, `nombre`) VALUES
-(1, 4, 'Institucion 1');
+(1, 4, 'Institucion 1'),
+(2, 8, 'escuela');
 
 -- --------------------------------------------------------
 
@@ -240,7 +272,6 @@ CREATE TABLE `municipio` (
 --
 
 INSERT INTO `municipio` (`id`, `nombre`) VALUES
-(22, 'Arístides Bastida'),
 (21, 'Arístides Bastidas'),
 (13, 'Bolívar'),
 (5, 'Bruzual'),
@@ -393,7 +424,9 @@ CREATE TABLE `solicitud` (
 INSERT INTO `solicitud` (`id`, `id_institucion`, `fecha_solicitud`, `hora_solicitud`, `lugar`, `responsable`, `participantes`, `descripcion`) VALUES
 (1, 1, '2026-08-09', '08:00:00', 'Biblioteca 1', 'Responsable 1', 20, 'Solicitud 1'),
 (2, 1, '2026-08-06', '14:16:00', 'zona', 'cesar contreras', 2, '1'),
-(3, 1, '2026-08-12', '15:36:00', 'zona2', 'carlos', 222, '2');
+(3, 1, '2026-08-12', '15:36:00', 'zona2', 'carlos', 222, '2'),
+(4, 1, '2026-08-13', '21:24:00', 'biblioteca', 'jesus serrano', 1, 'a'),
+(5, 2, '2026-08-07', '18:52:00', 'biblioteca', 'jesus serrano', 1, '');
 
 -- --------------------------------------------------------
 
@@ -490,6 +523,14 @@ ALTER TABLE `biblioteca`
   ADD UNIQUE KEY `uq_biblioteca_nombre_parroquia` (`nombre`,`id_parroquia`),
   ADD KEY `id_parroquia` (`id_parroquia`),
   ADD KEY `id_solicitud` (`id_solicitud_actividad`);
+
+--
+-- Indices de la tabla `bitacora`
+--
+ALTER TABLE `bitacora`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_usu` (`id_usu`),
+  ADD KEY `fecha` (`fecha`);
 
 --
 -- Indices de la tabla `cargo`
@@ -624,10 +665,16 @@ ALTER TABLE `biblioteca`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
+-- AUTO_INCREMENT de la tabla `bitacora`
+--
+ALTER TABLE `bitacora`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
 -- AUTO_INCREMENT de la tabla `cargo`
 --
 ALTER TABLE `cargo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `comuna`
@@ -657,13 +704,13 @@ ALTER TABLE `impacto_actividad`
 -- AUTO_INCREMENT de la tabla `institucion`
 --
 ALTER TABLE `institucion`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `municipio`
 --
 ALTER TABLE `municipio`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `nivel_impacto`
@@ -687,7 +734,7 @@ ALTER TABLE `responsable`
 -- AUTO_INCREMENT de la tabla `solicitud`
 --
 ALTER TABLE `solicitud`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_actividad`
@@ -726,6 +773,12 @@ ALTER TABLE `actividad_comuna`
 ALTER TABLE `biblioteca`
   ADD CONSTRAINT `biblioteca_ibfk_1` FOREIGN KEY (`id_parroquia`) REFERENCES `parroquia` (`id`),
   ADD CONSTRAINT `biblioteca_ibfk_2` FOREIGN KEY (`id_solicitud_actividad`) REFERENCES `solicitud` (`id`);
+
+--
+-- Filtros para la tabla `bitacora`
+--
+ALTER TABLE `bitacora`
+  ADD CONSTRAINT `bitacora_ibfk_1` FOREIGN KEY (`id_usu`) REFERENCES `usuario` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `comuna`

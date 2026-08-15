@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/institucion.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class InstitucionController
 {
@@ -64,6 +71,10 @@ class InstitucionController
         try {
             $created = $this->model->crearInstitucion($nombre, $id_municipio);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Institución', 'Institución registrada: ' . $nombre);
+                }
                 $this->success('Institución creada correctamente.');
                 return;
             }
@@ -110,6 +121,10 @@ class InstitucionController
         try {
             $updated = $this->model->actualizarInstitucion($id, $nombre, $id_municipio);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Institución', "Institución #$id actualizada: " . $nombre);
+                }
                 $this->success('Institución actualizada correctamente.');
                 return;
             }
@@ -146,6 +161,10 @@ class InstitucionController
         try {
             $deleted = $this->model->eliminarInstitucion($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Institución', "Institución #$id eliminada");
+                }
                 $this->success('Institución eliminada correctamente.');
                 return;
             }

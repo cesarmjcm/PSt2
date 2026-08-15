@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/cargo.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class CargoController
 {
@@ -71,6 +78,10 @@ class CargoController
         try {
             $created = $this->model->crearCargo($nombre, $descripcion);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Cargo', 'Cargo registrado: ' . $nombre);
+                }
                 $this->success('Cargo creado correctamente.');
                 return;
             }
@@ -124,6 +135,10 @@ class CargoController
         try {
             $updated = $this->model->actualizarCargo($id, $nombre, $descripcion);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Cargo', "Cargo #$id actualizado: " . $nombre);
+                }
                 $this->success('Cargo actualizado correctamente.');
                 return;
             }
@@ -155,6 +170,10 @@ class CargoController
         try {
             $deleted = $this->model->eliminarCargo($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Cargo', "Cargo #$id eliminado");
+                }
                 $this->success('Cargo eliminado correctamente.');
                 return;
             }

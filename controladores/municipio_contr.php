@@ -1,6 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../modelos/municipio.php';
 require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
 
 class MunicipioController
 {
@@ -58,6 +65,10 @@ class MunicipioController
         try {
             $created = $this->model->crearMunicipio($nombre);
             if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Municipio', 'Municipio registrado: ' . $nombre);
+                }
                 $this->success('Municipio creado correctamente.');
                 return;
             }
@@ -98,6 +109,10 @@ class MunicipioController
         try {
             $updated = $this->model->actualizarMunicipio($id, $nombre);
             if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Municipio', "Municipio #$id actualizado: " . $nombre);
+                }
                 $this->success('Municipio actualizado correctamente.');
                 return;
             }
@@ -134,6 +149,10 @@ class MunicipioController
         try {
             $deleted = $this->model->eliminarMunicipio($id);
             if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Municipio', "Municipio #$id eliminado");
+                }
                 $this->success('Municipio eliminado correctamente.');
                 return;
             }
