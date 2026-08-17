@@ -670,6 +670,22 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => abrirEditarActividad(btn));
     });
 
+    // jesus: toggle de la fila de detalle ("Ver más" / "Ver menos") en la tabla de actividades
+    document.querySelectorAll('.btn-ver-mas').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const fila = document.getElementById(btn.dataset.target);
+            if (!fila) return;
+
+            const expandido = btn.getAttribute('aria-expanded') === 'true';
+            fila.style.display = expandido ? 'none' : 'table-row';
+            btn.setAttribute('aria-expanded', String(!expandido));
+            btn.title = expandido ? 'Ver más' : 'Ver menos';
+            btn.innerHTML = expandido
+                ? '<i class="fas fa-chevron-down"></i>'
+                : '<i class="fas fa-chevron-up"></i>';
+        });
+    });
+
     const userMenuButton = document.getElementById('userMenuButton');
     const userMenu = document.getElementById('userMenu');
     const logoutBtn = document.getElementById('logoutBtn');
