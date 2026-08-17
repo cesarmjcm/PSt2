@@ -71,6 +71,16 @@ try {
                                     <td><?php echo htmlspecialchars($actividad['dia_semana'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 
                                     <td class="col-acciones">
+                                        <!-- jesus: los 3 botones ahora van agrupados en un contenedor con espacio entre ellos -->
+                                        <div class="acciones-grupo">
+                                            <button type="button"
+                                                    class="btn-icon btn-ver-mas"
+                                                    title="Ver más"
+                                                    aria-expanded="false"
+                                                    data-target="detalle-actividad-<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+
                                         <button type="button"
                                                 class="btn-icon btn-edit-actividad"
                                                 title="Editar"
@@ -98,6 +108,27 @@ try {
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- jesus: fila de detalle con los datos que no caben en la tabla principal, oculta por defecto -->
+                                <tr class="fila-detalle"
+                                    id="detalle-actividad-<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>"
+                                    style="display:none;">
+                                    <td colspan="6">
+                                        <div class="detalle-actividad">
+                                            <p><strong>Objetivo:</strong> <?php echo htmlspecialchars($actividad['objetivo'] ?? 'No definido', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Participantes:</strong> <?php echo htmlspecialchars($actividad['participantes'] ?? '0', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Nivel de impacto:</strong> <?php echo htmlspecialchars($actividad['nivel_impacto'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Municipio:</strong> <?php echo htmlspecialchars($actividad['municipio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Parroquia:</strong> <?php echo htmlspecialchars($actividad['parroquia'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Comuna:</strong> <?php echo htmlspecialchars($actividad['comuna'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Espacio cultural:</strong> <?php echo htmlspecialchars($actividad['espacio_cultural'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Biblioteca:</strong> <?php echo htmlspecialchars($actividad['biblioteca'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Responsable:</strong> <?php echo htmlspecialchars($actividad['responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Teléfono responsable:</strong> <?php echo htmlspecialchars($actividad['telefono_responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

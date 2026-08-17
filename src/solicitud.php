@@ -110,7 +110,7 @@ require_once __DIR__ . '/../include/guardian.php';
             </form>
         </div>
     </div>
-
+    <script src="./js/app.js"></script>
     <script>
     (function () {
         const endpoint = '../controladores/solicitud_contr.php';

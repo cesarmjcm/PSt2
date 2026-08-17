@@ -133,6 +133,6 @@ $usuarios  = obtener_usuarios_para_filtro();
         </table>
     </div>
 </main>
-
+<script src="./js/app.js"></script>
 </body>
 </html>

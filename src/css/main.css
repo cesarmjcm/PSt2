@@ -246,11 +246,11 @@ margin-top: 15px;
 }
 
 .tabla-planificacion th.col-actividad {
-	width: 18%;
+	width: 16%;
 }
 
 .tabla-planificacion th.col-descripcion {
-	width: 42%;
+	width: 38%;
 }
 
 .tabla-planificacion th.col-fecha {
@@ -262,8 +262,8 @@ margin-top: 15px;
 }
 
 .tabla-planificacion th.col-acciones {
-	width: 10%;
-	min-width: 70px;
+	width: 16%;
+	min-width: 150px;
 }
 
 td, th {
@@ -458,6 +458,115 @@ tbody tr:nth-child(even){
 fieldset{
 	margin-top: 5px;
 }
+
+/* Clase usada por el JS de modal.php / modal_editar.php para
+   mostrar/ocultar campos (simple vs completa, biblioteca vs espacio, etc.).
+   Faltaba en main.css: sin esto los toggles no ocultan nada. */
+.hidden{
+	display: none !important;
+}
+
+.form-aviso{
+	box-sizing: border-box;
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	background: #fdecea;
+	border: 1px solid #f5c2c0;
+	color: #611a15;
+	font-size: 0.68rem;
+	line-height: 1.15;
+	padding: 5px 8px;
+	border-radius: 6px;
+	margin: 0 0 10px;
+	text-align: left;
+	white-space: nowrap;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
+}
+
+.form-aviso::-webkit-scrollbar{
+	height: 4px;
+}
+
+.form-aviso::-webkit-scrollbar-thumb{
+	background: rgba(97, 26, 21, 0.35);
+	border-radius: 4px;
+}
+
+.btn-secondary{
+	background-color: #e7e9f2;
+	color: #25346b;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 10px;
+	cursor: pointer;
+	font-weight: bold;
+	transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus{
+	background-color: #d2d6eb;
+	transform: translateY(-1px);
+	box-shadow: 0 6px 12px rgba(37, 52, 107, 0.12);
+}
+
+.solicitudes-selector{
+	margin: 16px 0 0;
+	padding: 12px;
+	border: 1px solid #c8d2e8;
+	border-radius: 16px;
+	background: #f6f8ff;
+	max-height: 260px;
+	overflow-y: auto;
+	display: grid;
+	gap: 10px;
+}
+
+.solicitudes-selector[hidden]{
+	display: none;
+}
+
+.solicitudes-selector__item{
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	padding: 14px 16px;
+	border: 1px solid transparent;
+	border-radius: 14px;
+	background: #ffffff;
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+	text-align: left;
+}
+
+.solicitudes-selector__item:hover,
+.solicitudes-selector__item:focus-visible{
+	background: #eef3ff;
+	border-color: #7c96ed;
+	transform: translateY(-1px);
+	outline: none;
+}
+
+.solicitudes-selector__item strong{
+	font-size: 0.96rem;
+	color: #1f2f5f;
+}
+
+.solicitudes-selector__item span{
+	font-size: 0.89rem;
+	color: #5c6a8e;
+}
+
+.solicitudes-selector__empty{
+	color: #5e6c8e;
+	font-size: 0.95rem;
+	padding: 12px 14px;
+}
+
 .editar-header{
 	border-radius: 30px 30px 0 0;
 }
@@ -539,6 +648,89 @@ fieldset{
 	.tabla__container{
 		max-width: 80vw;
 	}
+}
+
+/* jesus: estilos del botón "Ver más" y de la fila de detalle de la actividad */
+/* jesus: agrupa ver-más, editar y eliminar en fila con espacio entre ellos para que no se amontonen */
+.acciones-grupo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	flex-wrap: nowrap;
+}
+
+td.col-acciones {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.btn-icon {
+	background-color: #f5f8ff;
+	color: #25346b;
+	border: 1px solid #99a0be;
+	border-radius: 8px;
+	width: 34px;
+	height: 34px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	padding: 0;
+	font-size: 0.95rem;
+}
+
+.btn-icon:hover {
+	background-color: #e7f1ff;
+	border-color: #5792ff;
+	transform: translateY(-1px);
+}
+
+.btn-ver-mas[aria-expanded="true"] {
+	background-color: #25346b;
+	color: #ffffff;
+	border-color: #25346b;
+}
+
+.btn-edit-actividad:hover {
+	background-color: #25346b;
+	color: #ffffff;
+	border-color: #25346b;
+}
+
+.btn-delete:hover {
+	background-color: #d9534f;
+	color: #ffffff;
+	border-color: #d9534f;
+}
+
+.form-eliminar-actividad {
+	display: inline-flex;
+}
+
+.fila-detalle td {
+	background-color: #f7f9ff;
+	border-bottom: 2px solid #99a0be;
+	padding: 18px 24px;
+}
+
+.detalle-actividad {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 10px 24px;
+}
+
+.detalle-actividad p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: #222222;
+	line-height: 1.4;
+}
+
+.detalle-actividad p strong {
+	color: #25346b;
+	font-weight: 700;
 }
 
 
