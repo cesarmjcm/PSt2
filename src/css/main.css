@@ -541,6 +541,65 @@ fieldset{
 	}
 }
 
+/* jesus: estilos del botón "Ver más" y de la fila de detalle de la actividad */
+/* jesus: agrupa ver-más, editar y eliminar en fila con espacio entre ellos para que no se amontonen */
+.acciones-grupo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.btn-ver-mas {
+	background-color: #f5f8ff;
+	color: #25346b;
+	border: 1px solid #99a0be;
+	border-radius: 8px;
+	width: 34px;
+	height: 34px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.btn-ver-mas:hover {
+	background-color: #e7f1ff;
+	border-color: #5792ff;
+}
+
+.btn-ver-mas[aria-expanded="true"] {
+	background-color: #25346b;
+	color: #ffffff;
+	border-color: #25346b;
+}
+
+.fila-detalle td {
+	background-color: #f7f9ff;
+	border-bottom: 2px solid #99a0be;
+	padding: 18px 24px;
+}
+
+.detalle-actividad {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 10px 24px;
+}
+
+.detalle-actividad p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: #222222;
+	line-height: 1.4;
+}
+
+.detalle-actividad p strong {
+	color: #25346b;
+	font-weight: 700;
+}
+
 
 
 
