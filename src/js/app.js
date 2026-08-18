@@ -66,8 +66,8 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
-function mostrarAvisoFormulario(mensaje, campoAEnfocar) {
-    const aviso = document.getElementById('form-planificacion-aviso');
+function mostrarAvisoFormulario(mensaje, campoAEnfocar, avisoId) {
+    const aviso = document.getElementById(avisoId || 'form-planificacion-aviso');
     if (aviso) {
         aviso.textContent = mensaje;
         aviso.style.visibility = 'visible';
@@ -81,8 +81,8 @@ function mostrarAvisoFormulario(mensaje, campoAEnfocar) {
     }
 }
 
-function ocultarAvisoFormulario() {
-    const aviso = document.getElementById('form-planificacion-aviso');
+function ocultarAvisoFormulario(avisoId) {
+    const aviso = document.getElementById(avisoId || 'form-planificacion-aviso');
     if (aviso) {
         aviso.style.visibility = 'hidden';
         aviso.textContent = '';
@@ -90,97 +90,147 @@ function ocultarAvisoFormulario() {
 }
 
 function validacionesformulario(form) {
-    ocultarAvisoFormulario();
+    // OJO: no usar `form.id` aquí. Como el formulario tiene un campo
+    // <input name="id" id="editar-id">, el navegador crea automáticamente
+    // una propiedad de acceso directo `form.id` que apunta a ESE INPUT,
+    // sobrescribiendo la propiedad estándar que debería devolver el
+    // atributo id del <form> como texto. form.getAttribute('id') no tiene
+    // ese problema: siempre devuelve el atributo real como string.
+    const esEditar = form && form.getAttribute('id') === 'form-editar-actividad';
+    const avisoId = esEditar ? 'form-editar-aviso' : 'form-planificacion-aviso';
+
+    // CORRECCIÓN: antes esta función siempre leía los IDs del formulario
+    // "Nueva Planificación" (plan-tipo, plan-fecha, etc.) sin importar cuál
+    // formulario se estaba enviando, porque ambos modales coexisten en el
+    // DOM. Al enviar el modal de editar, planTipo (id="plan-tipo") estaba
+    // vacío y la validación fallaba con "El nombre no puede quedar vacío"
+    // aunque editar-nombre sí tuviera datos. Ahora se elige el set de IDs
+    // según el formulario recibido.
+    const ids = esEditar ? {
+        nombre: 'editar-nombre',
+        descripcion: 'editar-descripcion',
+        fecha: 'editar-fecha',
+        dia: 'editar-dia',
+        hora: 'editar-hora',
+        municipio: 'editar-municipio',
+        parroquia: 'editar-parroquia',
+        espacio: 'editar-espacio',
+        biblioteca: 'editar-biblioteca',
+        comuna: 'editar-comuna',
+        responsable: 'editar-responsable',
+        telefono: 'editar-telefono',
+        objetivo: 'editar-objetivo',
+        participantes: 'editar-participantes',
+        nivelImpacto: 'editar-nivel-impacto',
+    } : {
+        nombre: 'plan-tipo',
+        descripcion: 'plan-descripcion',
+        fecha: 'plan-fecha',
+        dia: 'plan-dia',
+        hora: 'plan-hora',
+        municipio: 'planificacion-municipios',
+        parroquia: 'plan-parroquia',
+        espacio: 'plan-espacio',
+        biblioteca: 'plan-biblioteca',
+        comuna: 'planificacion-comunas',
+        responsable: 'plan-responsable',
+        telefono: 'plan-telefono',
+        objetivo: 'plan-objetivo',
+        participantes: 'plan-participantes',
+        nivelImpacto: 'plan-nivel-impacto',
+    };
+
+    ocultarAvisoFormulario(avisoId);
     limpiarCamposInvalidos(form);
 
-    const planTipo = document.getElementById('plan-tipo');
+    const planTipo = document.getElementById(ids.nombre);
     const nombre = planTipo ? planTipo.value.trim() : '';
     if (esVacio(nombre)) {
-        mostrarAvisoFormulario('El nombre de la actividad no puede quedar vacío.', planTipo);
+        mostrarAvisoFormulario('El nombre de la actividad no puede quedar vacío.', planTipo, avisoId);
         return false;
     }
     if (nombre.length < 2) {
-        mostrarAvisoFormulario('El nombre de la actividad debe tener al menos 2 caracteres.', planTipo);
+        mostrarAvisoFormulario('El nombre de la actividad debe tener al menos 2 caracteres.', planTipo, avisoId);
         return false;
     }
     if (nombre.length > MAXLEN_ACTIVIDAD_NOMBRE) {
-        mostrarAvisoFormulario('El nombre de la actividad no puede tener más de ' + MAXLEN_ACTIVIDAD_NOMBRE + ' caracteres.', planTipo);
+        mostrarAvisoFormulario('El nombre de la actividad no puede tener más de ' + MAXLEN_ACTIVIDAD_NOMBRE + ' caracteres.', planTipo, avisoId);
         return false;
     }
     if (!REGEX_TEXTO_VALIDO.test(nombre)) {
-        mostrarAvisoFormulario('El nombre de la actividad solo puede contener letras, números, espacios y los signos \' - .', planTipo);
+        mostrarAvisoFormulario('El nombre de la actividad solo puede contener letras, números, espacios y los signos \' - .', planTipo, avisoId);
         return false;
     }
     if (esRepetitivo(nombre)) {
-        mostrarAvisoFormulario('El nombre de la actividad no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planTipo);
+        mostrarAvisoFormulario('El nombre de la actividad no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planTipo, avisoId);
         return false;
     }
 
-    const planDescripcion = document.getElementById('plan-descripcion');
+    const planDescripcion = document.getElementById(ids.descripcion);
     const descripcion = planDescripcion ? planDescripcion.value.trim() : '';
     const tipoFormularioCompleta = document.getElementById('tipo-formulario-completa');
-    const esCompleta = tipoFormularioCompleta ? tipoFormularioCompleta.checked : false;
+    const esCompleta = esEditar ? true : (tipoFormularioCompleta ? tipoFormularioCompleta.checked : false);
 
     if (esCompleta && esVacio(descripcion)) {
-        mostrarAvisoFormulario('Escribe una descripción de la actividad.', planDescripcion);
+        mostrarAvisoFormulario('Escribe una descripción de la actividad.', planDescripcion, avisoId);
         return false;
     }
     if (!esVacio(descripcion) && descripcion.length > MAXLEN_DESCRIPCION) {
-        mostrarAvisoFormulario('La descripción no puede tener más de ' + MAXLEN_DESCRIPCION + ' caracteres.', planDescripcion);
+        mostrarAvisoFormulario('La descripción no puede tener más de ' + MAXLEN_DESCRIPCION + ' caracteres.', planDescripcion, avisoId);
         return false;
     }
 
-    const planFecha = document.getElementById('plan-fecha');
+    const planFecha = document.getElementById(ids.fecha);
     if (!planFecha || planFecha.value === '') {
-        mostrarAvisoFormulario('Selecciona la fecha de la actividad.', planFecha);
+        mostrarAvisoFormulario('Selecciona la fecha de la actividad.', planFecha, avisoId);
         return false;
     }
 
-    const planDia = document.getElementById('plan-dia');
+    const planDia = document.getElementById(ids.dia);
     if (planDia && planFecha) {
         planDia.value = calcularDiaSemana(planFecha.value);
     }
 
-    const planHora = document.getElementById('plan-hora');
+    const planHora = document.getElementById(ids.hora);
     if (!planHora || planHora.value === '') {
-        mostrarAvisoFormulario('Selecciona la hora de la actividad.', planHora);
+        mostrarAvisoFormulario('Selecciona la hora de la actividad.', planHora, avisoId);
         return false;
     }
 
-    const planMunicipios = document.getElementById('planificacion-municipios');
+    const planMunicipios = document.getElementById(ids.municipio);
     if (!planMunicipios || planMunicipios.value === '') {
-        mostrarAvisoFormulario('Selecciona un municipio.', planMunicipios);
+        mostrarAvisoFormulario('Selecciona un municipio.', planMunicipios, avisoId);
         return false;
     }
 
-    const planParroquia = document.getElementById('plan-parroquia');
+    const planParroquia = document.getElementById(ids.parroquia);
     const parroquia = planParroquia ? planParroquia.value.trim() : '';
     if (esVacio(parroquia)) {
-        mostrarAvisoFormulario('Selecciona o escribe una parroquia.', planParroquia);
+        mostrarAvisoFormulario('Selecciona o escribe una parroquia.', planParroquia, avisoId);
         return false;
     }
     if (parroquia.length > MAXLEN_PARROQUIA) {
-        mostrarAvisoFormulario('La parroquia no puede tener más de ' + MAXLEN_PARROQUIA + ' caracteres.', planParroquia);
+        mostrarAvisoFormulario('La parroquia no puede tener más de ' + MAXLEN_PARROQUIA + ' caracteres.', planParroquia, avisoId);
         return false;
     }
     if (!REGEX_NOMBRE_PROPIO.test(parroquia)) {
-        mostrarAvisoFormulario('La parroquia solo puede contener letras y espacios (sin números).', planParroquia);
+        mostrarAvisoFormulario('La parroquia solo puede contener letras y espacios (sin números).', planParroquia, avisoId);
         return false;
     }
     if (esRepetitivo(parroquia)) {
-        mostrarAvisoFormulario('La parroquia no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planParroquia);
+        mostrarAvisoFormulario('La parroquia no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planParroquia, avisoId);
         return false;
     }
 
-    const planEspacio = document.getElementById('plan-espacio');
-    const planBiblioteca = document.getElementById('plan-biblioteca');
+    const planEspacio = document.getElementById(ids.espacio);
+    const planBiblioteca = document.getElementById(ids.biblioteca);
     const tipoUbicacionSeleccionado = document.querySelector('input[name="tipo_ubicacion"]:checked');
     const tipoUbicacion = tipoUbicacionSeleccionado ? tipoUbicacionSeleccionado.value : 'biblioteca';
 
     if (tipoUbicacion === 'espacio') {
         const espacio = planEspacio ? planEspacio.value.trim() : '';
         if (esVacio(espacio)) {
-            mostrarAvisoFormulario('Selecciona un espacio cultural.', planEspacio);
+            mostrarAvisoFormulario('Selecciona un espacio cultural.', planEspacio, avisoId);
             return false;
         }
         if (planBiblioteca) {
@@ -188,7 +238,7 @@ function validacionesformulario(form) {
         }
     } else {
         if (!planBiblioteca || planBiblioteca.value === '') {
-            mostrarAvisoFormulario('Selecciona una biblioteca.', planBiblioteca);
+            mostrarAvisoFormulario('Selecciona una biblioteca.', planBiblioteca, avisoId);
             return false;
         }
         if (planEspacio) {
@@ -196,14 +246,14 @@ function validacionesformulario(form) {
         }
     }
 
-    const planComunas = document.getElementById('planificacion-comunas');
+    const planComunas = document.getElementById(ids.comuna);
     const comuna = planComunas ? planComunas.value.trim() : '';
     if (comuna !== '' && !REGEX_TEXTO_VALIDO.test(comuna)) {
-        mostrarAvisoFormulario('La comuna seleccionada no tiene un formato válido.', planComunas);
+        mostrarAvisoFormulario('La comuna seleccionada no tiene un formato válido.', planComunas, avisoId);
         return false;
     }
 
-    const planResponsable = document.getElementById('plan-responsable');
+    const planResponsable = document.getElementById(ids.responsable);
     const responsableValor = planResponsable ? planResponsable.value.trim() : '';
     if (responsableValor !== '') {
         const responsableTexto = planResponsable && planResponsable.tagName === 'SELECT'
@@ -211,82 +261,82 @@ function validacionesformulario(form) {
             : (planResponsable ? planResponsable.value.trim() : '');
 
         if (responsableTexto.length < 2) {
-            mostrarAvisoFormulario('El nombre del responsable debe tener al menos 2 caracteres.', planResponsable);
+            mostrarAvisoFormulario('El nombre del responsable debe tener al menos 2 caracteres.', planResponsable, avisoId);
             return false;
         }
         if (responsableTexto.length > MAXLEN_RESPONSABLE) {
-            mostrarAvisoFormulario('El nombre del responsable no puede tener más de ' + MAXLEN_RESPONSABLE + ' caracteres.', planResponsable);
+            mostrarAvisoFormulario('El nombre del responsable no puede tener más de ' + MAXLEN_RESPONSABLE + ' caracteres.', planResponsable, avisoId);
             return false;
         }
         if (!REGEX_NOMBRE_PROPIO.test(responsableTexto)) {
-            mostrarAvisoFormulario('El nombre del responsable solo puede contener letras y espacios (sin números).', planResponsable);
+            mostrarAvisoFormulario('El nombre del responsable solo puede contener letras y espacios (sin números).', planResponsable, avisoId);
             return false;
         }
         if (esRepetitivo(responsableTexto)) {
-            mostrarAvisoFormulario('El nombre del responsable no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planResponsable);
+            mostrarAvisoFormulario('El nombre del responsable no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planResponsable, avisoId);
             return false;
         }
     }
 
-    const planTelefono = document.getElementById('plan-telefono');
+    const planTelefono = document.getElementById(ids.telefono);
     const telefono = planTelefono ? planTelefono.value.trim() : '';
     if (telefono !== '' && !REGEX_TELEFONO.test(telefono)) {
-        mostrarAvisoFormulario('El teléfono debe tener exactamente 11 caracteres, usando solo números, espacios, guiones (-) o el signo +. Ejemplo: 04123456789', planTelefono);
+        mostrarAvisoFormulario('El teléfono debe tener exactamente 11 caracteres, usando solo números, espacios, guiones (-) o el signo +. Ejemplo: 04123456789', planTelefono, avisoId);
         return false;
     }
 
     if (esCompleta) {
-        const planObjetivo = document.getElementById('plan-objetivo');
+        const planObjetivo = document.getElementById(ids.objetivo);
         const objetivo = planObjetivo ? planObjetivo.value.trim() : '';
         if (esVacio(objetivo)) {
-            mostrarAvisoFormulario('Escribe el objetivo o enfoque de la actividad.', planObjetivo);
+            mostrarAvisoFormulario('Escribe el objetivo o enfoque de la actividad.', planObjetivo, avisoId);
             return false;
         }
         if (objetivo.length < 2) {
-            mostrarAvisoFormulario('El objetivo debe tener al menos 2 caracteres.', planObjetivo);
+            mostrarAvisoFormulario('El objetivo debe tener al menos 2 caracteres.', planObjetivo, avisoId);
             return false;
         }
         if (objetivo.length > MAXLEN_OBJETIVO) {
-            mostrarAvisoFormulario('El objetivo no puede tener más de ' + MAXLEN_OBJETIVO + ' caracteres.', planObjetivo);
+            mostrarAvisoFormulario('El objetivo no puede tener más de ' + MAXLEN_OBJETIVO + ' caracteres.', planObjetivo, avisoId);
             return false;
         }
         if (!REGEX_TEXTO_VALIDO.test(objetivo)) {
-            mostrarAvisoFormulario('El objetivo solo puede contener letras, números, espacios y los signos \' - .', planObjetivo);
+            mostrarAvisoFormulario('El objetivo solo puede contener letras, números, espacios y los signos \' - .', planObjetivo, avisoId);
             return false;
         }
         if (esRepetitivo(objetivo)) {
-            mostrarAvisoFormulario('El objetivo no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planObjetivo);
+            mostrarAvisoFormulario('El objetivo no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planObjetivo, avisoId);
             return false;
         }
 
-        const planParticipantes = document.getElementById('plan-participantes');
+        const planParticipantes = document.getElementById(ids.participantes);
         const participantesStr = planParticipantes ? planParticipantes.value.trim() : '';
         if (esVacio(participantesStr)) {
-            mostrarAvisoFormulario('Indica la cantidad de participantes.', planParticipantes);
+            mostrarAvisoFormulario('Indica la cantidad de participantes.', planParticipantes, avisoId);
             return false;
         }
         const participantes = Number(participantesStr);
         if (!Number.isInteger(participantes) || participantes < 0 || participantes > MAX_PARTICIPANTES) {
-            mostrarAvisoFormulario('La cantidad de participantes debe ser un número entero entre 0 y ' + MAX_PARTICIPANTES + '.', planParticipantes);
+            mostrarAvisoFormulario('La cantidad de participantes debe ser un número entero entre 0 y ' + MAX_PARTICIPANTES + '.', planParticipantes, avisoId);
             return false;
         }
 
-        const planNivelImpacto = document.getElementById('plan-nivel-impacto');
+        const planNivelImpacto = document.getElementById(ids.nivelImpacto);
         const nivelImpacto = planNivelImpacto ? planNivelImpacto.value.trim() : '';
         if (esVacio(nivelImpacto)) {
-            mostrarAvisoFormulario('Indica el nivel de impacto de la actividad.', planNivelImpacto);
+            mostrarAvisoFormulario('Indica el nivel de impacto de la actividad.', planNivelImpacto, avisoId);
             return false;
         }
         if (nivelImpacto.length > MAXLEN_NIVEL_IMPACTO) {
-            mostrarAvisoFormulario('El nivel de impacto no puede tener más de ' + MAXLEN_NIVEL_IMPACTO + ' caracteres.', planNivelImpacto);
+            mostrarAvisoFormulario('El nivel de impacto no puede tener más de ' + MAXLEN_NIVEL_IMPACTO + ' caracteres.', planNivelImpacto, avisoId);
             return false;
         }
         if (!REGEX_NOMBRE_PROPIO.test(nivelImpacto)) {
-            mostrarAvisoFormulario('El nivel de impacto solo puede contener letras y espacios (sin números).', planNivelImpacto);
+            mostrarAvisoFormulario('El nivel de impacto solo puede contener letras y espacios (sin números).', planNivelImpacto, avisoId);
             return false;
         }
         if (esRepetitivo(nivelImpacto)) {
-            mostrarAvisoFormulario('El nivel de impacto no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planNivelImpacto);
+            mostrarAvisoFormulario('El nivel de impacto no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planNivelImpacto, avisoId);
             return false;
         }
     }
@@ -652,10 +702,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setValue('editar-objetivo', btn.dataset.objetivo);
         setValue('editar-participantes', btn.dataset.participantes);
         setValue('editar-fecha', btn.dataset.fecha);
+        setValue('editar-hora', btn.dataset.hora);
         setValue('editar-dia', btn.dataset.dia);
 
         setValue('editar-nivel-impacto', btn.dataset.nivelImpacto);
-        setValue('editar-municipio-id', btn.dataset.municipioId);
+        setValue('editar-municipio', btn.dataset.municipioId);
         setValue('editar-parroquia', btn.dataset.parroquia);
         setValue('editar-comuna', btn.dataset.comuna);
         setValue('editar-espacio', btn.dataset.espacio);

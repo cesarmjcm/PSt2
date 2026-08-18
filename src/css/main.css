@@ -371,6 +371,12 @@ tbody tr:nth-child(even){
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 12px;
+	/* CORRECCIÓN: sin esto, Grid usa "stretch" por defecto y fuerza a
+	   ambas .planificacion-group a la misma altura. Cuando el JS revela
+	   los campos de "Actividad completa" (más contenido que antes), esa
+	   altura ya estaba fijada y el contenido nuevo se desbordaba fuera
+	   del borde/fondo redondeado de la tarjeta en vez de agrandarla. */
+	align-items: start;
 }
 
 .planificacion-group{
@@ -457,6 +463,32 @@ tbody tr:nth-child(even){
 }
 fieldset{
 	margin-top: 5px;
+}
+
+/* CORRECCIÓN: los <legend> (ej. "Responsable", "¿Dónde se realiza?",
+   "Detalles de actividad completa") no son <label>, así que no heredaban
+   el margin-bottom ni el estilo de la regla ".formulario-planificacion
+   label". Sin ese margen, el legend quedaba pegado al campo siguiente y
+   se veía encimado/roto. También se resetea el borde por defecto del
+   navegador en los fieldset anidados (Parroquia, Comuna, "¿Dónde se
+   realiza?", "Tipo de actividad", "Responsable"), que no estaban
+   cubiertos por ".planificacion-group > fieldset" al no ser hijos
+   directos, y por eso se veían inconsistentes entre sí. Los estilos
+   inline (ej. el legend de "Tipo de planificación") siguen ganando. */
+.formulario-planificacion fieldset:not(.planificacion-group){
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+
+.formulario-planificacion legend{
+	display: block;
+	width: 100%;
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: #25346b;
+	margin: 0 0 10px;
+	padding: 0;
 }
 
 /* Clase usada por el JS de modal.php / modal_editar.php para
@@ -623,7 +655,13 @@ fieldset{
 .modal-content-wrapper {
     display: flex;
     justify-content: center;
-    align-items: stretch;
+    /* CORRECCIÓN: "stretch" (junto con max-height + overflow-y:auto de
+       este mismo contenedor) hacía que .formulario-planificacion quedara
+       fijo a la altura "disponible" del wrapper en vez de crecer con su
+       propio contenido. Cuando el JS revelaba los campos de "Actividad
+       completa" (más alto que el cálculo inicial), el contenido se
+       desbordaba visualmente por fuera del borde/fondo de la tarjeta. */
+    align-items: flex-start;
     width: fit-content;
     max-width: min(760px, 100%);
     margin: auto;

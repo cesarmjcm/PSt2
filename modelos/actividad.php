@@ -26,6 +26,12 @@ class Actividad {
     }
 
     public function mostrarActividadesCompletas() {
+        // NOTA: municipio_id y parroquia no son columnas propias de `actividad`.
+        // Se derivan de la biblioteca donde se realiza la actividad:
+        // biblioteca.id_parroquia -> parroquia.id_municipio -> municipio.id.
+        // Si la actividad se realiza en un espacio cultural (id_biblioteca NULL),
+        // estos campos quedarán vacíos hasta que espacio_cultural tenga su
+        // propia relación con parroquia (pendiente, ver guardarRelaciones()).
         $sql = "
             SELECT
                 a.id,
@@ -34,15 +40,21 @@ class Actividad {
                 a.objetivo,
                 a.participantes,
                 a.fecha,
+                a.hora,
                 a.dia_semana,
                 a.id_biblioteca,
                 b.nombre AS biblioteca,
+                m.id AS municipio_id,
+                m.nombre AS municipio,
+                p.nombre AS parroquia,
                 GROUP_CONCAT(DISTINCT ni.nombre_impacto SEPARATOR ', ') AS nivel_impacto,
                 GROUP_CONCAT(DISTINCT co.nombre SEPARATOR ', ') AS comuna,
                 GROUP_CONCAT(DISTINCT r.nombre SEPARATOR ', ') AS responsable,
                 GROUP_CONCAT(DISTINCT r.telefono SEPARATOR ', ') AS telefono_responsable
             FROM actividad a
             LEFT JOIN biblioteca b ON b.id = a.id_biblioteca
+            LEFT JOIN parroquia p ON p.id = b.id_parroquia
+            LEFT JOIN municipio m ON m.id = p.id_municipio
             LEFT JOIN impacto_actividad ia ON ia.id_actividad = a.id
             LEFT JOIN nivel_impacto ni ON ni.id = ia.id_impacto
             LEFT JOIN actividad_comuna ac ON ac.id_actividad = a.id
@@ -99,8 +111,27 @@ class Actividad {
             $errors[] = 'Día de la semana inválido.';
         }
 
-        if (!Validador::esEnteroPositivo($d['id_biblioteca'] ?? 0)) {
-            $errors[] = 'Biblioteca inválida.';
+        // CORRECCIÓN: el formulario permite elegir "¿Dónde se realiza?"
+        // (Biblioteca o Espacio cultural) y solo envía el id correspondiente
+        // a la opción elegida; el otro llega vacío/0. Antes se exigían
+        // AMBOS como enteros positivos siempre, así que crear() fallaba con
+        // "Biblioteca inválida." cada vez que el usuario elegía "Espacio"
+        // (y viceversa). Ahora solo se valida el campo que corresponde a la
+        // opción seleccionada.
+        $tipoUbicacion = trim($d['tipo_ubicacion'] ?? '');
+        $esBiblioteca = $tipoUbicacion === 'biblioteca';
+        $esEspacio = $tipoUbicacion === 'espacio';
+
+        if (!$esBiblioteca && !$esEspacio) {
+            $errors[] = 'Debe indicar si la actividad se realiza en una biblioteca o en un espacio cultural.';
+        } elseif ($esBiblioteca) {
+            if (!Validador::esEnteroPositivo($d['id_biblioteca'] ?? 0)) {
+                $errors[] = 'Biblioteca inválida.';
+            }
+        } elseif ($esEspacio) {
+            if (!Validador::esEnteroPositivo($d['id_espacio_cultural'] ?? 0)) {
+                $errors[] = 'Espacio cultural inválido.';
+            }
         }
 
         if (!empty($d['municipio_id']) && !Validador::esEnteroPositivo($d['municipio_id'])) {
@@ -113,10 +144,6 @@ class Actividad {
 
         if (!empty(trim($d['comuna'] ?? '')) && !Validador::esTextoValido(trim($d['comuna']), 2, 100)) {
             $errors[] = 'Comuna inválida.';
-        }
-
-        if (!Validador::esEnteroPositivo($d['id_espacio_cultural'] ?? 0)) {
-            $errors[] = 'Espacio cultural inválido.';
         }
 
         if (!Validador::esEnteroPositivo($d['id_tipo_actividad'] ?? 0)) {
@@ -156,19 +183,21 @@ class Actividad {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // CORRECCIÓN: se agregó id_biblioteca porque la columna es NOT NULL
-    // en la tabla `actividad`; sin este parámetro el INSERT fallaba.
+    // NOTA: id_biblioteca ahora acepta NULL en la tabla `actividad`
+    // (ver CORRECCIÓN en validarActividad: la actividad puede realizarse
+    // en un espacio cultural, en cuyo caso no hay biblioteca asociada).
+    // Pasar null explícitamente aquí en ese caso, no 0 ni "".
     public function crearActividad($nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca) {
         $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, dia_semana, id_biblioteca) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca]);
+        return $stmt->execute([$nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca ?: null]);
     }
 
     
     public function actualizarActividad($id, $nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca) {
         $sql = "UPDATE actividad SET nombre = ?, descripcion = ?, objetivo = ?, participantes = ?, fecha = ?, dia_semana = ?, id_biblioteca = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca, $id]);
+        return $stmt->execute([$nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca ?: null, $id]);
     }
 
     public function eliminarActividad(int $id) {
@@ -186,13 +215,19 @@ class Actividad {
         $pdo = Conexion::conectar();
         $pdo->beginTransaction();
         try {
-            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // id_biblioteca ahora acepta NULL en la BD: solo se envía el id
+            // correspondiente al tipo_ubicacion elegido; el otro va null
+            // (no 0 ni "") en vez del valor "vacío" que llegue del form.
+            $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
+            $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
+
+            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
-                $d['participantes'], $d['fecha'], $d['dia_semana'], $d['id_biblioteca'],
-                $d['id_espacio_cultural'], $d['id_tipo_actividad']
+                $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
+                $idEspacioCultural, $d['id_tipo_actividad']
             ]);
             $idActividad = (int)$pdo->lastInsertId();
 
@@ -213,12 +248,17 @@ class Actividad {
         $pdo = Conexion::conectar();
         $pdo->beginTransaction();
         try {
-            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=? WHERE id=?";
+            // Mismo criterio que en crearActividadCompleta: null explícito
+            // para el campo que no corresponde al tipo_ubicacion elegido.
+            $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
+            $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
+
+            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=? WHERE id=?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
-                $d['participantes'], $d['fecha'], $d['dia_semana'], $d['id_biblioteca'],
-                $d['id_espacio_cultural'], $d['id_tipo_actividad'], $id
+                $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
+                $idEspacioCultural, $d['id_tipo_actividad'], $id
             ]);
 
             // Limpiamos relaciones previas para volver a insertarlas (simplifica updates)

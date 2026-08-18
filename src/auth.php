@@ -45,7 +45,7 @@ if ($username !== '' && $password !== '') {
 
             // --- Registro en bitácora ---
             $conex = Conexion::conectar();
-            registrar_bitacora($_SESSION['user_id'], 'Login', 'Usuario', 'Inicio de sesión: ' . $_SESSION['user']);
+            registrar_bitacora($conex, $_SESSION['user_id'], 'Login', 'Usuario', 'Inicio de sesión: ' . $_SESSION['user']);
         }
     }
 }

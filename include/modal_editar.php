@@ -40,17 +40,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                         <input type="hidden" id="editar-dia" name="dia_semana" value="">
                         <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? '../src/index.php', ENT_QUOTES, 'UTF-8'); ?>">
 
-                        <fieldset class="tipo-formulario-selector" style="border:none; padding:0; margin:0 0 16px; display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
-                            <legend style="font-weight:600; margin-bottom:6px; padding:0; width:100%;">Tipo de planificación</legend>
-                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
-                                <input type="radio" name="tipo_formulario" id="editar-tipo-formulario-simple" value="simple">
-                                Actividad simple
-                            </label>
-                            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
-                                <input type="radio" name="tipo_formulario" id="editar-tipo-formulario-completa" value="completa">
-                                Actividad completa
-                            </label>
-                        </fieldset>
+                        <input type="hidden" name="tipo_formulario" value="completa">
 
                         <div id="form-editar-aviso" class="form-aviso" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
 
@@ -60,7 +50,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                     <label for="editar-nombre">Nombre de la actividad</label>
                                     <input type="text" id="editar-nombre" maxlength="30" name="nombre" placeholder="Nombre de la actividad">
 
-                                    <div id="editar-fields-hidden" class="hidden">
+                                    <div id="editar-fields-hidden">
                                         <label for="editar-descripcion">Descripción de la actividad</label>
                                         <textarea id="editar-descripcion" maxlength="200" name="descripcion" placeholder="Descripción breve"></textarea>
                                     </div>
@@ -74,7 +64,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                     <input type="time" id="editar-hora" name="horaActividad">
                                 </fieldset>
 
-                                <fieldset id="editar-campos-completa" class="hidden">
+                                <fieldset id="editar-campos-completa">
                                     <legend>Detalles de actividad completa</legend>
 
                                     <label for="editar-objetivo">Objetivo / enfoque</label>
@@ -98,7 +88,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                         <?php endforeach; ?>
                                     </select>
 
-                                    <div id="editar-municipio-hidden" class="hidden">
+                                    <div id="editar-municipio-hidden">
                                         <fieldset>
                                             <label for="editar-parroquia">Parroquia</label>
                                             <input list="editar-parroquias" id="editar-parroquia" name="parroquia" maxlength="30" placeholder="Seleccione una parroquia">
@@ -209,21 +199,6 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             });
         }
 
-        // Alternar simple / completa
-        const radiosFormulario = document.querySelectorAll('#form-editar-actividad input[name="tipo_formulario"]');
-        const fieldsHidden = document.getElementById('editar-fields-hidden');
-        const camposCompleta = document.getElementById('editar-campos-completa');
-        const municipioHidden = document.getElementById('editar-municipio-hidden');
-
-        function actualizarTipoFormulario() {
-            const esCompleta = document.getElementById('editar-tipo-formulario-completa').checked;
-            fieldsHidden.classList.toggle('hidden', !esCompleta);
-            camposCompleta.classList.toggle('hidden', !esCompleta);
-            municipioHidden.classList.toggle('hidden', !esCompleta);
-        }
-
-        radiosFormulario.forEach(radio => radio.addEventListener('change', actualizarTipoFormulario));
-
         // Alternar biblioteca / espacio
         const radiosUbicacion = document.querySelectorAll('#form-editar-actividad input[name="tipo_ubicacion"]');
         const ubicacionBiblioteca = document.getElementById('editar-ubicacion-biblioteca');
@@ -257,18 +232,13 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             document.getElementById('editar-responsable').value = actividad.responsable ?? '';
             document.getElementById('editar-telefono').value = actividad.telefono_responsable ?? '';
 
-            const esCompleta = !!(actividad.objetivo || actividad.participantes || actividad.nivel_impacto || actividad.municipio_id);
-            document.getElementById('editar-tipo-formulario-' + (esCompleta ? 'completa' : 'simple')).checked = true;
-
             const esEspacio = !!actividad.id_espacio_cultural;
             document.getElementById('editar-tipo-ubicacion-' + (esEspacio ? 'espacio' : 'biblioteca')).checked = true;
 
-            actualizarTipoFormulario();
             actualizarUbicacion();
         };
 
-        // Estado inicial oculto por defecto (se ajusta al precargar)
-        actualizarTipoFormulario();
+        // Estado inicial (se ajusta al precargar)
         actualizarUbicacion();
     })();
 </script>

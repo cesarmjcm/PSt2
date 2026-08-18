@@ -87,8 +87,10 @@ try {
                                                 data-id="<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-nombre="<?php echo htmlspecialchars($actividad['nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-descripcion="<?php echo htmlspecialchars($actividad['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-objetivo="<?php echo htmlspecialchars($actividad['objetivo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-participantes="<?php echo htmlspecialchars($actividad['participantes'] ?? '0', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-fecha="<?php echo htmlspecialchars($actividad['fecha'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-hora="<?php echo htmlspecialchars(substr((string)($actividad['hora'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-dia="<?php echo htmlspecialchars($actividad['dia_semana'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-nivel-impacto="<?php echo htmlspecialchars($actividad['nivel_impacto'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-municipio-id="<?php echo htmlspecialchars($actividad['municipio_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
@@ -118,6 +120,8 @@ try {
                                     style="display:none;">
                                     <td colspan="6">
                                         <div class="detalle-actividad">
+                                            <p><strong>Fecha:</strong> <?php echo htmlspecialchars($fechaFmt, ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Hora:</strong> <?php echo htmlspecialchars(substr((string)($actividad['hora'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Objetivo:</strong> <?php echo htmlspecialchars($actividad['objetivo'] ?? 'No definido', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Participantes:</strong> <?php echo htmlspecialchars($actividad['participantes'] ?? '0', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Nivel de impacto:</strong> <?php echo htmlspecialchars($actividad['nivel_impacto'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>

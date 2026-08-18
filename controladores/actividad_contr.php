@@ -11,10 +11,18 @@ require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 class ActividadController
 {
     private $model;
+    private $conex;
 
     public function __construct()
     {
         $this->model = new Actividad();
+        // CORRECCIÓN: se crea UNA sola conexión a nivel de instancia y se
+        // reutiliza en todos los métodos (antes se creaba una variable local
+        // $conex dentro de cada if, que nunca llegaba al scope global que
+        // esperaba registrar_bitacora() vía `global $conex`, así que la
+        // bitácora fallaba en silencio). Ahora la conexión se pasa explícita
+        // como parámetro a registrar_bitacora().
+        $this->conex = Conexion::conectar();
     }
 
     public function dispatch(): void
@@ -64,8 +72,10 @@ class ActividadController
             $id = $this->model->crearActividadCompleta($data);
             if ($id) {
                 if (!empty($_SESSION['user_id'])) {
-                    $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Actividad', 'Actividad registrada: ' . $data['nombre']);
+                    $okBitacora = registrar_bitacora($this->conex, $_SESSION['user_id'], 'Crear', 'Actividad', 'Actividad registrada: ' . $data['nombre']);
+                    if (!$okBitacora) {
+                        error_log('[ActividadController::crear] La actividad #' . $id . ' se creó, pero registrar_bitacora() falló.');
+                    }
                 }
                 header('Location: ' . $this->getReturnUrl());
                 exit;
@@ -107,8 +117,10 @@ class ActividadController
             $updated = $this->model->actualizarActividadCompleta($id, $data);
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
-                    $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Actividad', "Actividad #$id actualizada: " . $data['nombre']);
+                    $okBitacora = registrar_bitacora($this->conex, $_SESSION['user_id'], 'Editar', 'Actividad', "Actividad #$id actualizada: " . $data['nombre']);
+                    if (!$okBitacora) {
+                        error_log('[ActividadController::actualizar] La actividad #' . $id . ' se actualizó, pero registrar_bitacora() falló.');
+                    }
                 }
                 header('Location: ' . $this->getReturnUrl());
                 exit;
@@ -138,8 +150,10 @@ class ActividadController
         $deleted = $this->model->eliminarActividad($id);
         if ($deleted) {
             if (!empty($_SESSION['user_id'])) {
-                $conex = Conexion::conectar();
-                registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Actividad', "Actividad #$id eliminada");
+                $okBitacora = registrar_bitacora($this->conex, $_SESSION['user_id'], 'Eliminar', 'Actividad', "Actividad #$id eliminada");
+                if (!$okBitacora) {
+                    error_log('[ActividadController::eliminar] La actividad #' . $id . ' se eliminó, pero registrar_bitacora() falló.');
+                }
             }
             header('Location: ' . $this->getReturnUrl());
             exit;
@@ -165,6 +179,7 @@ class ActividadController
         // mbstring deshabilitada o locale del sistema), lo cual hacía que
         // las regex con acentos/ñ de validador.php fallaran solo ahí.
         $fecha = Validador::normalizarTexto($_POST['fecha'] ?? $_POST['fechaActividad'] ?? '');
+        $hora = Validador::normalizarTexto($_POST['hora'] ?? $_POST['horaActividad'] ?? '');
         $diaSemana = Validador::normalizarTexto($_POST['dia_semana'] ?? $_POST['diaActividad'] ?? '');
 
         if ($diaSemana === '' && $fecha !== '') {
@@ -175,14 +190,30 @@ class ActividadController
         $objetivo = Validador::normalizarTexto($_POST['objetivo'] ?? $_POST['objetivoEnfoque'] ?? '');
         $participantes = intval($_POST['participantes'] ?? $_POST['cantidadParticipantes'] ?? 0);
 
+        // CORRECCIÓN: el formulario tiene un selector "¿Dónde se realiza?"
+        // (Biblioteca / Espacio) que oculta uno de los dos campos según la
+        // opción elegida. Antes se exigía id_biblioteca > 0 siempre, sin
+        // importar la elección, así que crear() fallaba con "Biblioteca
+        // inválida." cada vez que el usuario elegía "Espacio" (id_biblioteca
+        // llegaba vacío). Ahora se captura tipo_ubicacion para que el modelo
+        // valide solo el campo correspondiente.
+        $tipoUbicacion = Validador::normalizarTexto($_POST['tipo_ubicacion'] ?? '');
+        if ($tipoUbicacion === '') {
+            // Fallback por si el campo no viene explícito: se infiere de
+            // cuál de los dos ids llegó con datos.
+            $tipoUbicacion = intval($_POST['id_espacio_cultural'] ?? 0) > 0 ? 'espacio' : 'biblioteca';
+        }
+
         return [
             'nombre'               => Validador::normalizarTexto($_POST['nombre'] ?? $_POST['tipoActividad'] ?? ''),
             'descripcion'          => $descripcion,
             'objetivo'             => $objetivo !== '' ? $objetivo : 'No definido',
             'participantes'        => $participantes,
             'fecha'                => $fecha,
+            'hora'                 => $hora,
             'dia_semana'           => $diaSemana,
             'nivel_impacto'        => Validador::normalizarTexto($_POST['nivel_impacto'] ?? $_POST['nivel__impacto'] ?? ''),
+            'tipo_ubicacion'       => $tipoUbicacion,
             'id_biblioteca'        => intval($_POST['id_biblioteca'] ?? 0),
             'municipio_id'         => intval($_POST['municipio_id'] ?? $_POST['Municipio'] ?? 0),
             'parroquia'            => Validador::normalizarTexto($_POST['parroquia'] ?? ''),

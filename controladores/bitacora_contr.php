@@ -27,8 +27,10 @@ $filtros = [
     'fecha_hasta' => $_GET['fecha_hasta'] ?? '',
 ];
 
-$registros = obtener_bitacora($filtros);
-$usuarios  = obtener_usuarios_para_filtro();
+// CORRECCIÓN: modelo_bitacora.php ya no usa `global $conex` internamente
+// (ver notas en ese archivo), así que ahora se pasa $conex explícitamente.
+$registros = obtener_bitacora($conex, $filtros);
+$usuarios  = obtener_usuarios_para_filtro($conex);
 
 require_once __DIR__ . '/../src/bitacora.php';
 ?>
