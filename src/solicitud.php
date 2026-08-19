@@ -173,7 +173,7 @@ require_once __DIR__ . '/../include/guardian.php';
             llenarBibliotecas();
             llenarEmpleados();
             document.getElementById('campo_fecha_solicitud').value = solicitud.fecha_solicitud;
-            document.getElementById('campo_hora_solicitud').value = solicitud.hora_solicitud;
+            document.getElementById('campo_hora_solicitud').value = String(solicitud.hora_solicitud || '').slice(0, 5);
             document.getElementById('campo_lugar').value = solicitud.lugar;
             document.getElementById('campo_responsable').value = solicitud.responsable;
             document.getElementById('campo_participantes').value = solicitud.participantes;

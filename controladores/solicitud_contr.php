@@ -170,7 +170,7 @@ class SolicitudController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Solicitud', 'Solicitud registrada para institución #' . $data['id_institucion']);
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Crear', 'Solicitud', 'Solicitud registrada para institución #' . $data['id_institucion']);
                 }
                 $this->success('Solicitud creada correctamente.');
                 return;
@@ -217,7 +217,7 @@ class SolicitudController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Solicitud', "Solicitud #$id actualizada");
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Solicitud', "Solicitud #$id actualizada");
                 }
                 $this->success('Solicitud actualizada correctamente.');
                 return;
@@ -248,7 +248,7 @@ class SolicitudController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Solicitud', "Solicitud #$id eliminada");
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Eliminar', 'Solicitud', "Solicitud #$id eliminada");
                 }
                 $this->success('Solicitud eliminada correctamente.');
                 return;
