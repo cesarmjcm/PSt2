@@ -212,6 +212,16 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
 
         radiosUbicacion.forEach(radio => radio.addEventListener('change', actualizarUbicacion));
 
+        // CORRECCIÓN: se expone actualizarUbicacion() globalmente porque
+        // abrirEditarActividad() (en app.js) es quien realmente precarga el
+        // modal (usa data-* del botón, no precargarFormularioEditar), y
+        // necesita poder marcar el radio correcto y refrescar la
+        // visibilidad de los campos biblioteca/espacio después de
+        // precargar. Sin esto, ningún radio quedaba marcado al editar y el
+        // submit fallaba la validación de "tipo_ubicacion" (JS y PHP),
+        // dando la sensación de que los cambios no se guardaban.
+        window.actualizarUbicacionEditar = actualizarUbicacion;
+
         // Exponer función global para precargar el formulario al abrir el modal
         window.precargarFormularioEditar = function (actividad) {
             document.getElementById('editar-id').value = actividad.id ?? '';

@@ -98,6 +98,7 @@ try {
                                                 data-comuna="<?php echo htmlspecialchars($actividad['comuna'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-espacio="<?php echo htmlspecialchars($actividad['espacio_cultural'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-id-biblioteca="<?php echo htmlspecialchars($actividad['id_biblioteca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-id-tipo-actividad="<?php echo htmlspecialchars((string)($actividad['id_tipo_actividad'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-responsable="<?php echo htmlspecialchars($actividad['responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-telefono="<?php echo htmlspecialchars($actividad['telefono_responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                             <i class="fas fa-pen"></i>
@@ -123,6 +124,7 @@ try {
                                             <p><strong>Fecha:</strong> <?php echo htmlspecialchars($fechaFmt, ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Hora:</strong> <?php echo htmlspecialchars(substr((string)($actividad['hora'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Objetivo:</strong> <?php echo htmlspecialchars($actividad['objetivo'] ?? 'No definido', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Tipo de actividad:</strong> <?php echo htmlspecialchars($actividad['tipo_actividad'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Participantes:</strong> <?php echo htmlspecialchars($actividad['participantes'] ?? '0', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Nivel de impacto:</strong> <?php echo htmlspecialchars($actividad['nivel_impacto'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Municipio:</strong> <?php echo htmlspecialchars($actividad['municipio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>

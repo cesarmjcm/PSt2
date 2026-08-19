@@ -43,6 +43,9 @@ class Actividad {
                 a.hora,
                 a.dia_semana,
                 a.id_biblioteca,
+                a.id_espacio_cultural,
+                a.id_tipo_actividad,
+                ta.nombre AS tipo_actividad,
                 b.nombre AS biblioteca,
                 m.id AS municipio_id,
                 m.nombre AS municipio,
@@ -52,6 +55,7 @@ class Actividad {
                 GROUP_CONCAT(DISTINCT r.nombre SEPARATOR ', ') AS responsable,
                 GROUP_CONCAT(DISTINCT r.telefono SEPARATOR ', ') AS telefono_responsable
             FROM actividad a
+            LEFT JOIN tipo_actividad ta ON ta.id = a.id_tipo_actividad
             LEFT JOIN biblioteca b ON b.id = a.id_biblioteca
             LEFT JOIN parroquia p ON p.id = b.id_parroquia
             LEFT JOIN municipio m ON m.id = p.id_municipio
