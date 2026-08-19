@@ -221,6 +221,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                             <tr><td>Cargando...</td></tr>
                         </tbody>
                     </table>
+                    <nav class="paginacion" id="maestroPagination" aria-label="Páginas de registros"></nav>
                 <?php endif; ?>
             </div>
         </main>
@@ -278,6 +279,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
         const tablaHead = document.getElementById('tablaHead');
         const tablaBody = document.getElementById('tablaBody');
+        const paginacion = document.getElementById('maestroPagination');
         const alertBox = document.getElementById('alertBox');
 
         const modal = document.getElementById('maestroModal');
@@ -298,6 +300,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         let idAEliminar = null;
 
         let alertTimeoutId = null;
+        const filasPorPagina = 10;
+        let paginaActual = 1;
+        let filasCargadas = [];
 
         function mostrarAlerta(mensaje, tipo) {
             if (alertTimeoutId) clearTimeout(alertTimeoutId);
@@ -460,17 +465,24 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             }
 
             try {
-                renderBody(json.data || []);
+                filasCargadas = json.data || [];
+                const totalPaginas = Math.max(1, Math.ceil(filasCargadas.length / filasPorPagina));
+                paginaActual = Math.min(paginaActual, totalPaginas);
+                renderBody();
             } catch (e) {
                 console.error('Error al pintar la tabla:', e);
                 tablaBody.innerHTML = '<tr><td>Ocurrió un error al mostrar los datos.</td></tr>';
             }
         }
 
-        function renderBody(filas) {
+        function renderBody() {
+            const totalPaginas = Math.max(1, Math.ceil(filasCargadas.length / filasPorPagina));
+            const inicio = (paginaActual - 1) * filasPorPagina;
+            const filas = filasCargadas.slice(inicio, inicio + filasPorPagina);
             if (!filas.length) {
                 const colspan = camposKeys.filter(k => campos[k].type !== 'password' && !campos[k].soloFiltro).length + 2;
                 tablaBody.innerHTML = '<tr><td colspan="' + colspan + '">No hay registros todavía.</td></tr>';
+                renderPaginacion(totalPaginas);
                 return;
             }
 
@@ -502,6 +514,26 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             });
             tablaBody.querySelectorAll('.btn-delete').forEach(btn => {
                 btn.addEventListener('click', () => abrirConfirmEliminar(btn.dataset.id));
+            });
+            renderPaginacion(totalPaginas);
+        }
+
+        function renderPaginacion(totalPaginas) {
+            if (!paginacion || totalPaginas <= 1) {
+                if (paginacion) paginacion.innerHTML = '';
+                return;
+            }
+            let html = '';
+            for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+                html += '<button type="button" class="paginacion__pagina' + (pagina === paginaActual ? ' activa' : '') + '"' +
+                    (pagina === paginaActual ? ' aria-current="page"' : '') + ' data-page="' + pagina + '">' + pagina + '</button>';
+            }
+            paginacion.innerHTML = html;
+            paginacion.querySelectorAll('[data-page]').forEach((boton) => {
+                boton.addEventListener('click', () => {
+                    paginaActual = Number(boton.dataset.page);
+                    renderBody();
+                });
             });
         }
 

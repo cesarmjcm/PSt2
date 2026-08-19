@@ -28,8 +28,13 @@ $filtros = [
     'fecha_hasta' => $_GET['fecha_hasta'] ?? '',
 ];
 
-$registros = obtener_bitacora($filtros);
-$usuarios  = obtener_usuarios_para_filtro();
+$registros = obtener_bitacora($conex, $filtros);
+$usuarios  = obtener_usuarios_para_filtro($conex);
+$registrosPorPagina = 10;
+$paginaActual = max(1, intval($_GET['page'] ?? 1));
+$totalPaginas = max(1, (int)ceil(count($registros) / $registrosPorPagina));
+$paginaActual = min($paginaActual, $totalPaginas);
+$registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, $registrosPorPagina);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -131,6 +136,18 @@ $usuarios  = obtener_usuarios_para_filtro();
                 <?php endif; ?>
             </tbody>
         </table>
+        <?php if ($totalPaginas > 1): ?>
+            <nav class="paginacion" aria-label="Páginas de bitácora">
+                <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
+                    <?php $parametrosPagina = array_merge($filtros, ['page' => $pagina]); ?>
+                    <a href="?<?php echo htmlspecialchars(http_build_query($parametrosPagina), ENT_QUOTES, 'UTF-8'); ?>"
+                       class="paginacion__pagina<?php echo $pagina === $paginaActual ? ' activa' : ''; ?>"
+                       <?php echo $pagina === $paginaActual ? 'aria-current="page"' : ''; ?>>
+                        <?php echo $pagina; ?>
+                    </a>
+                <?php endfor; ?>
+            </nav>
+        <?php endif; ?>
     </div>
 </main>
 <script src="./js/app.js"></script>

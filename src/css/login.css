@@ -59,6 +59,34 @@ h2{
     text-align: center;
     margin-bottom: 20px;
 }
+.login-error {
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 169, 169, 0.8);
+  border-left: 4px solid #ff6b6b;
+  border-radius: 10px;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(112, 20, 34, 0.92), rgba(78, 12, 25, 0.92));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  color: #fff5f5;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+  animation: login-error-in 0.25s ease-out;
+}
+
+@keyframes login-error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 input{
     margin-bottom: 0px;
     padding: 12px 30px;

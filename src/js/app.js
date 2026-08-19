@@ -810,16 +810,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.querySelector('form[name="login"]');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('loginError');
 
     if (loginForm && usernameInput && passwordInput) {
+        const mostrarErrorLogin = (mensaje) => {
+            if (loginError) {
+                loginError.textContent = mensaje;
+                loginError.hidden = false;
+            }
+        };
+
+        const limpiarErrorLogin = () => {
+            if (loginError) {
+                loginError.textContent = '';
+                loginError.hidden = true;
+            }
+        };
+
         loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            limpiarErrorLogin();
 
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
 
             if (username === '' || password === '') {
-                alert('Debes ingresar usuario y contraseña.');
+                mostrarErrorLogin('Debes ingresar usuario y contraseña.');
                 usernameInput.focus();
                 return;
             }
@@ -846,13 +862,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     window.location.href = data.redirect || 'main2.php';
                 } else {
-                    alert(data.message || 'Usuario o contraseña incorrectos.');
+                    mostrarErrorLogin(data.message || 'Usuario o contraseña incorrectos.');
                     passwordInput.value = '';
                     usernameInput.focus();
                 }
             } catch (error) {
                 console.error('Error al iniciar sesión:', error);
-                alert('No se pudo conectar con el servidor. Inténtalo de nuevo.');
+                mostrarErrorLogin('No se pudo conectar con el servidor. Inténtalo de nuevo.');
             } finally {
                 if (submitBtn) submitBtn.disabled = false;
             }

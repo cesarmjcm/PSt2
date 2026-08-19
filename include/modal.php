@@ -6,6 +6,7 @@ require_once __DIR__ . '/../modelos/espacio.php';
 require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../modelos/biblioteca.php';
 require_once __DIR__ . '/../modelos/tipo_actividad.php';
+require_once __DIR__ . '/../modelos/nv_act.php';
 
 $municipioModel = new Municipio();
 $comunaModel = new Comuna();
@@ -14,14 +15,31 @@ $espacioModel = new Espacio();
 $empleadoModel = new Empleado();
 $bibliotecaModel = new Biblioteca();
 $tipoActividadModel = new TipoActividad();
+$nivelImpactoModel = new NivelImpacto();
 
 $municipios = $municipioModel->mostrarMunicipios();
 $comunas = $comunaModel->mostrarComunas();
 $parroquias = $parroquiaModel->mostrarParroquias();
+$parroquiasUnicas = [];
+foreach ($parroquias as $parroquia) {
+    $nombreParroquia = trim((string)($parroquia['nombre'] ?? ''));
+    $idParroquia = (string)($parroquia['id'] ?? '');
+    $municipioParroquia = (string)($parroquia['id_municipio'] ?? '');
+    if ($nombreParroquia !== '') {
+        $claveParroquia = $municipioParroquia . '|' . mb_strtolower($nombreParroquia, 'UTF-8');
+        $parroquiasUnicas[$claveParroquia] = [
+            'id' => $idParroquia,
+            'nombre' => $nombreParroquia,
+            'id_municipio' => $municipioParroquia,
+        ];
+    }
+}
+$parroquias = array_values($parroquiasUnicas);
 $espacios = $espacioModel->mostrarEspacios();
 $empleados = $empleadoModel->mostrarEmpleados();
 $bibliotecas = $bibliotecaModel->mostrarBibliotecas();
 $tiposActividad = $tipoActividadModel->mostrarTipos();
+$nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
 $empleado=$empleadoModel->mostrarEmpleados();
 ?>
 
@@ -90,7 +108,14 @@ $empleado=$empleadoModel->mostrarEmpleados();
                                     <input type="number" id="plan-participantes" name="participantes" min="0" max="99999" placeholder="Ej. 25">
 
                                     <label for="plan-nivel-impacto">Nivel de impacto</label>
-                                    <input type="text" id="plan-nivel-impacto" maxlength="20" name="nivel_impacto" placeholder="Ej. Comunal, Regional, Nacional">
+                                    <select id="plan-nivel-impacto" name="nivel_impacto">
+                                        <option value="">Seleccione un nivel de impacto</option>
+                                        <?php foreach ($nivelesImpacto as $nivel): ?>
+                                            <option value="<?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?>">
+                                                <?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </fieldset>
                             </fieldset>
 
@@ -107,21 +132,24 @@ $empleado=$empleadoModel->mostrarEmpleados();
                                     <div id="municipio-hidden" class="hidden">
                                         <fieldset>
                                             <label for="plan-parroquia">Parroquia</label>
-                                            <input list="planificacion-parroquias" id="plan-parroquia" name="parroquia" maxlength="30" placeholder="Seleccione una parroquia">
-                                            <datalist size="5" name="parroquia" id="planificacion-parroquias">
+                                            <select id="plan-parroquia" name="parroquia" disabled>
                                                 <option value="">Seleccione una parroquia</option>
-                                                <?php foreach ($parroquias as $p): ?>
-                                                    <option value="<?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php foreach ($parroquias as $parroquia): ?>
+                                                    <option value="<?= htmlspecialchars($parroquia['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars($parroquia['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars($parroquia['id_municipio'], ENT_QUOTES, 'UTF-8') ?>">
+                                                        <?= htmlspecialchars($parroquia['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
                                                 <?php endforeach; ?>
-                                            </datalist>
+                                            </select>
                                         </fieldset>
 
                                         <fieldset>
                                             <label for="plan-comuna">Comuna</label>
-                                            <select name="comuna" id="planificacion-comunas">
+                                            <select name="comuna" id="planificacion-comunas" disabled>
                                                 <option value="">Seleccione una comuna</option>
                                                 <?php foreach ($comunas as $c): ?>
-                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>">
+                                                        <?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </fieldset>
@@ -212,6 +240,50 @@ $empleado=$empleadoModel->mostrarEmpleados();
                     inputTelefono.readOnly = false;
                 }
             });
+        }
+
+        const selectMunicipio = document.getElementById('planificacion-municipios');
+        const selectParroquia = document.getElementById('plan-parroquia');
+        const selectComuna = document.getElementById('planificacion-comunas');
+
+        if (selectMunicipio && selectParroquia && selectComuna) {
+            const opcionesParroquias = Array.from(selectParroquia.options).slice(1);
+            const opcionesComunas = Array.from(selectComuna.options).slice(1);
+
+            const filtrarParroquias = () => {
+                const municipioId = selectMunicipio.value;
+                selectParroquia.replaceChildren(new Option('Seleccione una parroquia', ''));
+                opcionesParroquias.forEach((opcion) => {
+                    if (opcion.dataset.municipio === municipioId) {
+                        selectParroquia.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectParroquia.disabled = municipioId === '';
+            };
+
+            const filtrarComunas = () => {
+                const parroquiaId = selectParroquia.selectedOptions[0]?.dataset.id || '';
+                selectComuna.replaceChildren(new Option('Seleccione una comuna', ''));
+                opcionesComunas.forEach((opcion) => {
+                    if (opcion.dataset.parroquia === parroquiaId) {
+                        selectComuna.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectComuna.disabled = parroquiaId === '';
+            };
+
+            selectMunicipio.addEventListener('change', () => {
+                selectParroquia.value = '';
+                selectComuna.value = '';
+                filtrarParroquias();
+                filtrarComunas();
+            });
+            selectParroquia.addEventListener('change', () => {
+                selectComuna.value = '';
+                filtrarComunas();
+            });
+            filtrarParroquias();
+            filtrarComunas();
         }
     })();
 </script>

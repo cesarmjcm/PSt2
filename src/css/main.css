@@ -1,3 +1,32 @@
+.paginacion {
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+	margin-top: 16px;
+}
+
+.paginacion__pagina {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px;
+	height: 34px;
+	padding: 0 8px;
+	border: 1px solid #d0d7de;
+	border-radius: 4px;
+	background: #fff;
+	color: #374151;
+	cursor: pointer;
+	font: inherit;
+	text-decoration: none;
+}
+
+.paginacion__pagina:hover,
+.paginacion__pagina.activa {
+	background: #1f6feb;
+	border-color: #1f6feb;
+	color: #fff;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
     box-sizing: border-box;

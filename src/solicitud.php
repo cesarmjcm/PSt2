@@ -45,6 +45,7 @@ require_once __DIR__ . '/../include/guardian.php';
                         <tr><td>Cargando...</td></tr>
                     </tbody>
                 </table>
+                <nav class="paginacion" id="solicitudPagination" aria-label="Páginas de solicitudes"></nav>
             </div>
         </main>
     </div>
@@ -115,6 +116,7 @@ require_once __DIR__ . '/../include/guardian.php';
     (function () {
         const endpoint = '../controladores/solicitud_contr.php';
         const tablaBody = document.getElementById('tablaBody');
+        const paginacion = document.getElementById('solicitudPagination');
         const alertBox = document.getElementById('alertBox');
         const modal = document.getElementById('solicitudModal');
         const modalBackdrop = document.getElementById('modalBackdrop');
@@ -130,6 +132,9 @@ require_once __DIR__ . '/../include/guardian.php';
         let instituciones = [];
         let bibliotecas = [];
         let empleados = [];
+        const filasPorPagina = 10;
+        let paginaActual = 1;
+        let solicitudesCargadas = [];
 
         function mostrarAlerta(mensaje, tipo) {
             alertBox.textContent = mensaje;
@@ -286,15 +291,22 @@ require_once __DIR__ . '/../include/guardian.php';
                     tablaBody.innerHTML = '<tr><td>No se pudieron cargar las solicitudes.</td></tr>';
                     return;
                 }
-                renderTabla(json.data || []);
+                solicitudesCargadas = json.data || [];
+                const totalPaginas = Math.max(1, Math.ceil(solicitudesCargadas.length / filasPorPagina));
+                paginaActual = Math.min(paginaActual, totalPaginas);
+                renderTabla();
             } catch (e) {
                 tablaBody.innerHTML = '<tr><td>Error al conectar con el servidor.</td></tr>';
             }
         }
 
-        function renderTabla(rows) {
+        function renderTabla() {
+            const totalPaginas = Math.max(1, Math.ceil(solicitudesCargadas.length / filasPorPagina));
+            const inicio = (paginaActual - 1) * filasPorPagina;
+            const rows = solicitudesCargadas.slice(inicio, inicio + filasPorPagina);
             if (!rows.length) {
                 tablaBody.innerHTML = '<tr><td colspan="9">No hay solicitudes registradas.</td></tr>';
+                renderPaginacion(totalPaginas);
                 return;
             }
             const html = rows.map(row => `
@@ -323,6 +335,26 @@ require_once __DIR__ . '/../include/guardian.php';
             });
             tablaBody.querySelectorAll('.btn-delete').forEach(btn => {
                 btn.addEventListener('click', () => abrirConfirmarEliminar(btn.dataset.id));
+            });
+            renderPaginacion(totalPaginas);
+        }
+
+        function renderPaginacion(totalPaginas) {
+            if (!paginacion || totalPaginas <= 1) {
+                if (paginacion) paginacion.innerHTML = '';
+                return;
+            }
+            let html = '';
+            for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+                html += '<button type="button" class="paginacion__pagina' + (pagina === paginaActual ? ' activa' : '') + '"' +
+                    (pagina === paginaActual ? ' aria-current="page"' : '') + ' data-page="' + pagina + '">' + pagina + '</button>';
+            }
+            paginacion.innerHTML = html;
+            paginacion.querySelectorAll('[data-page]').forEach((boton) => {
+                boton.addEventListener('click', () => {
+                    paginaActual = Number(boton.dataset.page);
+                    renderTabla();
+                });
             });
         }
 

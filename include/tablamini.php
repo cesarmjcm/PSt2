@@ -12,6 +12,11 @@ try {
     // espacio cultural, nivel de impacto y responsable vía JOIN.
     $actividades = $actividadModel->mostrarActividadesCompletas();
     $totalActividades = count($actividades);
+    $actividadesPorPagina = 10;
+    $paginaActual = max(1, intval($_GET['page'] ?? 1));
+    $totalPaginas = max(1, (int)ceil($totalActividades / $actividadesPorPagina));
+    $paginaActual = min($paginaActual, $totalPaginas);
+    $actividades = array_slice($actividades, ($paginaActual - 1) * $actividadesPorPagina, $actividadesPorPagina);
 
     foreach ($actividades as $actividad) {
         $totalParticipantes += intval($actividad['participantes'] ?? 0);
@@ -141,5 +146,16 @@ try {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                <?php if ($totalPaginas > 1): ?>
+                    <nav class="paginacion" aria-label="Páginas de actividades">
+                        <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
+                            <a href="?page=<?php echo $pagina; ?>"
+                               class="paginacion__pagina<?php echo $pagina === $paginaActual ? ' activa' : ''; ?>"
+                               <?php echo $pagina === $paginaActual ? 'aria-current="page"' : ''; ?>>
+                                <?php echo $pagina; ?>
+                            </a>
+                        <?php endfor; ?>
+                    </nav>
+                <?php endif; ?>
                 
             </div>

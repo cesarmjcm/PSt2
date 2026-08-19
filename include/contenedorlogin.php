@@ -8,6 +8,7 @@
         <div class="login">
         <h2>Iniciar Sesión</h2>
         <form name="login" action="auth.php" method="post">
+            <div id="loginError" class="login-error" role="alert" aria-live="polite" hidden></div>
             <div class="user">
 
              
