@@ -7,7 +7,7 @@ require_once __DIR__ . '/../include/guardian.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitudes de Escuelas</title>
-    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/main.css?v=2">
     <link rel="stylesheet" href="./css/maestro.css">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
@@ -26,6 +26,18 @@ require_once __DIR__ . '/../include/guardian.php';
                 </div>
 
                 <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
+
+                <form class="tabla-buscador tabla-buscador--solicitudes" style="margin-bottom: 12px; max-width: 40px;" id="buscarSolicitudesForm" role="search">
+                    <label class="sr-only" for="buscarSolicitudes">Buscar solicitud</label>
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input type="search"
+                           id="buscarSolicitudes"
+                           placeholder="Buscar solicitud..."
+                           autocomplete="off">
+                    <button type="button" class="tabla-buscador__limpiar" id="limpiarBusquedaSolicitud" title="Limpiar búsqueda" aria-label="Limpiar búsqueda" hidden>
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
 
                 <table class="tabla-planificacion" id="tablaSolicitudes">
                     <thead>
@@ -127,6 +139,9 @@ require_once __DIR__ . '/../include/guardian.php';
         const formId = document.getElementById('formId');
         const modalErrorBox = document.getElementById('modalError');
         const btnNuevaSolicitud = document.getElementById('btnNuevaSolicitud');
+        const buscarSolicitudesForm = document.getElementById('buscarSolicitudesForm');
+        const buscarSolicitudes = document.getElementById('buscarSolicitudes');
+        const limpiarBusquedaSolicitud = document.getElementById('limpiarBusquedaSolicitud');
         const campoBiblioteca = document.getElementById('campo_biblioteca');
         const campoEmpleado = document.getElementById('campo_empleado');
         let instituciones = [];
@@ -135,6 +150,21 @@ require_once __DIR__ . '/../include/guardian.php';
         const filasPorPagina = 10;
         let paginaActual = 1;
         let solicitudesCargadas = [];
+
+        function normalizarTexto(valor) {
+            return String(valor ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
+        }
+
+        function solicitudesFiltradas() {
+            const termino = normalizarTexto(buscarSolicitudes.value.trim());
+            if (!termino) return solicitudesCargadas;
+            return solicitudesCargadas.filter(solicitud =>
+                normalizarTexto(Object.values(solicitud).join(' ')).includes(termino)
+            );
+        }
 
         function mostrarAlerta(mensaje, tipo) {
             alertBox.textContent = mensaje;
@@ -301,11 +331,12 @@ require_once __DIR__ . '/../include/guardian.php';
         }
 
         function renderTabla() {
-            const totalPaginas = Math.max(1, Math.ceil(solicitudesCargadas.length / filasPorPagina));
+            const solicitudes = solicitudesFiltradas();
+            const totalPaginas = Math.max(1, Math.ceil(solicitudes.length / filasPorPagina));
             const inicio = (paginaActual - 1) * filasPorPagina;
-            const rows = solicitudesCargadas.slice(inicio, inicio + filasPorPagina);
+            const rows = solicitudes.slice(inicio, inicio + filasPorPagina);
             if (!rows.length) {
-                tablaBody.innerHTML = '<tr><td colspan="9">No hay solicitudes registradas.</td></tr>';
+                tablaBody.innerHTML = '<tr><td colspan="9">' + (buscarSolicitudes.value.trim() ? 'No se encontraron solicitudes para esa búsqueda.' : 'No hay solicitudes registradas.') + '</td></tr>';
                 renderPaginacion(totalPaginas);
                 return;
             }
@@ -338,6 +369,20 @@ require_once __DIR__ . '/../include/guardian.php';
             });
             renderPaginacion(totalPaginas);
         }
+
+        buscarSolicitudesForm.addEventListener('submit', (event) => event.preventDefault());
+        buscarSolicitudes.addEventListener('input', () => {
+            paginaActual = 1;
+            limpiarBusquedaSolicitud.hidden = !buscarSolicitudes.value.trim();
+            renderTabla();
+        });
+        limpiarBusquedaSolicitud.addEventListener('click', () => {
+            buscarSolicitudes.value = '';
+            limpiarBusquedaSolicitud.hidden = true;
+            paginaActual = 1;
+            buscarSolicitudes.focus();
+            renderTabla();
+        });
 
         function renderPaginacion(totalPaginas) {
             if (!paginacion || totalPaginas <= 1) {

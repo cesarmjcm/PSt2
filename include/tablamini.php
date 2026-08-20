@@ -4,6 +4,7 @@ $errorMessage = '';
 $totalActividades = 0;
 $totalParticipantes = 0;
 $municipiosActivos = [];
+$busqueda = trim((string)($_GET['q'] ?? ''));
 
 try {
     require_once __DIR__ . '/../modelos/actividad.php';
@@ -11,6 +12,12 @@ try {
     // mostrarActividadesCompletas() trae además municipio, parroquia, comuna,
     // espacio cultural, nivel de impacto y responsable vía JOIN.
     $actividades = $actividadModel->mostrarActividadesCompletas();
+    if ($busqueda !== '') {
+        $actividades = array_values(array_filter($actividades, static function (array $actividad) use ($busqueda): bool {
+            $textoActividad = implode(' ', array_map('strval', $actividad));
+            return stripos($textoActividad, $busqueda) !== false;
+        }));
+    }
     $totalActividades = count($actividades);
     $actividadesPorPagina = 10;
     $paginaActual = max(1, intval($_GET['page'] ?? 1));
@@ -30,7 +37,24 @@ try {
 ?>
 
 <div class="tabla__container">
-                <h2 class="section-title">Cronograma Semanal de Actividades</h2>
+                <div class="tabla__header">
+                    <h2 class="section-title">Cronograma Semanal de Actividades</h2>
+                    <form class="tabla-buscador" style="margin-top: 10px;" method="get" role="search">
+                        <label class="sr-only" for="buscarActividad">Buscar actividad</label>
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input  type="search"
+                               id="buscarActividad"
+                               name="q"
+                               value="<?php echo htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8'); ?>"
+                               placeholder="Buscar actividad..."
+                               autocomplete="off">
+                        <?php if ($busqueda !== ''): ?>
+                            <a href="index.php" class="tabla-buscador__limpiar" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        <?php endif; ?>
+                    </form>
+                </div>
                 <table class="tabla-planificacion">
                     <thead>
                         <tr>
@@ -49,7 +73,7 @@ try {
                             </tr>
                         <?php elseif (empty($actividades)): ?>
                             <tr>
-                                <td colspan="6">No hay actividades registradas.</td>
+                                <td colspan="6"><?php echo $busqueda !== '' ? 'No se encontraron actividades para esa búsqueda.' : 'No hay actividades registradas.'; ?></td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($actividades as $index => $actividad): ?>
@@ -149,7 +173,7 @@ try {
                 <?php if ($totalPaginas > 1): ?>
                     <nav class="paginacion" aria-label="Páginas de actividades">
                         <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
-                            <a href="?page=<?php echo $pagina; ?>"
+                            <a href="?page=<?php echo $pagina; ?>&amp;q=<?php echo urlencode($busqueda); ?>"
                                class="paginacion__pagina<?php echo $pagina === $paginaActual ? ' activa' : ''; ?>"
                                <?php echo $pagina === $paginaActual ? 'aria-current="page"' : ''; ?>>
                                 <?php echo $pagina; ?>

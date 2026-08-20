@@ -19,7 +19,6 @@ $esAdmin = isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'administra
             <a href="bitacora.php" class="nav__link<?= $bitacoraActive ? ' active' : '' ?>">Bitácora</a>
         <?php endif; ?>
         
-                <input type="text" class="nav__search" placeholder="Buscar...">
                 <div class="nav__user">
                     <button id="userMenuButton" class="nav__user-btn" aria-haspopup="true" aria-expanded="false" title="Usuario" type="button">
                         <i class="fas fa-user-circle"></i>
