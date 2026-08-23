@@ -41,10 +41,10 @@ class EmpleadoController
         }
     }
 
-    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula): ?string
+    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $anios_servicio): ?string
     {
-        if ($nombre === '' || $apellido === '' || $telefono === '' || $cedula === '') {
-            return 'Nombre, apellido, teléfono y cédula son obligatorios.';
+        if ($nombre === '' || $apellido === '' || $telefono === '' || $cedula === '' || $genero === '') {
+            return 'Nombre, apellido, teléfono, cédula y género son obligatorios.';
         }
         if ($id_cargo <= 0) {
             return 'Debe seleccionar un cargo.';
@@ -61,6 +61,12 @@ class EmpleadoController
         if (!Validador::esCedulaValida($cedula)) {
             return 'La cédula debe contener solo números y tener entre 6 y 8 dígitos.';
         }
+        if (!in_array($genero, ['M', 'F'], true)) {
+            return 'Debe seleccionar Masculino o Femenino.';
+        }
+        if ($edad < 0 || $anios_servicio < 0) {
+            return 'La edad y los años de servicio no pueden ser negativos.';
+        }
         return null;
     }
 
@@ -76,8 +82,11 @@ class EmpleadoController
         $telefono = trim($_POST['telefono'] ?? '');
         $id_cargo = intval($_POST['id_cargo'] ?? 0);
         $cedulaRaw = trim($_POST['cedula'] ?? '');
+        $genero = trim($_POST['genero'] ?? '');
+        $edad = intval($_POST['edad'] ?? 0);
+        $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
 
-        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw);
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio);
         if ($errorValidacion !== null) {
             $this->error($errorValidacion);
             return;
@@ -91,16 +100,16 @@ class EmpleadoController
         }
 
         try {
-            $created = $this->model->crearEmpleado($nombre, $apellido, $telefono, $id_cargo, $cedula);
+            $created = $this->model->crearEmpleado($nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio);
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Empleado', 'Empleado registrado: ' . $nombre . ' ' . $apellido);
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Crear', 'Empleado', 'Empleado registrado: ' . $nombre . ' ' . $apellido);
                 }
                 $this->success('Empleado creado correctamente.');
                 return;
             }
-        } catch (PDOException $e) {
+        } catch (Throwable $e) {
             if ($e->getCode() === '23000') {
                 $this->error('Ya existe un empleado con esa cédula.');
                 return;
@@ -125,13 +134,16 @@ class EmpleadoController
         $telefono = trim($_POST['telefono'] ?? '');
         $id_cargo = intval($_POST['id_cargo'] ?? 0);
         $cedulaRaw = trim($_POST['cedula'] ?? '');
+        $genero = trim($_POST['genero'] ?? '');
+        $edad = intval($_POST['edad'] ?? 0);
+        $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
 
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
         }
 
-        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw);
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio);
         if ($errorValidacion !== null) {
             $this->error($errorValidacion);
             return;
@@ -145,16 +157,16 @@ class EmpleadoController
         }
 
         try {
-            $updated = $this->model->actualizarEmpleado($id, $nombre, $apellido, $telefono, $id_cargo, $cedula);
+            $updated = $this->model->actualizarEmpleado($id, $nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio);
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Empleado', "Empleado #$id actualizado: " . $nombre . ' ' . $apellido);
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Empleado', "Empleado #$id actualizado: " . $nombre . ' ' . $apellido);
                 }
                 $this->success('Empleado actualizado correctamente.');
                 return;
             }
-        } catch (PDOException $e) {
+        } catch (Throwable $e) {
             if ($e->getCode() === '23000') {
                 $this->error('Ya existe otro empleado con esa cédula.');
                 return;
@@ -184,7 +196,7 @@ class EmpleadoController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Empleado', "Empleado #$id eliminado");
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Eliminar', 'Empleado', "Empleado #$id eliminado");
                 }
                 $this->success('Empleado eliminado correctamente.');
                 return;

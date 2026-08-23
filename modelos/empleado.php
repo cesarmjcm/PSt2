@@ -4,7 +4,7 @@ require_once __DIR__ . '/../config/conexion.php';
 class Empleado {
 
     public function mostrarEmpleados() {
-        $sql = "SELECT e.*, c.nombre AS id_cargo_nombre
+        $sql = "SELECT e.*, e.genero AS genero, e.edad AS edad, e.`anios_de_servicio` AS anios_servicio, c.nombre AS id_cargo_nombre
                 FROM empleado e
                 JOIN cargo c ON e.id_cargo = c.id
                 ORDER BY e.nombre, e.apellido";
@@ -37,16 +37,16 @@ class Empleado {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearEmpleado(string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula) {
-        $sql = "INSERT INTO empleado (nombre, apellido, telefono, id_cargo, cedula) VALUES (?, ?, ?, ?, ?)";
+    public function crearEmpleado(string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula, string $genero, int $edad, int $anios_servicio) {
+        $sql = "INSERT INTO empleado (nombre, apellido, telefono, id_cargo, cedula, genero, edad, `anios_de_servicio`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula]);
+        return $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio]);
     }
 
-    public function actualizarEmpleado(int $id, string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula) {
-        $sql = "UPDATE empleado SET nombre = ?, apellido = ?, telefono = ?, id_cargo = ?, cedula = ? WHERE id = ?";
+    public function actualizarEmpleado(int $id, string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula, string $genero, int $edad, int $anios_servicio) {
+        $sql = "UPDATE empleado SET nombre = ?, apellido = ?, telefono = ?, id_cargo = ?, cedula = ?, genero = ?, edad = ?, `anios_de_servicio` = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula, $id]);
+        return $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id]);
     }
 
     public function eliminarEmpleado(int $id) {

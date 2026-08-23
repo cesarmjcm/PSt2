@@ -122,7 +122,10 @@ $camposPorMaestro = [
         'telefono' => ['label' => 'Teléfono', 'type' => 'text', 'maxLength' => 11, 'formatoVenezolano' => true],
         'id_cargo' => [ 'label'       => 'Cargo', 'type'        => 'select','fuente'      => '../controladores/cargo_contr.php','optionValue' => 'id','optionLabel' => 'nombre', ],
         'cedula'   => ['label' => 'Cédula', 'type' => 'number', 'minLength' => 6, 'maxLength' => 8],
-        ],
+        'genero'   => ['label' => 'Género', 'type' => 'select', 'options' => ['M' => 'Masculino', 'F' => 'Femenino']],
+        'edad'     => ['label' => 'Edad', 'type' => 'number', 'min' => 0],
+        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0],
+    ],
     'nv_act'     => [
         'nombre_impacto' => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 20, 'noNumeros' => true],
     ],
@@ -449,7 +452,10 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             let json;
             try {
-                const resp = await fetch(endpoint + '?action=listar', { signal: miController.signal });
+                const resp = await fetch(endpoint + '?action=listar&_=' + Date.now(), {
+                    signal: miController.signal,
+                    cache: 'no-store'
+                });
                 json = await resp.json();
             } catch (e) {
                 if (e.name === 'AbortError') return; // Petición cancelada por una más nueva, ignorar
@@ -495,7 +501,11 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     if (campos[key].soloFiltro) return;
                     if (campos[key].type === 'select') {
                         const labelKey = key + '_nombre';
-                        const displayValue = fila[labelKey] !== undefined ? fila[labelKey] : fila[key];
+                        const displayValue = fila[labelKey] !== undefined
+                            ? fila[labelKey]
+                            : (campos[key].options && campos[key].options[fila[key]] !== undefined
+                                ? campos[key].options[fila[key]]
+                                : fila[key]);
                         html += '<td>' + escapeHtml(displayValue) + '</td>';
                     } else {
                         html += '<td>' + escapeHtml(fila[key]) + '</td>';
@@ -545,7 +555,14 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             await Promise.all(camposKeys.map(async key => {
                 const campo = campos[key];
                 if (campo.type === 'select') {
-                    opcionesPorCampo[key] = await obtenerOpciones(campo.fuente);
+                    if (campo.options) {
+                        opcionesPorCampo[key] = Object.entries(campo.options).map(([value, label]) => ({
+                            value,
+                            label
+                        }));
+                    } else {
+                        opcionesPorCampo[key] = await obtenerOpciones(campo.fuente);
+                    }
                 }
             }));
 
@@ -585,8 +602,8 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     html += '<select id="campo_' + key + '" name="' + key + '"' + (esOpcional ? '' : ' required') + (campo.filtradoPor && opciones.length === 0 ? ' disabled' : '') + '>';
                     html += '<option value="">' + (campo.filtradoPor && opciones.length === 0 ? 'Seleccione ' + (campos[campo.filtradoPor] ? campos[campo.filtradoPor].label.toLowerCase() : 'una opción') + ' primero' : '-- Seleccione --') + '</option>';
                     opciones.forEach(op => {
-                        const valOp = op[campo.optionValue];
-                        const labelOp = op[campo.optionLabel];
+                        const valOp = campo.options ? op.value : op[campo.optionValue];
+                        const labelOp = campo.options ? op.label : op[campo.optionLabel];
                         const seleccionado = (valorInicialSelect !== '' && String(valOp) === String(valorInicialSelect)) ? ' selected' : '';
                         html += '<option value="' + escapeHtml(valOp) + '"' + seleccionado + '>' + escapeHtml(labelOp) + '</option>';
                     });
@@ -726,17 +743,23 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             try {
                 const resp = await fetch(endpoint, { method: 'POST', body });
-                const json = await resp.json();
+                const respuesta = (await resp.text()).replace(/^\uFEFF/, '').trim();
+                let json;
+                try {
+                    json = JSON.parse(respuesta);
+                } catch (error) {
+                    throw new Error('Respuesta inválida del servidor');
+                }
                 if (json.success) {
                     delete cacheOpciones[endpoint]; // por si este maestro es fuente de un select en otro maestro
                     cerrarModal();
-                    cargarDatos();
+                    await cargarDatos();
                     mostrarAlerta(json.message, 'success');
                 } else {
                     mostrarErrorModal(json.message);
                 }
             } catch (e) {
-                mostrarErrorModal('Error de conexión con el servidor.');
+                mostrarErrorModal(e.message || 'Error de conexión con el servidor.');
             }
         });
 
