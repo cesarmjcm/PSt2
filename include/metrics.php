@@ -70,9 +70,9 @@ $porcentajeParticipantes = $metaParticipantes > 0
             </div>
             <div class="metric-card">
                 <div class="metric-info">
-                    <h3>Participantes</h3>
+                    <h3>Participantes</h3>git
                     <p class="metric-value"><?php echo $totalParticipantes > 0 ? $totalParticipantes : '-'; ?></p>
-                    <span class="metric-delta">Meta: <?php echo number_format($metaParticipantes, 0, ',', '.'); ?></span>
+                    <span class="metric-delta">Meta: <?php echo number_format($metaParticipantes, 0, ',', '.'); ?> (<?php echo number_format($porcentajeParticipantes, 1); ?>%)</span>
                 </div>
                 <i class="fas fa-users"></i>
             </div>
