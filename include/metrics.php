@@ -5,11 +5,18 @@ $totalActividades = 0;
 $totalParticipantes = 0;
 $municipiosActivos = [];
 
+$actividadesMesActual = 0;
+$actividadesMesAnterior = 0;
+$mesActual = (int) date('n');
+$anioActual = (int) date('Y');
+$mesAnteriorNum = $mesActual === 1 ? 12 : $mesActual - 1;
+$anioMesAnterior = $mesActual === 1 ? $anioActual - 1 : $anioActual;
+
+$metaParticipantes = 2000;
 try {
     require_once __DIR__ . '/../modelos/actividad.php';
     $actividadModel = new Actividad();
-    // mostrarActividadesCompletas() trae además municipio, parroquia, comuna,
-    // espacio cultural, nivel de impacto y responsable vía JOIN.
+   
     $actividades = $actividadModel->mostrarActividadesCompletas();
     $totalActividades = count($actividades);
 
@@ -18,11 +25,35 @@ try {
         if (!empty($actividad['municipio'])) {
             $municipiosActivos[$actividad['municipio']] = true;
         }
+        if (!empty($actividad['fecha'])) {
+            $timestamp = strtotime($actividad['fecha']);
+            $mesActividad = (int) date('n', $timestamp);
+            $anioActividad = (int) date('Y', $timestamp);
+    
+            if ($mesActividad === $mesActual && $anioActividad === $anioActual) {
+                $actividadesMesActual++;
+            } elseif ($mesActividad === $mesAnteriorNum && $anioActividad === $anioMesAnterior) {
+                $actividadesMesAnterior++;
+            }
+        }
     }
-} catch (Exception $e) {
+    }
+ catch (Exception $e) {
     $errorMessage = $e->getMessage();
 }
-?>
+if($actividadesMesAnterior > 0){
+    $porcentajeactividades = (($actividadesMesActual - $actividadesMesAnterior) / $actividadesMesAnterior) * 100;
+}
+else{
+    $porcentajeactividades = $actividadesMesActual > 0 ? 100 : 0;
+}
+$signoActividades = $porcentajeactividades >= 0 ? '+' : '';
+
+
+$porcentajeParticipantes = $metaParticipantes > 0
+    ? ($totalParticipantes / $metaParticipantes) * 100
+    : 0;
+ ?>
 
 <main class="dashboard-container">
         <h1 class="dashboard__title">Panel de Control: Red de Bibliotecas</h1>
@@ -33,7 +64,7 @@ try {
                 <div class="metric-info">
                     <h3>Total Actividades</h3>
                     <p class="metric-value"><?php echo $totalActividades > 0 ? $totalActividades : '-'; ?></p>
-                    <span class="metric-delta">+12% vs mes anterior</span>
+                    <span class="metric-delta"><?php echo $signoActividades . number_format($porcentajeactividades, 2) . '%'; ?> mas que el mes anterior</span>
                 </div>
                 <i class="fas fa-calendar-check"></i>
             </div>
@@ -41,7 +72,7 @@ try {
                 <div class="metric-info">
                     <h3>Participantes</h3>
                     <p class="metric-value"><?php echo $totalParticipantes > 0 ? $totalParticipantes : '-'; ?></p>
-                    <span class="metric-delta">Meta: 2,000</span>
+                    <span class="metric-delta">Meta: <?php echo number_format($metaParticipantes, 0, ',', '.'); ?></span>
                 </div>
                 <i class="fas fa-users"></i>
             </div>
