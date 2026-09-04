@@ -20,10 +20,7 @@ class Empleado {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Verdadero si ya existe un empleado con esa cédula
-     * (la tabla tiene una UNIQUE KEY sobre `cedula`).
-     */
+    
     public function existeCedula(int $cedula, ?int $idExcluir = null): bool {
         $sql = "SELECT id FROM empleado WHERE cedula = ?";
         $params = [$cedula];
@@ -50,8 +47,8 @@ class Empleado {
     }
 
     public function eliminarEmpleado(int $id) {
-        // `usuario.id_empleado` referencia esta tabla con ON DELETE SET NULL,
-        // así que borrar un empleado no falla por esa relación.
+        
+        
         $sql = "DELETE FROM empleado WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

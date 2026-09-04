@@ -20,10 +20,7 @@ class Parroquia {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Verdadero si ya existe una parroquia con ese nombre DENTRO DEL
-     * MISMO municipio.
-     */
+    
     public function existeNombre(string $nombre, int $id_municipio, ?int $idExcluir = null): bool {
         $sql = "SELECT id FROM parroquia WHERE LOWER(nombre) = LOWER(?) AND id_municipio = ?";
         $params = [$nombre, $id_municipio];

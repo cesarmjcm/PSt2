@@ -715,20 +715,21 @@ document.addEventListener('DOMContentLoaded', () => {
         setValue('editar-comuna', btn.dataset.comuna);
         setValue('editar-espacio', btn.dataset.espacio);
         setValue('editar-biblioteca', btn.dataset.idBiblioteca);
-        // CORRECCIÓN: faltaba por completo esta línea. El select de "Tipo
-        // de actividad" nunca se precargaba porque nada copiaba el dato al
-        // formulario (además del bug de actividad.php que ni siquiera
-        // devolvía id_tipo_actividad en el listado).
+        setValue('editar-estado', btn.dataset.estado);
+       
+        
+        
+        
         setValue('editar-tipo-actividad', btn.dataset.tipoActividad ?? btn.dataset.idTipoActividad);
         setValue('editar-responsable', btn.dataset.responsable);
         setValue('editar-telefono', btn.dataset.telefono);
 
-        // CORRECCIÓN: antes ningún radio de "tipo_ubicacion" quedaba
-        // marcado al abrir el modal de editar, así que el submit fallaba
-        // la validación (JS y PHP exigen que venga 'biblioteca' o
-        // 'espacio') y los cambios nunca llegaban a guardarse. Se marca
-        // el radio según cuál id venga poblado en el botón, y se refresca
-        // la visibilidad de los campos biblioteca/espacio.
+        
+        
+        
+        
+        
+        
         const tieneEspacio = !!btn.dataset.espacio && btn.dataset.espacio !== '0';
         const radioBiblioteca = document.getElementById('editar-tipo-ubicacion-biblioteca');
         const radioEspacio = document.getElementById('editar-tipo-ubicacion-espacio');
@@ -748,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => abrirEditarActividad(btn));
     });
 
-    // jesus: toggle de la fila de detalle ("Ver más" / "Ver menos") en la tabla de actividades
+    
     document.querySelectorAll('.btn-ver-mas').forEach((btn) => {
         btn.addEventListener('click', () => {
             const fila = document.getElementById(btn.dataset.target);

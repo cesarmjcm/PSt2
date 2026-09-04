@@ -96,6 +96,13 @@ $empleado=$empleadoModel->mostrarEmpleados();
 
                                     <label for="plan-hora">Hora de la actividad</label>
                                     <input type="time" id="plan-hora" name="horaActividad" placeholder="Ej. 09:00">
+
+                                    <label for="plan-estado">Estado de la actividad</label>
+                                    <select id="plan-estado" name="estado">
+                                        <option value="confirmada">Confirmada</option>
+                                        <option value="ejecutada">Ejecutada</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
                                 </fieldset>
 
                                 <fieldset id="campos-completa" class="hidden">

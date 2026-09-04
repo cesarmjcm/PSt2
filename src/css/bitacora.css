@@ -1,13 +1,4 @@
-/* =========================================================
-   BITACORA.CSS
-   Estilos específicos de la página de Bitácora (historial de acciones).
-   Reutiliza la paleta y patrones visuales de main.css:
-   - Header azul #25346b
-   - Acentos verdes #156939 / #65c20e
-   - Tarjetas blancas con borde #99a0be y sombra suave
-   - Tabla con encabezado verde y filas cebra
-   Este archivo se carga DESPUÉS de main.css.
-   ========================================================= */
+
 
 .container__bitacora {
     display: flex;
@@ -36,7 +27,7 @@
     text-align: center;
 }
 
-/* --- Formulario de filtros: mismo lenguaje visual que .formulario-planificacion --- */
+
 .bitacora__filtros {
     width: 100%;
     max-width: 1100px;
@@ -121,7 +112,7 @@
     border-color: #5792ff;
 }
 
-/* --- Tabla: reutiliza el patrón visual de .tabla__container / thead th / tbody nth-child --- */
+
 .tabla__container.bitacora__tabla-wrap {
     width: 100%;
     max-width: 1100px;
@@ -181,7 +172,7 @@
     padding: 24px 18px !important;
 }
 
-/* --- Badges de acción, usando la misma paleta del sitio --- */
+
 .bitacora__badge {
     display: inline-block;
     padding: 4px 12px;
@@ -194,19 +185,19 @@
 }
 
 .bitacora__badge--crear {
-    background-color: #156939; /* verde: acorde a btn-ingresar-planificacion */
+    background-color: #156939; 
 }
 
 .bitacora__badge--editar {
-    background-color: #25346b; /* azul: acorde al header/nav */
+    background-color: #25346b; 
 }
 
 .bitacora__badge--eliminar {
-    background-color: #ff4d4d; /* rojo: mismo tono usado en hover de logout */
+    background-color: #ff4d4d; 
 }
 
 .bitacora__badge--login {
-    background-color: #99a0be; /* gris-azulado neutro */
+    background-color: #99a0be; 
 }
 
 @media (max-width: 900px) {

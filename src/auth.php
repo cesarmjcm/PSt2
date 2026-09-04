@@ -43,7 +43,7 @@ if ($username !== '' && $password !== '') {
             $ok = true;
             $message = 'Autenticación correcta.';
 
-            // --- Registro en bitácora ---
+            
             $conex = Conexion::conectar();
             registrar_bitacora($conex, $_SESSION['user_id'], 'Login', 'Usuario', 'Inicio de sesión: ' . $_SESSION['user']);
         }

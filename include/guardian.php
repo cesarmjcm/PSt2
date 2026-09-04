@@ -57,22 +57,14 @@ if (empty($_SESSION['user_id'])) {
 }
 
 
-/**
- * Devuelve true si el usuario autenticado tiene rol de administrador.
- * El rol debe haberse guardado en $_SESSION['user_rol'] durante el login
- * (ver nota en login.php).
- */
+
 function esAdministrador(): bool
 {
     $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
     return $rol === 'administrador';
 }
 
-/**
- * Corta la ejecución si el usuario autenticado no es administrador.
- * Pensada para usarse al inicio de vistas (redirige) o de controladores
- * AJAX (responde JSON y termina), según $modo.
- */
+
 function guardian_requerirAdmin(string $modo = 'vista'): void
 {
     if (esAdministrador()) {

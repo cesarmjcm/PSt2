@@ -12,11 +12,11 @@ $errorUsuarios = '';
 $esAdmin = esAdministrador();
 $idSesion = intval($_SESSION['user_id'] ?? 0);
 
-// Procesamiento de alta/edición/baja de usuarios (POST tradicional, sin AJAX)
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
     $usuarioAction = $_POST['usuario_action'];
 
-    // Un usuario básico nunca puede crear usuarios ni editar a otros.
+    
     if ($usuarioAction === 'crear' && !$esAdmin) {
         $usuarioAction = null;
         $errorUsuarios = 'No tienes permisos para crear usuarios.';
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
         $telefono = trim($_POST['nuevo_telefono'] ?? '');
         $id_empleado = intval($_POST['nuevo_id_empleado'] ?? 0);
 
-        // El rol solo lo puede fijar un administrador.
+        
         $rol = null;
         if ($esAdmin) {
             $rolEnviado = trim($_POST['nuevo_rol'] ?? '');
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
             if ($clave !== '' && $clave !== $claveConfirmacion) {
                 $errors[] = 'La confirmación de la clave no coincide.';
             } elseif (!$esActualizacion && $clave === '') {
-                // ya cubierto arriba, pero por si acaso
+                
             }
 
             $empleadoSeleccionado = $empleadoModel->obtenerEmpleadoPorId($id_empleado);
@@ -178,8 +178,8 @@ try {
                             <?php endif; ?>
 
                             <?php
-                                // Un usuario básico siempre está editando su propio registro;
-                                // un administrador arranca en modo "crear" por defecto.
+                                
+                                
                                 $miUsuario = $esAdmin ? null : ($usuarios[0] ?? null);
                             ?>
                             <form method="POST" action="" id="form-usuario" style="margin-top:16px;">
@@ -330,7 +330,7 @@ try {
                 });
             }
 
-            // --- Edición de usuarios: reutiliza el mismo formulario de creación ---
+            
             const formTitulo = document.getElementById('usuario-form-titulo');
             const usuarioActionInput = document.getElementById('usuario_action');
             const usuarioIdInput = document.getElementById('usuario_id');
@@ -339,7 +339,7 @@ try {
             const empleadoSelect = document.getElementById('nuevo_id_empleado');
             const claveInput = document.getElementById('nueva_clave');
             const claveConfirmInput = document.getElementById('nueva_clave_confirmacion');
-            const rolSelect = document.getElementById('nuevo_rol'); // solo existe si el panel es de administrador
+            const rolSelect = document.getElementById('nuevo_rol'); 
             const labelClave = document.getElementById('label-clave');
             const btnGuardar = document.getElementById('btn-guardar-usuario');
             const btnCancelar = document.getElementById('btn-cancelar-edicion');

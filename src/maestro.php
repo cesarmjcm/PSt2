@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/../include/guardian.php';
-// Nota: aquí solo se exige sesión iniciada (guardian.php ya lo hace).
-// El maestro "cargo" está restringido a administradores más abajo,
-// una vez que se conoce $tabla.
+
+
+
 
 $maestros = [
     'municipio' => 'Municipios',
@@ -162,13 +162,13 @@ $tablaValida = !empty($tabla) && isset($maestros[$tabla]);
 
 $esAdmin = esAdministrador();
 
-// El maestro "cargo" es exclusivo del administrador; los demás son
-// accesibles para cualquier usuario con sesión iniciada.
+
+
 if ($tablaValida && $tabla === 'cargo' && !$esAdmin) {
     guardian_requerirAdmin('vista');
 }
 
-// El menú lateral tampoco muestra "Cargos" a los usuarios básicos.
+
 $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => true]);
 ?>
 
@@ -217,7 +217,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     <table class="tabla-planificacion" id="tablaMaestro">
                         <thead>
                             <tr id="tablaHead">
-                                <!-- Encabezados generados por JS -->
+                                
                             </tr>
                         </thead>
                         <tbody id="tablaBody">

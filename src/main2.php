@@ -26,7 +26,7 @@ if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
         echo json_encode(['error' => $e->getMessage()]);
     }
 
-    exit; // Importante: cortamos aquí para no renderizar el HTML
+    exit; 
 }
 ?>
 <!DOCTYPE html>

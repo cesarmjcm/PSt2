@@ -32,12 +32,12 @@
     try {
         require_once __DIR__ . '/../modelos/actividad.php';
         $actividadModel = new Actividad();
-        // mostrarActividadesCompletas() trae los nombres reales vía JOIN
-        // (municipio, parroquia, comuna, espacio cultural, nivel de impacto,
-        // responsable). Si una actividad no tiene relación registrada en la
-        // tabla puente correspondiente, ese campo llega NULL y se muestra
-        // como 'N/A' — no significa que falte algo en el código, sino que
-        // todavía no se ha asociado ese dato a la actividad.
+        
+        
+        
+        
+        
+        
         $actividades = $actividadModel->mostrarActividadesCompletas();
         $errorMessage = '';
     } catch (Exception $e) {

@@ -22,10 +22,7 @@ class UsuarioController
         $this->empleadoModel = new Empleado();
     }
 
-    /**
-     * Compara dos teléfonos ignorando espacios, guiones y el signo +,
-     * para que "0412-1234567" y "04121234567" se consideren iguales.
-     */
+    
     private function telefonosCoinciden(string $a, string $b): bool
     {
         $limpiar = static fn(string $v): string => preg_replace('/[^0-9]/', '', $v);
@@ -62,7 +59,7 @@ class UsuarioController
             return;
         }
 
-        // Solo un administrador puede dar de alta nuevos usuarios.
+        
         if (!esAdministrador()) {
             $this->error('No tienes permisos para crear usuarios.');
             return;
@@ -156,14 +153,14 @@ class UsuarioController
         $esAdmin = esAdministrador();
         $idSesion = intval($_SESSION['user_id'] ?? 0);
 
-        // Un usuario que no es administrador solo puede editar su propio registro.
+        
         if (!$esAdmin && $id !== $idSesion) {
             $this->error('No tienes permisos para editar este usuario.');
             return;
         }
 
-        // El rol solo lo puede fijar un administrador; un usuario básico
-        // nunca puede auto-asignarse un rol distinto al que ya tiene.
+        
+        
         $rol = null;
         if ($esAdmin) {
             $rolEnviado = trim($_POST['rol'] ?? '');

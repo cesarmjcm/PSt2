@@ -16,12 +16,12 @@ class ActividadController
     public function __construct()
     {
         $this->model = new Actividad();
-        // CORRECCIÓN: se crea UNA sola conexión a nivel de instancia y se
-        // reutiliza en todos los métodos (antes se creaba una variable local
-        // $conex dentro de cada if, que nunca llegaba al scope global que
-        // esperaba registrar_bitacora() vía `global $conex`, así que la
-        // bitácora fallaba en silencio). Ahora la conexión se pasa explícita
-        // como parámetro a registrar_bitacora().
+        
+        
+        
+        
+        
+        
         $this->conex = Conexion::conectar();
     }
 
@@ -58,10 +58,10 @@ class ActividadController
         $data = $this->collectInput();
         $errors = $this->model->validarActividad($data);
         if (!empty($errors)) {
-            // CORRECCIÓN: antes, si la petición no era AJAX (caso normal del
-            // modal), error() redirigía sin dejar rastro del motivo real del
-            // fallo. Ahora queda registrado en el log de PHP para poder
-            // diagnosticar sin depender de que el navegador lo muestre.
+            
+            
+            
+            
             error_log('[ActividadController::crear] Validación falló: ' . implode(' | ', $errors)
                 . ' | Datos recibidos: ' . json_encode($data, JSON_UNESCAPED_UNICODE));
             $this->error(implode(' ', $errors));
@@ -97,7 +97,12 @@ class ActividadController
             $this->error('Método no permitido.');
             return;
         }
-
+   
+    
+        if (($_SESSION['user_rol'] ?? '') !== 'administrador') {
+            $this->error('No tienes permisos para editar actividades.');
+            return;
+        }
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->error('ID de actividad inválido.');
@@ -164,20 +169,20 @@ class ActividadController
 
     private function listar(): void
     {
-        // mostrarActividadesCompletas() incluye municipio, parroquia, comuna,
-        // espacio cultural, nivel de impacto y responsable vía JOIN.
+        
+        
         $actividades = $this->model->mostrarActividadesCompletas();
         $this->respond(['success' => true, 'data' => $actividades]);
     }
 
     private function collectInput(): array
     {
-        // CORRECCIÓN (bug "funciona en Windows, no en Linux"): se usa
-        // Validador::normalizarTexto() en vez de trim() a secas para cada
-        // campo de texto. trim() no arregla nada si el servidor Linux
-        // recibe la cadena en una codificación distinta de UTF-8 (por
-        // mbstring deshabilitada o locale del sistema), lo cual hacía que
-        // las regex con acentos/ñ de validador.php fallaran solo ahí.
+        
+        
+        
+        
+        
+        
         $fecha = Validador::normalizarTexto($_POST['fecha'] ?? $_POST['fechaActividad'] ?? '');
         $hora = Validador::normalizarTexto($_POST['hora'] ?? $_POST['horaActividad'] ?? '');
         $diaSemana = Validador::normalizarTexto($_POST['dia_semana'] ?? $_POST['diaActividad'] ?? '');
@@ -190,18 +195,24 @@ class ActividadController
         $objetivo = Validador::normalizarTexto($_POST['objetivo'] ?? $_POST['objetivoEnfoque'] ?? '');
         $participantes = intval($_POST['participantes'] ?? $_POST['cantidadParticipantes'] ?? 0);
 
-        // CORRECCIÓN: el formulario tiene un selector "¿Dónde se realiza?"
-        // (Biblioteca / Espacio) que oculta uno de los dos campos según la
-        // opción elegida. Antes se exigía id_biblioteca > 0 siempre, sin
-        // importar la elección, así que crear() fallaba con "Biblioteca
-        // inválida." cada vez que el usuario elegía "Espacio" (id_biblioteca
-        // llegaba vacío). Ahora se captura tipo_ubicacion para que el modelo
-        // valide solo el campo correspondiente.
+        
+        
+        
+        
+        
+        
+        
         $tipoUbicacion = Validador::normalizarTexto($_POST['tipo_ubicacion'] ?? '');
         if ($tipoUbicacion === '') {
-            // Fallback por si el campo no viene explícito: se infiere de
-            // cuál de los dos ids llegó con datos.
+            
+            
             $tipoUbicacion = intval($_POST['id_espacio_cultural'] ?? 0) > 0 ? 'espacio' : 'biblioteca';
+        }
+
+        $estadosValidos = ['confirmada', 'ejecutada', 'cancelada'];
+        $estado = Validador::normalizarTexto($_POST['estado'] ?? '');
+        if (!in_array($estado, $estadosValidos, true)) {
+            $estado = 'confirmada';
         }
 
         return [
@@ -212,6 +223,7 @@ class ActividadController
             'fecha'                => $fecha,
             'hora'                 => $hora,
             'dia_semana'           => $diaSemana,
+            'estado'               => $estado,
             'nivel_impacto'        => Validador::normalizarTexto($_POST['nivel_impacto'] ?? $_POST['nivel__impacto'] ?? ''),
             'tipo_ubicacion'       => $tipoUbicacion,
             'id_biblioteca'        => intval($_POST['id_biblioteca'] ?? 0),

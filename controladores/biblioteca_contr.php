@@ -110,10 +110,10 @@ class BibliotecaController
                 return;
             }
         } catch (PDOException $e) {
-            // CORRECCIÓN: antes cualquier SQLSTATE 23000 (que incluye NOT NULL,
-            // FK inválida, etc., no solo duplicados) se reportaba como "ya
-            // existe", ocultando el error real. Ahora solo se asume duplicado
-            // si el código de error de MySQL es 1062 (Duplicate entry).
+            
+            
+            
+            
             $mysqlErrorCode = $e->errorInfo[1] ?? null;
             if ($mysqlErrorCode === 1062) {
                 $this->error('Ya existe una biblioteca con ese nombre en esta parroquia.');

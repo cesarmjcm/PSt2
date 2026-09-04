@@ -41,16 +41,10 @@ class SolicitudController
         }
     }
 
-    /**
-     * Determina si un valor está "vacío" a efectos de campo obligatorio,
-     * considerando también cadenas compuestas únicamente por espacios en
-     * blanco (espacio normal, tabs, saltos de línea, espacio de no separación
-     * \u{00A0}, etc.), para que no se pueda "engañar" la validación
-     * presionando solo la barra espaciadora.
-     */
+    
     private function esCampoEnBlanco(string $valor): bool
     {
-        // Quita cualquier tipo de espacio en blanco Unicode (incluye NBSP)
+        
         $sinEspacios = preg_replace('/[\s\x{00A0}\x{200B}]+/u', '', $valor);
         return $sinEspacios === null || $sinEspacios === '';
     }
@@ -72,8 +66,8 @@ class SolicitudController
     {
         $errors = [];
 
-        // 1) CAMPOS OBLIGATORIOS: no se pueden dejar en blanco
-        //    (descripcion es el único campo opcional del formulario)
+        
+        
         $camposObligatorios = [
             'id_institucion'  => 'La institución',
             'fecha_solicitud' => 'La fecha de solicitud',
@@ -83,7 +77,7 @@ class SolicitudController
         ];
         foreach ($camposObligatorios as $campo => $etiqueta) {
             $valor = $data[$campo];
-            // Para numéricos, 0 (o vacío convertido a 0 por intval) cuenta como "no enviado"
+            
             $estaVacio = is_string($valor)
                 ? $this->esCampoEnBlanco($valor)
                 : (int) $valor <= 0;
@@ -91,19 +85,19 @@ class SolicitudController
                 $errors[] = "{$etiqueta} no puede estar vacío ni contener solo espacios en blanco.";
             }
         }
-        // participantes admite 0 como valor válido, así que solo se valida que
-        // realmente haya llegado en el POST (no que sea solo espacios en blanco).
+        
+        
         if (!isset($_POST['participantes']) || $this->esCampoEnBlanco((string) $_POST['participantes'])) {
             $errors[] = 'La cantidad de participantes no puede estar vacía ni contener solo espacios en blanco.';
         }
 
-        // Si falta algo obligatorio, no seguimos con las validaciones de
-        // formato/tipo para no duplicar mensajes de error sobre datos vacíos.
+        
+        
         if (!empty($errors)) {
             return $errors;
         }
 
-        // 2) TIPO DE DATO / FORMATO
+        
         if (!Validador::esEnteroPositivo($data['id_institucion'])) {
             $errors[] = 'Institución inválida: debe ser un identificador numérico positivo.';
         }
@@ -126,8 +120,8 @@ class SolicitudController
             $errors[] = 'La descripción de la solicitud no puede ser mayor a 250 caracteres y solo puede contener letras, números y signos básicos.';
         }
 
-        // 3) CARACTERES/CADENAS REPETIDAS SOSPECHOSAS
-        //    (ej: "aaaa", "hola holaholahola", spam/relleno)
+        
+        
         $camposTexto = [
             'lugar'       => 'lugar',
             'responsable' => 'responsable',

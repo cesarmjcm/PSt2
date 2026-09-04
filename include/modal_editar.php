@@ -62,6 +62,13 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
 
                                     <label for="editar-hora">Hora de la actividad</label>
                                     <input type="time" id="editar-hora" name="horaActividad">
+
+                                    <label for="editar-estado">Estado de la actividad</label>
+                                    <select id="editar-estado" name="estado">
+                                        <option value="confirmada">Confirmada</option>
+                                        <option value="ejecutada">Ejecutada</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
                                 </fieldset>
 
                                 <fieldset id="editar-campos-completa">
@@ -182,7 +189,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
 
 <script>
     (function () {
-        // Autocompletar teléfono al elegir responsable
+        
         const selectResponsable = document.getElementById('editar-responsable');
         const inputTelefono = document.getElementById('editar-telefono');
 
@@ -199,7 +206,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             });
         }
 
-        // Alternar biblioteca / espacio
+        
         const radiosUbicacion = document.querySelectorAll('#form-editar-actividad input[name="tipo_ubicacion"]');
         const ubicacionBiblioteca = document.getElementById('editar-ubicacion-biblioteca');
         const ubicacionEspacio = document.getElementById('editar-ubicacion-espacio');
@@ -212,17 +219,17 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
 
         radiosUbicacion.forEach(radio => radio.addEventListener('change', actualizarUbicacion));
 
-        // CORRECCIÓN: se expone actualizarUbicacion() globalmente porque
-        // abrirEditarActividad() (en app.js) es quien realmente precarga el
-        // modal (usa data-* del botón, no precargarFormularioEditar), y
-        // necesita poder marcar el radio correcto y refrescar la
-        // visibilidad de los campos biblioteca/espacio después de
-        // precargar. Sin esto, ningún radio quedaba marcado al editar y el
-        // submit fallaba la validación de "tipo_ubicacion" (JS y PHP),
-        // dando la sensación de que los cambios no se guardaban.
+        
+        
+        
+        
+        
+        
+        
+        
         window.actualizarUbicacionEditar = actualizarUbicacion;
 
-        // Exponer función global para precargar el formulario al abrir el modal
+        
         window.precargarFormularioEditar = function (actividad) {
             document.getElementById('editar-id').value = actividad.id ?? '';
             document.getElementById('editar-dia').value = actividad.dia_semana ?? '';
@@ -230,6 +237,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             document.getElementById('editar-descripcion').value = actividad.descripcion ?? '';
             document.getElementById('editar-fecha').value = actividad.fecha ?? '';
             document.getElementById('editar-hora').value = actividad.horaActividad ?? '';
+            document.getElementById('editar-estado').value = actividad.estado ?? 'confirmada';
             document.getElementById('editar-objetivo').value = actividad.objetivo ?? '';
             document.getElementById('editar-participantes').value = actividad.participantes ?? '';
             document.getElementById('editar-nivel-impacto').value = actividad.nivel_impacto ?? '';
@@ -248,7 +256,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             actualizarUbicacion();
         };
 
-        // Estado inicial (se ajusta al precargar)
+        
         actualizarUbicacion();
     })();
 </script>

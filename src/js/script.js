@@ -1,7 +1,7 @@
 
 let actividadesDesdeBD = []; 
 
-// Controla el estado de la fecha actual del calendario
+
 let fechaActual = new Date();
 let mesActual = fechaActual.getMonth(); 
 let anioActual = fechaActual.getFullYear();
@@ -12,14 +12,14 @@ const meses = [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-    //  Deberia cargar los datos de la base de datos
+    
     cargarActividadesDesdeBD();
 
-    //  oculta y muestra el calendario
+    
     const btnToggle = document.getElementById("btn-toggle-calendario");
     const calendario = document.querySelector(".calendar-container"); 
 
-    // Mostrar el calendario visible desde que carga la página
+    
     calendario.classList.add("mostrar");
     btnToggle.innerText = "Cerrar Calendario";
 
@@ -33,11 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 3. Escuchadores de eventos para los botones de navegacion
+    
     document.getElementById("prev-month").addEventListener("click", () => cambiarMes(-1));
     document.getElementById("next-month").addEventListener("click", () => cambiarMes(1));
 
-    // 4. Eventos para cerrar el Modal de manera segura
+    
     const closeBtn = document.querySelector(".close-btn");
     if (closeBtn) {
         closeBtn.addEventListener("click", cerrarModal);
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Funcion para conectar con el Backend PHP
+
 function cargarActividadesDesdeBD() {
     fetch('main2.php?accion=obtener_actividades')
         .then(respuesta => {
@@ -68,7 +68,7 @@ function cargarActividadesDesdeBD() {
         });
 }
 
-// Funcion que dibuja la cuadricula de dias 
+
 function renderizarCalendario(mes, anio) {
     const contenedorDias = document.getElementById("days-grid");
     const tituloMesAnio = document.getElementById("month-year-title");
@@ -79,13 +79,13 @@ function renderizarCalendario(mes, anio) {
     const primerDiaIndex = new Date(anio, mes, 1).getDay();
     const totalDiasMes = new Date(anio, mes + 1, 0).getDate();
 
-    // esta broma crea las celdas de los dias vacias
+    
     for (let i = 0; i < primerDiaIndex; i++) {
         const celdaVacia = document.createElement("div");
         contenedorDias.appendChild(celdaVacia);
     }
 
-    // crea los dias del mes
+    
     for (let dia = 1; dia <= totalDiasMes; dia++) {
         const celdaDia = document.createElement("div");
         celdaDia.innerText = dia;
@@ -119,7 +119,7 @@ function cambiarMes(direccion) {
     renderizarCalendario(mesActual, anioActual);
 }
 
-// FUNCIONES DEL MODAL, se añadio esta broma porque daba error
+
 function abrirModal(actividades, fecha) {
     const modal = document.getElementById("activity-modal");
     const modalBody = document.getElementById("activity-modal-body");

@@ -30,11 +30,7 @@ class Municipio {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * La tabla `parroquia` no tiene FK declarada hacia `municipio`, así que
-     * el motor no bloquea el DELETE por sí solo. Se verifica a mano para
-     * no dejar parroquias huérfanas.
-     */
+    
     public function tieneParroquiasAsociadas(int $id): bool {
         $sql = "SELECT id FROM parroquia WHERE id_municipio = ? LIMIT 1";
         $stmt = Conexion::conectar()->prepare($sql);

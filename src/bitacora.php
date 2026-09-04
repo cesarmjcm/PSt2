@@ -1,7 +1,7 @@
 <?php
-// BITACORA.PHP - Página de historial de acciones (solo administrador)
-// Este archivo es autosuficiente: valida sesión, consulta datos y renderiza la vista.
-// Se puede abrir directamente (ej: localhost/PSt2-main/src/bitacora.php).
+
+
+
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -10,17 +10,17 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 
-$conex = Conexion::conectar(); // Usa tu clase Conexion existente
+$conex = Conexion::conectar(); 
 
-// --- Control de acceso: solo administrador puede ver la bitácora ---
-// Si tu guardian.php ya expone una función centralizada tipo requerirRol('administrador'),
-// reemplaza este bloque por esa llamada (y agrega el require_once correspondiente).
+
+
+
 if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'administrador') {
     header('Location: main2.php');
     exit;
 }
 
-// --- Filtros desde la URL (GET) ---
+
 $filtros = [
     'id_usu'      => $_GET['id_usu']      ?? '',
     'accion'      => $_GET['accion']      ?? '',

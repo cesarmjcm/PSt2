@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modalMunicipio');
-    if (!modal) return; // Esta página no es el maestro de municipios
+    if (!modal) return; 
 
     const modalTitulo = document.getElementById('modalMunicipioTitulo');
     const form = document.getElementById('formMunicipio');
@@ -31,13 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
         errorBox.style.display = 'block';
     }
 
-    // Abrir modal en modo "agregar"
+    
     const btnAgregar = document.getElementById('btnAgregarMunicipio');
     if (btnAgregar) {
         btnAgregar.addEventListener('click', () => abrirModal('agregar'));
     }
 
-    // Cerrar modal: botón X, botón cancelar, click fuera de la caja, tecla Escape
+    
     document.getElementById('btnCerrarModalMunicipio').addEventListener('click', cerrarModal);
     document.getElementById('btnCancelarModalMunicipio').addEventListener('click', cerrarModal);
     modal.addEventListener('click', (e) => {
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape' && modal.classList.contains('is-open')) cerrarModal();
     });
 
-    // Abrir modal en modo "editar" tomando los datos de la fila
+    
     if (tbody) {
         tbody.addEventListener('click', (e) => {
             const filaEditar = e.target.closest('.btn-editar-municipio');
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Guardar (crear o actualizar) vía fetch
+    
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         errorBox.style.display = 'none';
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tbody.appendChild(tr);
             });
         } catch (err) {
-            // Si falla la recarga silenciosa, no interrumpimos al usuario
+            
         }
     }
 

@@ -116,7 +116,7 @@ class Validador
             return false;
         }
         if ($len === 0) {
-            return true; // campo opcional vacío
+            return true; 
         }
         return (bool) preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 \'\-\.,()#]+$/u', $valor);
     }
@@ -133,10 +133,7 @@ class Validador
         return (bool) preg_match('/^[0-9\-\+ ]{7,' . $max . '}$/', $valor);
     }
 
-    /**
-     * Cédula: solo números, entre $min y $max dígitos (por defecto 6-8,
-     * que es el rango real de cédulas venezolanas).
-     */
+    
     public static function esCedulaValida(string $valor, int $min = 6, int $max = 8): bool
     {
         $valor = trim($valor);
@@ -147,7 +144,7 @@ class Validador
         return (bool) preg_match('/^[0-9]+$/', $valor);
     }
 
-    /** Entero positivo (id de FK, capacidad, participantes, etc.) */
+    
     public static function esEnteroPositivo($valor, int $max = 2147483647): bool
     {
         if (!is_numeric($valor)) {
@@ -191,17 +188,13 @@ class Validador
         return $len >= $min && $len <= $max;
     }
 
-    /**
-     * Correo electrónico. Campo opcional en varios maestros (biblioteca),
-     * por eso una cadena vacía se considera válida; si viene con contenido
-     * sí debe tener formato de correo.
-     */
+    
     public static function esCorreoValido(string $valor, int $max = 30): bool
     {
         $valor = self::normalizarTexto($valor);
         $len = self::longitud($valor);
         if ($len === 0) {
-            return true; // campo opcional vacío
+            return true; 
         }
         if ($len > $max) {
             return false;
@@ -218,7 +211,7 @@ class Validador
             return false;
         }
         if ($len === 0) {
-            return true; // campo opcional vacío
+            return true; 
         }
         return (bool) preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 @\.\/:\-_,()]+$/u', $valor);
     }
@@ -231,26 +224,26 @@ class Validador
             return false;
         }
         if ($len === 0) {
-            return true; // campo opcional vacío
+            return true; 
         }
 
-        // Primero, límite general de caracteres permitidos (evita símbolos
-        // raros/peligrosos aunque calcen con alguno de los formatos).
+        
+        
         if (!preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 @\.\/:\-_,\+()]+$/u', $valor)) {
             return false;
         }
 
-        // Teléfono: dígitos, espacios y guiones, con + opcional al inicio,
-        // entre 7 y 15 dígitos en total.
+        
+        
         $esTelefono = (bool) preg_match('/^\+?[0-9][0-9\-\s]{6,14}$/', $valor);
 
-        // Correo electrónico válido.
+        
         $esCorreo = filter_var($valor, FILTER_VALIDATE_EMAIL) !== false;
 
-        // Usuario de red social: empieza con @ seguido de letras/números/./_ (2 a 30 caracteres).
+        
         $esRedSocial = (bool) preg_match('/^@[A-Za-z0-9_\.]{2,30}$/', $valor);
 
-        // Enlace web.
+        
         $esEnlace = (bool) preg_match('/^(https?:\/\/|www\.)[^\s]+$/i', $valor);
 
         return $esTelefono || $esCorreo || $esRedSocial || $esEnlace;

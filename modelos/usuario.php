@@ -102,10 +102,7 @@ ORDER BY u.nombre";
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Verdadero si el empleado indicado ya tiene un usuario creado.
-     * $idExcluir permite ignorar el propio usuario cuando se está editando.
-     */
+    
     public function existeUsuarioPorEmpleado(int $id_empleado, ?int $idExcluir = null): bool
     {
         $sql = "SELECT id FROM usuario WHERE id_empleado = ?";
@@ -129,22 +126,15 @@ ORDER BY u.nombre";
             return $stmt->execute([$nombre, $hash, $telefono, $id_empleado, $rol]);
         } catch (PDOException $e) {
             if ($e->getCode() === '23000') {
-                // Nombre duplicado o empleado ya con usuario (constraint UNIQUE).
+                
                 return false;
             }
             throw $e;
         }
     }
 
-    /**
-     * Actualiza nombre, teléfono y empleado. La clave solo se cambia si se
-     * envía un valor no vacío; si no, se conserva la clave actual.
-     */
-    /**
-     * $rol solo se actualiza cuando se pasa explícitamente (lo hace el
-     * controlador solo si quien edita es administrador). Si es null, el
-     * rol actual del usuario no se toca.
-     */
+    
+    
     public function actualizarUsuario(int $id, string $nombre, string $telefono, int $id_empleado, ?string $clave = null, ?string $rol = null)
     {
         try {

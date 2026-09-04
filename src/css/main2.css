@@ -326,7 +326,7 @@ nav {
     white-space: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    scrollbar-width: thin; /* Firefox */
+    scrollbar-width: thin; 
 }
 
 .form-aviso::-webkit-scrollbar {
@@ -757,7 +757,7 @@ fieldset{
     transform: translateY(-1px);
 }
 
-/* dia con la actividad */
+
 .days-grid div.has-activity {
     background-color:#0000FF ;
     color: white;

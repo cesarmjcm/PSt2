@@ -144,7 +144,7 @@ header nav {
     display: flex;
     align-items: center;
     gap: 15px;
-    flex: 1; /* Ocupa el espacio disponible */
+    flex: 1; 
 }
 
 .nav__links a {
@@ -167,7 +167,7 @@ header nav {
     outline: none;
 }
 .nav__user-icon {
-    margin-left: auto; /* EMPUJA EL ICONO AL FINAL DE LA DERECHA */
+    margin-left: auto; 
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -175,16 +175,16 @@ header nav {
 
 .nav__user-icon i {
     color: white;
-    font-size: 30px; /* TAMAÑO GRANDE EN PÍXELES PARA QUE NO FALLE */
+    font-size: 30px; 
     transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .nav__user-icon:hover i {
-    color: #ff4d4d; /* Color rojizo para cerrar sesión */
-    transform: scale(1.1); /* Efecto de crecimiento */
+    color: #ff4d4d; 
+    transform: scale(1.1); 
 }
 
-/* Estilos menú de usuario */
+
 .nav__user {
     position: relative;
     margin-left: auto;
@@ -225,7 +225,7 @@ header nav {
 .nav__user-menu a:last-child { border-bottom: none; }
 .nav__user-menu a:hover { background: #f4f6ff; }
 
-/* Oculto por defecto via atributo hidden */
+
 .nav__user-menu[hidden] { display: none; }
 .dashboard-container {
     padding: 20px 40px;
@@ -450,9 +450,7 @@ tbody tr:nth-child(even){
 	min-width: 0;
 }
 
-/* Dentro de un modal, .container__planificacion no debe reservar
-   90vh de alto ni un margen superior de 60px: eso es lo que dejaba
-   el hueco en blanco encima del formulario de "Editar Actividad". */
+
 .modal .container__planificacion,
 .maestro-modal .container__planificacion{
 	min-height: 0;
@@ -490,11 +488,7 @@ tbody tr:nth-child(even){
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 12px;
-	/* CORRECCIÓN: sin esto, Grid usa "stretch" por defecto y fuerza a
-	   ambas .planificacion-group a la misma altura. Cuando el JS revela
-	   los campos de "Actividad completa" (más contenido que antes), esa
-	   altura ya estaba fijada y el contenido nuevo se desbordaba fuera
-	   del borde/fondo redondeado de la tarjeta en vez de agrandarla. */
+	
 	align-items: start;
 }
 
@@ -584,16 +578,7 @@ fieldset{
 	margin-top: 5px;
 }
 
-/* CORRECCIÓN: los <legend> (ej. "Responsable", "¿Dónde se realiza?",
-   "Detalles de actividad completa") no son <label>, así que no heredaban
-   el margin-bottom ni el estilo de la regla ".formulario-planificacion
-   label". Sin ese margen, el legend quedaba pegado al campo siguiente y
-   se veía encimado/roto. También se resetea el borde por defecto del
-   navegador en los fieldset anidados (Parroquia, Comuna, "¿Dónde se
-   realiza?", "Tipo de actividad", "Responsable"), que no estaban
-   cubiertos por ".planificacion-group > fieldset" al no ser hijos
-   directos, y por eso se veían inconsistentes entre sí. Los estilos
-   inline (ej. el legend de "Tipo de planificación") siguen ganando. */
+
 .formulario-planificacion fieldset:not(.planificacion-group){
 	border: none;
 	margin: 0;
@@ -610,9 +595,7 @@ fieldset{
 	padding: 0;
 }
 
-/* Clase usada por el JS de modal.php / modal_editar.php para
-   mostrar/ocultar campos (simple vs completa, biblioteca vs espacio, etc.).
-   Faltaba en main.css: sin esto los toggles no ocultan nada. */
+
 .hidden{
 	display: none !important;
 }
@@ -743,7 +726,7 @@ fieldset{
 
 
 .btn-editar-tabla:hover {
-    background-color: #65c20e; /* Cambia a verde al pasar el mouse */
+    background-color: #65c20e; 
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
@@ -756,7 +739,7 @@ fieldset{
 	grid-template-columns: 1fr;
 }
 
-/* Estilos del modal de edición (traídos de main2.css) */
+
 .modal {
     display: none;
     position: fixed;
@@ -774,12 +757,7 @@ fieldset{
 .modal-content-wrapper {
     display: flex;
     justify-content: center;
-    /* CORRECCIÓN: "stretch" (junto con max-height + overflow-y:auto de
-       este mismo contenedor) hacía que .formulario-planificacion quedara
-       fijo a la altura "disponible" del wrapper en vez de crecer con su
-       propio contenido. Cuando el JS revelaba los campos de "Actividad
-       completa" (más alto que el cálculo inicial), el contenido se
-       desbordaba visualmente por fuera del borde/fondo de la tarjeta. */
+    
     align-items: flex-start;
     width: fit-content;
     max-width: min(760px, 100%);
@@ -807,8 +785,8 @@ fieldset{
 	}
 }
 
-/* jesus: estilos del botón "Ver más" y de la fila de detalle de la actividad */
-/* jesus: agrupa ver-más, editar y eliminar en fila con espacio entre ellos para que no se amontonen */
+
+
 .acciones-grupo {
 	display: flex;
 	align-items: center;

@@ -20,10 +20,7 @@ class Comuna {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Verdadero si ya existe una comuna con ese nombre DENTRO DE LA
-     * MISMA parroquia.
-     */
+    
     public function existeNombre(string $nombre, int $id_parroquia, ?int $idExcluir = null): bool {
         $sql = "SELECT id FROM comuna WHERE LOWER(nombre) = LOWER(?) AND id_parroquia = ?";
         $params = [$nombre, $id_parroquia];
@@ -50,8 +47,8 @@ class Comuna {
     }
 
     public function eliminarComuna(int $id) {
-        // `actividad_comuna` referencia esta tabla con ON DELETE CASCADE,
-        // por eso no hace falta validar dependencias antes de borrar.
+        
+        
         $sql = "DELETE FROM comuna WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

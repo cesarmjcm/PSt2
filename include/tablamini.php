@@ -9,8 +9,8 @@ $busqueda = trim((string)($_GET['q'] ?? ''));
 try {
     require_once __DIR__ . '/../modelos/actividad.php';
     $actividadModel = new Actividad();
-    // mostrarActividadesCompletas() trae además municipio, parroquia, comuna,
-    // espacio cultural, nivel de impacto y responsable vía JOIN.
+    
+    
     $actividades = $actividadModel->mostrarActividadesCompletas();
     if ($busqueda !== '') {
         $actividades = array_values(array_filter($actividades, static function (array $actividad) use ($busqueda): bool {
@@ -36,6 +36,29 @@ try {
 }
 ?>
 
+<style>
+    .badge-estado {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        white-space: nowrap;
+    }
+    .badge-estado--confirmada {
+        background: #e0edff;
+        color: #1d4ed8;
+    }
+    .badge-estado--ejecutada {
+        background: #dcfce7;
+        color: #15803d;
+    }
+    .badge-estado--cancelada {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+</style>
 <div class="tabla__container">
                 <div class="tabla__header">
                     <h2 class="section-title">Cronograma Semanal de Actividades</h2>
@@ -60,7 +83,7 @@ try {
                         <tr>
                             <th class="col-index">N°</th>
                             <th class="col-actividad">Actividad</th>
-                            <th class="col-descripcion">Descripción</th>
+                            <th class="col-estado">Estado</th>
                             <th class="col-fecha">Fecha</th>
                             <th class="col-dia">Día Semana</th>
                             <th class="col-acciones">Acciones</th>
@@ -82,7 +105,20 @@ try {
 
                                     <td><strong><?php echo htmlspecialchars($actividad['nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></td>
 
-                                    <td><?php echo htmlspecialchars($actividad['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td>
+                                        <?php
+                                            $estadoActividad = strtolower(trim((string)($actividad['estado'] ?? 'confirmada')));
+                                            $estadoLabels = [
+                                                'confirmada' => 'Confirmada',
+                                                'ejecutada'  => 'Ejecutada',
+                                                'cancelada'  => 'Cancelada',
+                                            ];
+                                            $estadoLabel = $estadoLabels[$estadoActividad] ?? ucfirst($estadoActividad);
+                                        ?>
+                                        <span class="badge-estado badge-estado--<?php echo htmlspecialchars($estadoActividad, ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?php echo htmlspecialchars($estadoLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                        </span>
+                                    </td>
 
                                     <td>
                                         <?php
@@ -100,7 +136,7 @@ try {
                                     <td><?php echo htmlspecialchars($actividad['dia_semana'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 
                                     <td class="col-acciones">
-                                        <!-- jesus: los 3 botones ahora van agrupados en un contenedor con espacio entre ellos -->
+                                        
                                         <div class="acciones-grupo">
                                             <button type="button"
                                                     class="btn-icon btn-ver-mas"
@@ -109,7 +145,7 @@ try {
                                                     data-target="detalle-actividad-<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 <i class="fas fa-chevron-down"></i>
                                             </button>
-
+                                            <?php if (($_SESSION['user_rol'] ?? '') === 'administrador'): ?>
                                         <button type="button"
                                                 class="btn-icon btn-edit-actividad"
                                                 title="Editar"
@@ -121,6 +157,7 @@ try {
                                                 data-fecha="<?php echo htmlspecialchars($actividad['fecha'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-hora="<?php echo htmlspecialchars(substr((string)($actividad['hora'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-dia="<?php echo htmlspecialchars($actividad['dia_semana'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-estado="<?php echo htmlspecialchars($actividad['estado'] ?? 'confirmada', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-nivel-impacto="<?php echo htmlspecialchars($actividad['nivel_impacto'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-municipio-id="<?php echo htmlspecialchars($actividad['municipio_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-parroquia="<?php echo htmlspecialchars($actividad['parroquia'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
@@ -132,6 +169,7 @@ try {
                                                 data-telefono="<?php echo htmlspecialchars($actividad['telefono_responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                             <i class="fas fa-pen"></i>
                                         </button>
+                                        <?php endif; ?>
 
                                         <form action="../controladores/actividad_contr.php" method="POST" class="form-eliminar-actividad" style="display:inline;">
                                             <input type="hidden" name="action" value="eliminar">
@@ -144,12 +182,14 @@ try {
                                     </td>
                                 </tr>
 
-                                <!-- jesus: fila de detalle con los datos que no caben en la tabla principal, oculta por defecto -->
+                                
                                 <tr class="fila-detalle"
                                     id="detalle-actividad-<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>"
                                     style="display:none;">
                                     <td colspan="6">
                                         <div class="detalle-actividad">
+                                            <p><strong>Descripción:</strong> <?php echo htmlspecialchars($actividad['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p><strong>Estado:</strong> <?php echo htmlspecialchars($estadoLabel, ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Fecha:</strong> <?php echo htmlspecialchars($fechaFmt, ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Hora:</strong> <?php echo htmlspecialchars(substr((string)($actividad['hora'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Objetivo:</strong> <?php echo htmlspecialchars($actividad['objetivo'] ?? 'No definido', ENT_QUOTES, 'UTF-8'); ?></p>

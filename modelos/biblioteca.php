@@ -28,10 +28,7 @@ public function mostrarBibliotecas() {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Verdadero si ya existe una biblioteca con ese nombre DENTRO DE LA
-     * MISMA parroquia.
-     */
+    
     public function existeNombre(string $nombre, int $id_parroquia, ?int $idExcluir = null): bool {
         $sql = "SELECT id FROM biblioteca WHERE LOWER(nombre) = LOWER(?) AND id_parroquia = ?";
         $params = [$nombre, $id_parroquia];
