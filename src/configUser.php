@@ -138,7 +138,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración de usuario</title>
     <link rel="stylesheet" href="./css/main.css">
-    <link rel="stylesheet" href="./css/configuracion.css">
+    <link rel="stylesheet" href="./css/configuracion.css?v=4">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
 <body>
@@ -249,8 +249,8 @@ try {
                             <div class="config-note" style="margin-top:24px;">
                                 <p>Listado de usuarios registrados en la base de datos.</p>
                             </div>
-                            <div class="tabla__container" style="margin-top:30px;">
-                                <table class="tabla-planificacion" style="min-width:0; margin-top:10px;">
+                            <div class="tabla__container tabla-usuarios-wrap" style="margin-top:30px;">
+                                <table class="tabla-planificacion tabla-usuarios">
                                     <thead>
                                         <tr>
                                             <th>ID</th>

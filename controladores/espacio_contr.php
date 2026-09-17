@@ -82,7 +82,7 @@ class EspacioController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Espacio cultural', 'Espacio cultural registrado: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Espacio cultural', 'Espacio cultural registrado: ' . $nombre);
                 }
                 $this->success('Espacio cultural creado correctamente.');
                 return;
@@ -141,7 +141,7 @@ class EspacioController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Espacio cultural', "Espacio cultural #$id actualizado: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Espacio cultural', "Espacio cultural #$id actualizado: " . $nombre);
                 }
                 $this->success('Espacio cultural actualizado correctamente.');
                 return;
@@ -175,7 +175,7 @@ class EspacioController
         if ($deleted) {
             if (!empty($_SESSION['user_id'])) {
                 $conex = Conexion::conectar();
-                registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Espacio cultural', "Espacio cultural #$id eliminado");
+                registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Espacio cultural', "Espacio cultural #$id eliminado");
             }
             $this->success('Espacio cultural eliminado correctamente.');
             return;

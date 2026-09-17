@@ -104,7 +104,7 @@ class BibliotecaController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Biblioteca', 'Biblioteca registrada: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Biblioteca', 'Biblioteca registrada: ' . $nombre);
                 }
                 $this->success('Biblioteca creada correctamente.');
                 return;
@@ -189,7 +189,7 @@ $direccion = trim($_POST['direccion'] ?? '');
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Biblioteca', "Biblioteca #$id actualizada: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Biblioteca', "Biblioteca #$id actualizada: " . $nombre);
                 }
                 $this->success('Biblioteca actualizada correctamente.');
                 return;
@@ -226,7 +226,7 @@ $direccion = trim($_POST['direccion'] ?? '');
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Biblioteca', "Biblioteca #$id eliminada");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Biblioteca', "Biblioteca #$id eliminada");
                 }
                 $this->success('Biblioteca eliminada correctamente.');
                 return;

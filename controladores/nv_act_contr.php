@@ -67,7 +67,7 @@ class NvActController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Nivel de impacto', 'Nivel de impacto registrado: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Nivel de impacto', 'Nivel de impacto registrado: ' . $nombre);
                 }
                 $this->success('Nivel de impacto creado correctamente.');
                 return;
@@ -111,7 +111,7 @@ class NvActController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Nivel de impacto', "Nivel de impacto #$id actualizado: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Nivel de impacto', "Nivel de impacto #$id actualizado: " . $nombre);
                 }
                 $this->success('Nivel de impacto actualizado correctamente.');
                 return;
@@ -146,7 +146,7 @@ class NvActController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Nivel de impacto', "Nivel de impacto #$id eliminado");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Nivel de impacto', "Nivel de impacto #$id eliminado");
                 }
                 $this->success('Nivel de impacto eliminado correctamente.');
                 return;

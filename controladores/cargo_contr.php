@@ -80,7 +80,7 @@ class CargoController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Cargo', 'Cargo registrado: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Cargo', 'Cargo registrado: ' . $nombre);
                 }
                 $this->success('Cargo creado correctamente.');
                 return;
@@ -137,7 +137,7 @@ class CargoController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Cargo', "Cargo #$id actualizado: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Cargo', "Cargo #$id actualizado: " . $nombre);
                 }
                 $this->success('Cargo actualizado correctamente.');
                 return;
@@ -172,7 +172,7 @@ class CargoController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Cargo', "Cargo #$id eliminado");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Cargo', "Cargo #$id eliminado");
                 }
                 $this->success('Cargo eliminado correctamente.');
                 return;

@@ -58,7 +58,7 @@ class RangoActController
         if ($created) {
             if (!empty($_SESSION['user_id'])) {
                 $conex = Conexion::conectar();
-                registrar_bitacora($_SESSION['user_id'], 'Crear', 'Rango de actividad', 'Rango de actividad registrado: ' . $nombre);
+                registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Rango de actividad', 'Rango de actividad registrado: ' . $nombre);
             }
             $this->success('Rango de actividad creado correctamente.');
             return;
@@ -86,7 +86,7 @@ class RangoActController
         if ($updated) {
             if (!empty($_SESSION['user_id'])) {
                 $conex = Conexion::conectar();
-                registrar_bitacora($_SESSION['user_id'], 'Editar', 'Rango de actividad', "Rango de actividad #$id actualizado: " . $nombre);
+                registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Rango de actividad', "Rango de actividad #$id actualizado: " . $nombre);
             }
             $this->success('Rango de actividad actualizado correctamente.');
             return;
@@ -112,7 +112,7 @@ class RangoActController
         if ($deleted) {
             if (!empty($_SESSION['user_id'])) {
                 $conex = Conexion::conectar();
-                registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Rango de actividad', "Rango de actividad #$id eliminado");
+                registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Rango de actividad', "Rango de actividad #$id eliminado");
             }
             $this->success('Rango de actividad eliminado correctamente.');
             return;

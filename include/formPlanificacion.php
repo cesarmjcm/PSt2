@@ -7,7 +7,7 @@
 				</div>
 				<div class="container__planificacion">
 					
-						<form id="form-planificacion" action="../controladores/actividad_contr.php?action=crear" method="post" onsubmit="return validacionesformulario(this)">
+						<form id="form-planificacion" action="../controladores/actividad_contr.php?action=crear" method="post" onsubmit="return validacionesformulario(this)" autocomplete="off">
 						<input type="hidden" name="id" id="actividad-id" value="">
 						<button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
 						

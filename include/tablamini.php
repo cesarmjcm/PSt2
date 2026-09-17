@@ -170,14 +170,18 @@ try {
                                             <i class="fas fa-pen"></i>
                                         </button>
                                         <?php endif; ?>
-
+                                                <?php if (($_SESSION['user_rol'] ?? '') === 'administrador'): ?>
                                         <form action="../controladores/actividad_contr.php" method="POST" class="form-eliminar-actividad" style="display:inline;">
                                             <input type="hidden" name="action" value="eliminar">
+                                           
+                                            
                                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>">
                                             <button type="submit" class="btn-icon btn-delete" title="Eliminar">
                                                 <i class="fas fa-trash"></i>
                                             </button>
+                                    
                                         </form>
+                                        <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>

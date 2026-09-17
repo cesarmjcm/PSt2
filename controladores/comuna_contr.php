@@ -72,7 +72,7 @@ class ComunaController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Comuna', 'Comuna registrada: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Comuna', 'Comuna registrada: ' . $nombre);
                 }
                 $this->success('Comuna creada correctamente.');
                 return;
@@ -117,7 +117,7 @@ class ComunaController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Comuna', "Comuna #$id actualizada: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Comuna', "Comuna #$id actualizada: " . $nombre);
                 }
                 $this->success('Comuna actualizada correctamente.');
                 return;
@@ -152,7 +152,7 @@ class ComunaController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Comuna', "Comuna #$id eliminada");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Comuna', "Comuna #$id eliminada");
                 }
                 $this->success('Comuna eliminada correctamente.');
                 return;

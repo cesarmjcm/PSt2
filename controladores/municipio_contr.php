@@ -67,7 +67,7 @@ class MunicipioController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Municipio', 'Municipio registrado: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Municipio', 'Municipio registrado: ' . $nombre);
                 }
                 $this->success('Municipio creado correctamente.');
                 return;
@@ -111,7 +111,7 @@ class MunicipioController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Municipio', "Municipio #$id actualizado: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Municipio', "Municipio #$id actualizado: " . $nombre);
                 }
                 $this->success('Municipio actualizado correctamente.');
                 return;
@@ -151,7 +151,7 @@ class MunicipioController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Municipio', "Municipio #$id eliminado");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Municipio', "Municipio #$id eliminado");
                 }
                 $this->success('Municipio eliminado correctamente.');
                 return;

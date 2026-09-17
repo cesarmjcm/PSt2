@@ -43,6 +43,7 @@ $registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, 
     <title>Bitácora del sistema - Red de Bibliotecas</title>
     <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./css/bitacora.css">
+    <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>

@@ -186,6 +186,75 @@
 .tabla-container{
     margin-top: 10px;
 }
+
+.tabla-usuarios-wrap {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+
+.tabla-usuarios {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 0.86rem;
+}
+
+.tabla-usuarios th,
+.tabla-usuarios td {
+    padding: 10px 7px;
+    vertical-align: middle;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    white-space: normal;
+}
+
+.tabla-usuarios th {
+    text-align: left;
+}
+
+.tabla-usuarios th:first-child,
+.tabla-usuarios td:first-child {
+    width: 8%;
+}
+
+.tabla-usuarios th:nth-child(2),
+.tabla-usuarios td:nth-child(2) {
+    width: 16%;
+}
+
+.tabla-usuarios th:nth-child(3),
+.tabla-usuarios td:nth-child(3) {
+    width: 19%;
+}
+
+.tabla-usuarios th:nth-child(4),
+.tabla-usuarios td:nth-child(4) {
+    width: 22%;
+}
+
+.tabla-usuarios th:nth-child(5),
+.tabla-usuarios td:nth-child(5) {
+    width: 13%;
+}
+
+.tabla-usuarios th:last-child,
+.tabla-usuarios td:last-child {
+    width: 22%;
+}
+
+.tabla-usuarios td:last-child form {
+    display: block !important;
+    margin: 6px 0 0;
+}
+
+.tabla-usuarios td:last-child .btn-secondary {
+    width: 100%;
+    padding: 8px 6px;
+    font-size: 0.78rem;
+    white-space: normal;
+}
 .config-actions {
     display: flex;
     justify-content: flex-end;

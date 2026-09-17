@@ -72,7 +72,7 @@ class ParroquiaController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Parroquia', 'Parroquia registrada: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Parroquia', 'Parroquia registrada: ' . $nombre);
                 }
                 $this->success('Parroquia creada correctamente.');
                 return;
@@ -117,7 +117,7 @@ class ParroquiaController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Parroquia', "Parroquia #$id actualizada: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Parroquia', "Parroquia #$id actualizada: " . $nombre);
                 }
                 $this->success('Parroquia actualizada correctamente.');
                 return;
@@ -152,7 +152,7 @@ class ParroquiaController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Parroquia', "Parroquia #$id eliminada");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Parroquia', "Parroquia #$id eliminada");
                 }
                 $this->success('Parroquia eliminada correctamente.');
                 return;

@@ -11,6 +11,7 @@
 
 
 function registrar_bitacora($conex, $id_usu, $accion, $descripcion, $detalle) {
+
     if (!$conex) {
         error_log("Error: Conexión de BD no disponible para registrar bitácora.");
         return false;

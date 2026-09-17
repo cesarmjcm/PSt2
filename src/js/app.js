@@ -108,6 +108,7 @@ function validacionesformulario(form) {
     // según el formulario recibido.
     const ids = esEditar ? {
         nombre: 'editar-nombre',
+        tipoActividad: 'editar-tipo-actividad',
         descripcion: 'editar-descripcion',
         fecha: 'editar-fecha',
         dia: 'editar-dia',
@@ -124,6 +125,7 @@ function validacionesformulario(form) {
         nivelImpacto: 'editar-nivel-impacto',
     } : {
         nombre: 'plan-tipo',
+        tipoActividad: 'plan-tipo-actividad',
         descripcion: 'plan-descripcion',
         fecha: 'plan-fecha',
         dia: 'plan-dia',
@@ -163,6 +165,12 @@ function validacionesformulario(form) {
     }
     if (esRepetitivo(nombre)) {
         mostrarAvisoFormulario('El nombre de la actividad no puede ser un mismo carácter repetido ni una cadena repetida (ej. "aaa", "abab").', planTipo, avisoId);
+        return false;
+    }
+
+    const planTipoActividad = document.getElementById(ids.tipoActividad);
+    if (!planTipoActividad || planTipoActividad.value === '') {
+        mostrarAvisoFormulario('Selecciona el tipo de actividad.', planTipoActividad, avisoId);
         return false;
     }
 
@@ -589,12 +597,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (planTipo) {
             planTipo.value = solicitud.lugar || solicitud.descripcion || '';
+            planTipo.dispatchEvent(new Event('input', { bubbles: true }));
         }
         if (planDescripcion) {
             planDescripcion.value = solicitud.descripcion || '';
         }
         if (planFecha) {
             planFecha.value = solicitud.fecha_solicitud || '';
+            planFecha.dispatchEvent(new Event('change', { bubbles: true }));
         }
         if (planHora) {
             planHora.value = solicitud.hora_solicitud || '';

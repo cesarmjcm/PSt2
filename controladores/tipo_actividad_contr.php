@@ -12,10 +12,12 @@ $conex = Conexion::conectar();
 class TipoActividadController
 {
     private $model;
+    private $conex;
 
     public function __construct()
     {
         $this->model = new TipoActividad();
+        $this->conex = Conexion::conectar();
     }
 
     public function dispatch(): void
@@ -79,8 +81,8 @@ class TipoActividadController
             $created = $this->model->crearTipo($nombre, $descripcion);
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
-                    $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: ' . $nombre);
+                    
+                    registrar_bitacora($this->conex, $_SESSION['user_id'], 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: ' . $nombre);
                 }
                 $this->success('Tipo de actividad creado correctamente.');
                 return;
@@ -136,8 +138,8 @@ class TipoActividadController
             $updated = $this->model->actualizarTipo($id, $nombre, $descripcion);
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
-                    $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Tipo de actividad', "Tipo de actividad #$id actualizado: " . $nombre);
+                    
+                    registrar_bitacora($this->conex, $_SESSION['user_id'], 'Editar', 'Tipo de actividad', "Tipo de actividad #$id actualizado: " . $nombre);
                 }
                 $this->success('Tipo de actividad actualizado correctamente.');
                 return;
@@ -171,8 +173,7 @@ class TipoActividadController
             $deleted = $this->model->eliminarTipo($id);
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
-                    $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Tipo de actividad', "Tipo de actividad #$id eliminado");
+                    registrar_bitacora($this->conex, $_SESSION['user_id'], 'Eliminar', 'Tipo de actividad', "Tipo de actividad #$id eliminado");
                 }
                 $this->success('Tipo de actividad eliminado correctamente.');
                 return;

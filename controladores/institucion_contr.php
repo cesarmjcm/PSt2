@@ -73,7 +73,7 @@ class InstitucionController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Crear', 'Institución', 'Institución registrada: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Institución', 'Institución registrada: ' . $nombre);
                 }
                 $this->success('Institución creada correctamente.');
                 return;
@@ -123,7 +123,7 @@ class InstitucionController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Editar', 'Institución', "Institución #$id actualizada: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Institución', "Institución #$id actualizada: " . $nombre);
                 }
                 $this->success('Institución actualizada correctamente.');
                 return;
@@ -163,7 +163,7 @@ class InstitucionController
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($_SESSION['user_id'], 'Eliminar', 'Institución', "Institución #$id eliminada");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Institución', "Institución #$id eliminada");
                 }
                 $this->success('Institución eliminada correctamente.');
                 return;
