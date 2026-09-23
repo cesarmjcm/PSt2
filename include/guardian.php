@@ -22,7 +22,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 
 if (!defined('GUARDIAN_LOGIN_PATH')) {
-    define('GUARDIAN_LOGIN_PATH', 'login.php');
+    $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    $projectPath = dirname(dirname($scriptPath));
+    define('GUARDIAN_LOGIN_PATH', rtrim($projectPath, '/') . '/src/login.php');
 }
 
 
@@ -38,8 +40,11 @@ function guardian_redirigirALogin(string $motivo = ''): void
   
     unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['ultima_actividad'], $_SESSION['creada_en']);
 
-    if ($urlActual) {
+    $esControlador = $urlActual && strpos(parse_url($urlActual, PHP_URL_PATH) ?? '', '/controladores/') !== false;
+    if ($urlActual && !$esControlador) {
         $_SESSION['redirect_after_login'] = $urlActual;
+    } else {
+        unset($_SESSION['redirect_after_login']);
     }
 
     $destino = GUARDIAN_LOGIN_PATH;

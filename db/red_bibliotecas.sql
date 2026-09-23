@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-09-2026 a las 02:59:03
+-- Tiempo de generación: 23-09-2026 a las 16:24:35
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -26,9 +26,11 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-
+create database red_bibliotecas;
+use red_bibliotecas;
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
+  `id_solicitud` int(10) DEFAULT NULL,
   `id_biblioteca` int(11) DEFAULT NULL,
   `id_espacio_cultural` int(11) DEFAULT NULL,
   `nombre` varchar(30) NOT NULL,
@@ -57,7 +59,8 @@ INSERT INTO `actividad` (`id`, `id_biblioteca`, `id_espacio_cultural`, `nombre`,
 (32, 15, NULL, 'Juego de Ajedrez', 5, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada'),
 (33, 15, NULL, 'Juego de Ajedrez', 5, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada'),
 (34, 15, NULL, 'Juego de Ajedrez', 5, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada'),
-(35, 15, NULL, 'juego de mesa', 4, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada');
+(35, 15, NULL, 'juego de mesa', 4, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada'),
+(36, 15, NULL, 'biblioteca', 5, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada');
 
 -- --------------------------------------------------------
 
@@ -86,7 +89,8 @@ INSERT INTO `actividad_comuna` (`id`, `id_comuna`, `id_actividad`) VALUES
 (33, 8, 32),
 (34, 8, 33),
 (35, 8, 34),
-(42, 8, 35);
+(42, 8, 35),
+(43, 8, 36);
 
 -- --------------------------------------------------------
 
@@ -199,7 +203,22 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (52, 'Viernes', '2026-09-04', '00:00:17', 11, 'Editar', 'Actividad', 'Actividad #35 actualizada: juego de mesa'),
 (53, 'Viernes', '2026-09-04', '00:03:32', 11, 'Editar', 'Actividad', 'Actividad #35 actualizada: juego de mesa'),
 (54, 'Viernes', '2026-09-04', '00:04:55', 11, 'Editar', 'Actividad', 'Actividad #35 actualizada: juego de mesa'),
-(55, 'Viernes', '2026-09-04', '00:05:00', 11, 'Editar', 'Actividad', 'Actividad #35 actualizada: juego de mesa');
+(55, 'Viernes', '2026-09-04', '00:05:00', 11, 'Editar', 'Actividad', 'Actividad #35 actualizada: juego de mesa'),
+(56, 'Miercoles', '2026-09-09', '22:14:47', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(57, 'Jueves', '2026-09-17', '20:28:37', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(58, 'Jueves', '2026-09-17', '20:35:11', 11, 'Eliminar', 'Tipo de actividad', 'Tipo de actividad #7 eliminado'),
+(59, 'Jueves', '2026-09-17', '20:35:14', 11, 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: hola'),
+(60, 'Jueves', '2026-09-17', '20:36:02', 11, 'Crear', 'Nivel de impacto', 'Nivel de impacto registrado: municipal'),
+(61, 'Jueves', '2026-09-17', '20:36:12', 11, 'Eliminar', 'Cargo', 'Cargo #3 eliminado'),
+(62, 'Jueves', '2026-09-17', '20:39:17', 11, 'Crear', 'Actividad', 'Actividad registrada: biblioteca'),
+(63, 'Jueves', '2026-09-17', '20:39:34', 11, 'Eliminar', 'Solicitud', 'Solicitud #4 eliminada'),
+(64, 'Jueves', '2026-09-17', '20:39:36', 11, 'Eliminar', 'Solicitud', 'Solicitud #6 eliminada'),
+(65, 'Jueves', '2026-09-17', '20:39:38', 11, 'Eliminar', 'Solicitud', 'Solicitud #3 eliminada'),
+(66, 'Jueves', '2026-09-17', '20:39:41', 11, 'Eliminar', 'Solicitud', 'Solicitud #1 eliminada'),
+(67, 'Jueves', '2026-09-17', '20:39:44', 11, 'Eliminar', 'Solicitud', 'Solicitud #5 eliminada'),
+(68, 'Jueves', '2026-09-17', '20:42:19', 12, 'Login', 'Usuario', 'Inicio de sesión: jesus'),
+(69, 'Jueves', '2026-09-17', '20:42:38', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(70, 'Jueves', '2026-09-17', '20:47:47', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar');
 
 -- --------------------------------------------------------
 
@@ -218,8 +237,7 @@ CREATE TABLE `cargo` (
 --
 
 INSERT INTO `cargo` (`id`, `nombre`, `Descripcion`) VALUES
-(1, 'coordinador', '2'),
-(3, 'hola', 'peso');
+(1, 'coordinador', '2');
 
 -- --------------------------------------------------------
 
@@ -380,7 +398,8 @@ CREATE TABLE `nivel_impacto` (
 
 INSERT INTO `nivel_impacto` (`id`, `nombre_impacto`) VALUES
 (3, 'Comunal'),
-(4, 'estadal');
+(4, 'estadal'),
+(5, 'municipal');
 
 -- --------------------------------------------------------
 
@@ -483,7 +502,8 @@ INSERT INTO `responsable` (`id`, `id_actividad`, `nombre`, `telefono`) VALUES
 (34, 32, 'jesus serrano', '04125240489'),
 (35, 33, 'jesus serrano', '04125240489'),
 (36, 34, 'jesus serrano', '04125240489'),
-(43, 35, 'jesus serrano', '04125240489');
+(43, 35, 'jesus serrano', '04125240489'),
+(44, 36, 'jesus serrano', '04125240489');
 
 -- --------------------------------------------------------
 
@@ -499,7 +519,8 @@ CREATE TABLE `solicitud` (
   `lugar` varchar(100) NOT NULL,
   `responsable` varchar(50) NOT NULL,
   `participantes` int(10) NOT NULL DEFAULT 0,
-  `descripcion` varchar(250) NOT NULL
+  `descripcion` varchar(250) NOT NULL,
+  `estado` enum('pendiente','aprobada','rechazada','cancelada') NOT NULL DEFAULT 'pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -507,12 +528,7 @@ CREATE TABLE `solicitud` (
 --
 
 INSERT INTO `solicitud` (`id`, `id_institucion`, `fecha_solicitud`, `hora_solicitud`, `lugar`, `responsable`, `participantes`, `descripcion`) VALUES
-(1, 1, '2026-08-09', '08:00:00', 'Biblioteca 1', 'Responsable 1', 20, 'Solicitud 1'),
-(2, 1, '2026-08-06', '14:16:00', 'zona', 'cesar contreras', 2, '1'),
-(3, 1, '2026-08-12', '15:36:00', 'zona2', 'carlos', 2222, '2'),
-(4, 1, '2026-08-13', '21:24:00', 'biblioteca', 'jesus serrano', 1, 'a'),
-(5, 2, '2026-08-07', '18:52:00', 'biblioteca', 'jesus serrano', 1, ''),
-(6, 2, '2026-08-13', '16:56:00', 'biblioteca', 'jesus serrano', 1, 'a');
+(2, 1, '2026-08-06', '14:16:00', 'zona', 'cesar contreras', 2, '1');
 
 -- --------------------------------------------------------
 
@@ -532,7 +548,8 @@ CREATE TABLE `tipo_actividad` (
 
 INSERT INTO `tipo_actividad` (`id`, `nombre`, `Descripcion`) VALUES
 (4, 'eduativa', '0004'),
-(5, 'educativa', '');
+(5, 'educativa', ''),
+(8, 'hola', '');
 
 -- --------------------------------------------------------
 
@@ -582,6 +599,7 @@ INSERT INTO `usuario` (`id`, `nombre`, `clave`, `telefono`, `id_empleado`, `rol`
 --
 ALTER TABLE `actividad`
   ADD PRIMARY KEY (`id`),
+  ADD KEY `id_solicitud` (`id_solicitud`),
   ADD KEY `id_biblioteca` (`id_biblioteca`),
   ADD KEY `id_espacio_cultural` (`id_espacio_cultural`),
   ADD KEY `id_tipo_actividad` (`id_tipo_actividad`);
@@ -731,13 +749,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT de la tabla `actividad_comuna`
 --
 ALTER TABLE `actividad_comuna`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT de la tabla `actividad_espaciocultural`
@@ -755,7 +773,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -803,7 +821,7 @@ ALTER TABLE `municipio`
 -- AUTO_INCREMENT de la tabla `nivel_impacto`
 --
 ALTER TABLE `nivel_impacto`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `parroquia`
@@ -815,7 +833,7 @@ ALTER TABLE `parroquia`
 -- AUTO_INCREMENT de la tabla `responsable`
 --
 ALTER TABLE `responsable`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT de la tabla `solicitud`
@@ -827,7 +845,7 @@ ALTER TABLE `solicitud`
 -- AUTO_INCREMENT de la tabla `tipo_actividad`
 --
 ALTER TABLE `tipo_actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
@@ -843,6 +861,7 @@ ALTER TABLE `usuario`
 -- Filtros para la tabla `actividad`
 --
 ALTER TABLE `actividad`
+  ADD CONSTRAINT `actividad_ibfk_solicitud` FOREIGN KEY (`id_solicitud`) REFERENCES `solicitud` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
   ADD CONSTRAINT `actividad_ibfk_2` FOREIGN KEY (`id_espacio_cultural`) REFERENCES `espacio_cultural` (`id`),
   ADD CONSTRAINT `actividad_ibfk_3` FOREIGN KEY (`id_tipo_actividad`) REFERENCES `tipo_actividad` (`id`);

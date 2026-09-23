@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../modelos/solicitud.php';
 require_once __DIR__ . '/../helpers/validador.php';
 require_once __DIR__ . '/../config/conexion.php';
@@ -59,6 +60,7 @@ class SolicitudController
             'responsable' => trim($_POST['responsable'] ?? ''),
             'participantes' => intval($_POST['participantes'] ?? 0),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
+            'estado' => trim($_POST['estado'] ?? 'Pendiente'),
         ];
     }
 
@@ -119,6 +121,9 @@ class SolicitudController
         if (!Validador::esDescripcionValida($data['descripcion'], 0, 250)) {
             $errors[] = 'La descripción de la solicitud no puede ser mayor a 250 caracteres y solo puede contener letras, números y signos básicos.';
         }
+        if (!in_array($data['estado'], ['pendiente', 'aprobada', 'rechazada', 'cancelada'], true)) {
+            $errors[] = 'Estado de solicitud inválido.';
+        }
 
         
         
@@ -159,7 +164,8 @@ class SolicitudController
                 $data['lugar'],
                 $data['responsable'],        
                 $data['participantes'],
-                $data['descripcion']
+                $data['descripcion'],
+                $data['estado']
             );
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
@@ -206,7 +212,8 @@ class SolicitudController
                 $data['lugar'],
                 $data['responsable'],
                 $data['participantes'],
-                $data['descripcion']
+                $data['descripcion'],
+                $data['estado']
             );
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {

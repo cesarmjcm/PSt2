@@ -14,7 +14,8 @@ class Solicitud
                     s.lugar,
                     s.responsable,
                     s.participantes,
-                    s.descripcion
+                    s.descripcion,
+                    s.estado
                 FROM solicitud s
                 JOIN institucion i ON i.id = s.id_institucion
                 ORDER BY s.fecha_solicitud DESC, s.hora_solicitud DESC";
@@ -31,19 +32,19 @@ class Solicitud
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearSolicitud(int $id_institucion, string $fecha_solicitud, string $hora_solicitud, string $lugar, string $responsable, int $participantes, string $descripcion)
+    public function crearSolicitud(int $id_institucion, string $fecha_solicitud, string $hora_solicitud, string $lugar, string $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente')
     {
-        $sql = "INSERT INTO solicitud (id_institucion, fecha_solicitud, hora_solicitud, lugar, responsable, participantes, descripcion)
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO solicitud (id_institucion, fecha_solicitud, hora_solicitud, lugar, responsable, participantes, descripcion, estado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$id_institucion, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion]);
+        return $stmt->execute([$id_institucion, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado]);
     }
 
-    public function actualizarSolicitud(int $id, int $id_institucion, string $fecha_solicitud, string $hora_solicitud, string $lugar, string $responsable, int $participantes, string $descripcion)
+    public function actualizarSolicitud(int $id, int $id_institucion, string $fecha_solicitud, string $hora_solicitud, string $lugar, string $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente')
     {
-        $sql = "UPDATE solicitud SET id_institucion = ?, fecha_solicitud = ?, hora_solicitud = ?, lugar = ?, responsable = ?, participantes = ?, descripcion = ? WHERE id = ?";
+        $sql = "UPDATE solicitud SET id_institucion = ?, fecha_solicitud = ?, hora_solicitud = ?, lugar = ?, responsable = ?, participantes = ?, descripcion = ?, estado = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$id_institucion, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $id]);
+        return $stmt->execute([$id_institucion, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado, $id]);
     }
 
     public function eliminarSolicitud(int $id)

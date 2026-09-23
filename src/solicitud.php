@@ -50,6 +50,7 @@ require_once __DIR__ . '/../include/guardian.php';
                             <th>Responsable</th>
                             <th>Participantes</th>
                             <th>Descripción</th>
+                            <th>Estado</th>
                             <th class="col-acciones">Acciones</th>
                         </tr>
                     </thead>
@@ -116,6 +117,15 @@ require_once __DIR__ . '/../include/guardian.php';
                     <label for="campo_descripcion">Descripción</label>
                     <textarea id="campo_descripcion" name="descripcion" maxlength="250" rows="3"></textarea>
                 </div>
+                <div class="config-field">
+                    <label for="campo_estado">Estado</label>
+                    <select id="campo_estado" name="estado" required>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="aprobada">Aprobada</option>
+                        <option value="rechazada">Rechazada</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                </div>
                 <div class="maestro-modal__actions">
                     <button type="button" class="btn-secondary" id="btnCancelar">Cancelar</button>
                     <button type="submit" class="btn-primary">Guardar</button>
@@ -156,6 +166,11 @@ require_once __DIR__ . '/../include/guardian.php';
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase();
+        }
+
+        function formatearEstado(estado) {
+            const texto = String(estado || 'pendiente');
+            return texto.charAt(0).toUpperCase() + texto.slice(1);
         }
 
         function solicitudesFiltradas() {
@@ -208,6 +223,7 @@ require_once __DIR__ . '/../include/guardian.php';
             document.getElementById('campo_responsable').value = solicitud.responsable;
             document.getElementById('campo_participantes').value = solicitud.participantes;
             document.getElementById('campo_descripcion').value = solicitud.descripcion;
+            document.getElementById('campo_estado').value = solicitud.estado || 'pendiente';
             modal.hidden = false;
         }
 
@@ -336,7 +352,7 @@ require_once __DIR__ . '/../include/guardian.php';
             const inicio = (paginaActual - 1) * filasPorPagina;
             const rows = solicitudes.slice(inicio, inicio + filasPorPagina);
             if (!rows.length) {
-                tablaBody.innerHTML = '<tr><td colspan="9">' + (buscarSolicitudes.value.trim() ? 'No se encontraron solicitudes para esa búsqueda.' : 'No hay solicitudes registradas.') + '</td></tr>';
+                tablaBody.innerHTML = '<tr><td colspan="10">' + (buscarSolicitudes.value.trim() ? 'No se encontraron solicitudes para esa búsqueda.' : 'No hay solicitudes registradas.') + '</td></tr>';
                 renderPaginacion(totalPaginas);
                 return;
             }
@@ -350,6 +366,7 @@ require_once __DIR__ . '/../include/guardian.php';
                     <td>${escapeHtml(row.responsable)}</td>
                     <td>${escapeHtml(row.participantes)}</td>
                     <td>${escapeHtml(row.descripcion)}</td>
+                    <td>${escapeHtml(formatearEstado(row.estado))}</td>
                     <td class="col-acciones">
                         <button type="button" class="btn-icon btn-edit" data-id="${row.id}"><i class="fas fa-pen"></i></button>
                         <button type="button" class="btn-icon btn-delete" data-id="${row.id}"><i class="fas fa-trash"></i></button>
@@ -446,6 +463,7 @@ require_once __DIR__ . '/../include/guardian.php';
                 responsable: document.getElementById('campo_responsable').value.trim(),
                 participantes: document.getElementById('campo_participantes').value,
                 descripcion: document.getElementById('campo_descripcion').value.trim(),
+                estado: document.getElementById('campo_estado').value,
             };
 
             if (!data.id_institucion) { mostrarErrorModal('Seleccione una institución.'); return; }
