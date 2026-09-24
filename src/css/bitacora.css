@@ -131,9 +131,9 @@
 .bitacora__tabla th.col-dia { width: 10%; }
 .bitacora__tabla th.col-hora { width: 9%; }
 .bitacora__tabla th.col-usuario { width: 14%; }
-.bitacora__tabla th.col-accion { width: 12%; }
-.bitacora__tabla th.col-modulo { width: 14%; }
-.bitacora__tabla th.col-detalle { width: 30%; }
+.bitacora__tabla th.col-accion { width: 22%; }
+.bitacora__tabla th.col-modulo { width: 11%; }
+.bitacora__tabla th.col-detalle { width: 23%; }
 
 .bitacora__tabla thead th {
     padding: 16px 18px;
@@ -151,6 +151,17 @@
     word-break: break-word;
     white-space: normal;
     overflow-wrap: anywhere;
+}
+
+.bitacora__tabla td[data-label="Detalle"] {
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.bitacora__tabla td[data-label="Acción"] {
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
 }
 
 .bitacora__tabla tr {
@@ -175,13 +186,17 @@
 
 .bitacora__badge {
     display: inline-block;
-    padding: 4px 12px;
+    background-color: #99a0be;
+    padding: 4px 10px;
     border-radius: 999px;
-    font-size: 0.78rem;
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: #ffffff;
+    white-space: nowrap !important;
+    word-break: keep-all;
+    overflow-wrap: normal !important;
 }
 
 .bitacora__badge--crear {
@@ -197,7 +212,7 @@
 }
 
 .bitacora__badge--login {
-    background-color: #99a0be; 
+    background-color: #99a0be;
 }
 
 @media (max-width: 900px) {

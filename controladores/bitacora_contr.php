@@ -14,10 +14,7 @@ $conex = Conexion::conectar();
 
 
 
-if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'administrador') {
-    header('Location: main2.php');
-    exit;
-}
+guardian_requerirAdmin();
 
 
 $filtros = [

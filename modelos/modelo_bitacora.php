@@ -75,10 +75,10 @@ function obtener_bitacora($conex, $filtros = []) {
         $params[] = $filtros['fecha_hasta'];
     }
 
-    $sql = "SELECT b.id, b.nom_dia, b.fecha, b.hora, b.id_usu, b.accion, b.descripcion, b.detalle,
-                   u.nombre AS nombre_usuario
+        $sql = "SELECT b.id, b.nom_dia, b.fecha, b.hora, b.id_usu, b.accion, b.descripcion, b.detalle,
+                 COALESCE(u.nombre, 'No autenticado') AS nombre_usuario
             FROM bitacora b
-            INNER JOIN usuario u ON u.id = b.id_usu";
+             LEFT JOIN usuario u ON u.id = b.id_usu";
 
     if (!empty($where)) {
         $sql .= " WHERE " . implode(" AND ", $where);

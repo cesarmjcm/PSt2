@@ -138,7 +138,7 @@ CREATE TABLE `bitacora` (
   `nom_dia` varchar(15) NOT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
-  `id_usu` int(10) NOT NULL,
+  `id_usu` int(10) DEFAULT NULL,
   `accion` varchar(30) NOT NULL,
   `descripcion` varchar(50) NOT NULL,
   `detalle` text NOT NULL

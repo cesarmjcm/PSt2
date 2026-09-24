@@ -8,6 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 
 $conex = Conexion::conectar(); 
@@ -15,10 +16,7 @@ $conex = Conexion::conectar();
 
 
 
-if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'administrador') {
-    header('Location: main2.php');
-    exit;
-}
+guardian_requerirAdmin();
 
 
 $filtros = [

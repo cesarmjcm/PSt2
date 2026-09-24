@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
 
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -36,6 +39,15 @@ if (!defined('GUARDIAN_TIEMPO_INACTIVIDAD_MIN')) {
 function guardian_redirigirALogin(string $motivo = ''): void
 {
     $urlActual = $_SERVER['REQUEST_URI'] ?? null;
+
+    $idUsuario = !empty($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+    registrar_bitacora(
+        Conexion::conectar(),
+        $idUsuario,
+        'Acceso Denegado',
+        'Seguridad',
+        'Intento de acceso sin autenticación a: ' . ($urlActual ?? 'recurso desconocido')
+    );
 
   
     unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['ultima_actividad'], $_SESSION['creada_en']);
@@ -74,6 +86,18 @@ function guardian_requerirAdmin(string $modo = 'vista'): void
 {
     if (esAdministrador()) {
         return;
+    }
+
+    if (!empty($_SESSION['user_id'])) {
+        $conexBitacora = Conexion::conectar();
+        $recurso = $_SERVER['REQUEST_URI'] ?? ($_SERVER['SCRIPT_NAME'] ?? 'recurso desconocido');
+        registrar_bitacora(
+            $conexBitacora,
+            $_SESSION['user_id'],
+            'Acceso Denegado',
+            'Seguridad',
+            'Intento de acceso sin permisos de administrador a: ' . $recurso
+        );
     }
 
     if ($modo === 'json') {

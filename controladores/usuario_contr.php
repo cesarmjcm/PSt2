@@ -118,7 +118,7 @@ class UsuarioController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($conex, $_SESSION['user_id'], 'Crear', 'Usuario', 'Usuario registrado: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Usuario', 'Usuario registrado: ' . $nombre);
                 }
                 $this->success('Usuario creado correctamente.');
                 return;
@@ -223,7 +223,7 @@ class UsuarioController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
-                    registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Usuario', "Usuario #$id actualizado: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Usuario', "Usuario #$id actualizado: " . $nombre);
                 }
                 $this->success('Usuario actualizado correctamente.');
                 return;
@@ -258,7 +258,7 @@ class UsuarioController
         if ($deleted) {
             if (!empty($_SESSION['user_id'])) {
                 $conex = Conexion::conectar();
-                registrar_bitacora($conex, $_SESSION['user_id'], 'Eliminar', 'Usuario', "Usuario #$id eliminado");
+                registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Usuario', "Usuario #$id eliminado");
             }
             $this->success('Usuario eliminado correctamente.');
             return;

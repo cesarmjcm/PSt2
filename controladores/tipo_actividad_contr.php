@@ -83,7 +83,7 @@ class TipoActividadController
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     
-                    registrar_bitacora($this->conex, $_SESSION['user_id'], 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: ' . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: ' . $nombre);
                 }
                 $this->success('Tipo de actividad creado correctamente.');
                 return;
@@ -140,7 +140,7 @@ class TipoActividadController
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     
-                    registrar_bitacora($this->conex, $_SESSION['user_id'], 'Editar', 'Tipo de actividad', "Tipo de actividad #$id actualizado: " . $nombre);
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Tipo de actividad', "Tipo de actividad #$id actualizado: " . $nombre);
                 }
                 $this->success('Tipo de actividad actualizado correctamente.');
                 return;
@@ -174,7 +174,7 @@ class TipoActividadController
             $deleted = $this->model->eliminarTipo($id);
             if ($deleted) {
                 if (!empty($_SESSION['user_id'])) {
-                    registrar_bitacora($this->conex, $_SESSION['user_id'], 'Eliminar', 'Tipo de actividad', "Tipo de actividad #$id eliminado");
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Tipo de actividad', "Tipo de actividad #$id eliminado");
                 }
                 $this->success('Tipo de actividad eliminado correctamente.');
                 return;

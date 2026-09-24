@@ -194,6 +194,55 @@ class Actividad {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Verifica si ya existe otra actividad registrada el mismo día, a la
+     * misma hora, en la misma biblioteca o en el mismo espacio cultural
+     * (según cuál de los dos tenga la actividad que se está validando).
+     * Las actividades canceladas no cuentan como choque, ya que ese cupo
+     * quedó liberado.
+     *
+     * @param array    $d         Datos de la actividad (fecha, hora, id_biblioteca, id_espacio_cultural).
+     * @param int|null $idExcluir ID de la actividad actual, para no compararla consigo misma al editar.
+     * @return bool True si hay conflicto de horario/lugar.
+     */
+    public function existeConflictoHorario(array $d, ?int $idExcluir = null): bool
+    {
+        $fecha = trim($d['fecha'] ?? '');
+        $hora = trim($d['hora'] ?? '');
+        if ($fecha === '' || $hora === '') {
+            // Sin hora no hay forma de comparar un choque de horario.
+            return false;
+        }
+
+        $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : 0;
+        $idEspacio = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : 0;
+        if ($idBiblioteca === 0 && $idEspacio === 0) {
+            return false;
+        }
+
+        $sql = "SELECT id FROM actividad
+                WHERE fecha = ? AND hora = ? AND estado != 'cancelada'";
+        $params = [$fecha, $hora];
+
+        if ($idBiblioteca > 0) {
+            $sql .= " AND id_biblioteca = ?";
+            $params[] = $idBiblioteca;
+        } else {
+            $sql .= " AND id_espacio_cultural = ?";
+            $params[] = $idEspacio;
+        }
+
+        if ($idExcluir !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $idExcluir;
+        }
+        $sql .= " LIMIT 1";
+
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute($params);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     
     
     

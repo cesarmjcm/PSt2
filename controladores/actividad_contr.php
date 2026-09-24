@@ -69,6 +69,15 @@ class ActividadController
             return;
         }
 
+        $hayConflicto = $this->model->existeConflictoHorario($data);
+        error_log('[ActividadController::crear] existeConflictoHorario=' . ($hayConflicto ? 'true' : 'false')
+            . ' | fecha=' . ($data['fecha'] ?? '') . ' hora=' . ($data['hora'] ?? '')
+            . ' id_biblioteca=' . ($data['id_biblioteca'] ?? '') . ' id_espacio_cultural=' . ($data['id_espacio_cultural'] ?? ''));
+        if ($hayConflicto) {
+            $this->error('Ya existe otra actividad registrada en ese mismo lugar, fecha y hora.');
+            return;
+        }
+
         try {
             $id = $this->model->crearActividadCompleta($data);
             if ($id) {
@@ -78,8 +87,8 @@ class ActividadController
                         error_log('[ActividadController::crear] La actividad #' . $id . ' se creó, pero registrar_bitacora() falló.');
                     }
                 }
-                header('Location: ' . $this->getReturnUrl());
-                exit;
+                $this->success('Actividad registrada correctamente.');
+                return;
             }
         } catch (Exception $e) {
             error_log('[ActividadController::crear] Excepción: ' . $e->getMessage());
@@ -119,6 +128,15 @@ class ActividadController
             return;
         }
 
+        $hayConflicto = $this->model->existeConflictoHorario($data, $id);
+        error_log('[ActividadController::actualizar] existeConflictoHorario=' . ($hayConflicto ? 'true' : 'false')
+            . ' | id=' . $id . ' fecha=' . ($data['fecha'] ?? '') . ' hora=' . ($data['hora'] ?? '')
+            . ' id_biblioteca=' . ($data['id_biblioteca'] ?? '') . ' id_espacio_cultural=' . ($data['id_espacio_cultural'] ?? ''));
+        if ($hayConflicto) {
+            $this->error('Ya existe otra actividad registrada en ese mismo lugar, fecha y hora.');
+            return;
+        }
+
         try {
             $updated = $this->model->actualizarActividadCompleta($id, $data);
             if ($updated) {
@@ -128,8 +146,8 @@ class ActividadController
                         error_log('[ActividadController::actualizar] La actividad #' . $id . ' se actualizó, pero registrar_bitacora() falló.');
                     }
                 }
-                header('Location: ' . $this->getReturnUrl());
-                exit;
+                $this->success('Actividad actualizada correctamente.');
+                return;
             }
         } catch (Exception $e) {
             error_log('[ActividadController::actualizar] Excepción: ' . $e->getMessage());
@@ -161,8 +179,8 @@ class ActividadController
                     error_log('[ActividadController::eliminar] La actividad #' . $id . ' se eliminó, pero registrar_bitacora() falló.');
                 }
             }
-            header('Location: ' . $this->getReturnUrl());
-            exit;
+            $this->success('Actividad eliminada correctamente.');
+            return;
         }
 
         $this->error('No se pudo eliminar la actividad.');
@@ -210,6 +228,14 @@ class ActividadController
             $tipoUbicacion = intval($_POST['id_espacio_cultural'] ?? 0) > 0 ? 'espacio' : 'biblioteca';
         }
 
+        $idBiblioteca = intval($_POST['id_biblioteca'] ?? 0);
+        $idEspacioCultural = intval($_POST['id_espacio_cultural'] ?? 0);
+        if ($tipoUbicacion === 'biblioteca') {
+            $idEspacioCultural = 0;
+        } elseif ($tipoUbicacion === 'espacio') {
+            $idBiblioteca = 0;
+        }
+
         $estadosValidos = ['confirmada', 'ejecutada', 'cancelada'];
         $estado = Validador::normalizarTexto($_POST['estado'] ?? '');
         if (!in_array($estado, $estadosValidos, true)) {
@@ -227,11 +253,11 @@ class ActividadController
             'estado'               => $estado,
             'nivel_impacto'        => Validador::normalizarTexto($_POST['nivel_impacto'] ?? $_POST['nivel__impacto'] ?? ''),
             'tipo_ubicacion'       => $tipoUbicacion,
-            'id_biblioteca'        => intval($_POST['id_biblioteca'] ?? 0),
+            'id_biblioteca'        => $idBiblioteca,
             'municipio_id'         => intval($_POST['municipio_id'] ?? $_POST['Municipio'] ?? 0),
             'parroquia'            => Validador::normalizarTexto($_POST['parroquia'] ?? ''),
             'comuna'               => Validador::normalizarTexto($_POST['comuna'] ?? ''),
-            'id_espacio_cultural'  => intval($_POST['id_espacio_cultural'] ?? 0),
+            'id_espacio_cultural'  => $idEspacioCultural,
             'id_tipo_actividad'    => intval($_POST['id_tipo_actividad'] ?? 0),
             'responsable'          => Validador::normalizarTexto($_POST['responsable'] ?? $_POST['id_responsable'] ?? ''),
             'telefono_responsable' => Validador::normalizarTexto($_POST['telefono_responsable'] ?? $_POST['telefonoResponsable'] ?? ''),

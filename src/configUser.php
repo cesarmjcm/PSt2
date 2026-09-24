@@ -3,6 +3,7 @@ include '../include/guardian.php';
 include '../include/header.php';
 require_once __DIR__ . '/../modelos/usuario.php';
 require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 
 $model = new Usuario();
 $empleadoModel = new Empleado();
@@ -93,6 +94,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 }
 
                 if ($ok) {
+                    if (!empty($_SESSION['user_id'])) {
+                        $accionBitacora = $esActualizacion ? 'Editar' : 'Crear';
+                        $detalleBitacora = $esActualizacion
+                            ? "Usuario #$id actualizado: $nombre"
+                            : 'Usuario registrado: ' . $nombre;
+                        registrar_bitacora(
+                            Conexion::conectar(),
+                            $_SESSION['user_id'],
+                            $accionBitacora,
+                            'Usuario',
+                            $detalleBitacora
+                        );
+                    }
                     $mensajeUsuarios = $mensajeExito;
                 } else {
                     $errorUsuarios = $mensajeFallo;
@@ -106,6 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
         } else {
             $ok = $model->eliminarUsuario($id);
             if ($ok) {
+                if (!empty($_SESSION['user_id'])) {
+                    registrar_bitacora(
+                        Conexion::conectar(),
+                        $_SESSION['user_id'],
+                        'Eliminar',
+                        'Usuario',
+                        "Usuario #$id eliminado"
+                    );
+                }
                 $mensajeUsuarios = 'Usuario eliminado correctamente.';
             } else {
                 $errorUsuarios = 'No se pudo eliminar el usuario.';

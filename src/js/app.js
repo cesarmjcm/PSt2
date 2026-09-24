@@ -89,6 +89,57 @@ function ocultarAvisoFormulario(avisoId) {
     }
 }
 
+// Envía el formulario de actividad por AJAX para poder leer el JSON de
+// error que ya genera ActividadController::error() (por ejemplo, el
+// conflicto de "misma actividad, mismo lugar, misma fecha/hora"). Un
+// <form> nativo no manda el header X-Requested-With, así que el backend
+// respondía con un redirect silencioso y el mensaje se perdía.
+async function enviarFormularioActividad(form, avisoId) {
+    // OJO: no usar `form.action` aquí. Igual que con `form.id` (ver el
+    // comentario en validacionesformulario), el formulario tiene un campo
+    // <input name="action" id="plan-action">, y el navegador sobrescribe
+    // la propiedad `form.action` para que apunte a ESE INPUT en lugar de
+    // devolver la URL real del atributo action del <form>. Eso hacía que
+    // fetch() recibiera el elemento del input (convertido a texto como
+    // "[object HTMLInputElement]") en vez de la URL, y el servidor
+    // respondía 404 con HTML, no JSON. form.getAttribute('action') no
+    // tiene ese problema.
+    const actionUrl = form.getAttribute('action');
+    const formData = new FormData(form);
+    if (!formData.has('return_url')) {
+        formData.append('return_url', window.location.pathname + window.location.search);
+    }
+
+    try {
+        const response = await fetch(actionUrl, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData,
+        });
+
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseErr) {
+            mostrarAvisoFormulario('No se pudo procesar la respuesta del servidor. Intenta nuevamente.', null, avisoId);
+            return;
+        }
+
+        if (data && data.success) {
+            window.location.reload();
+            return;
+        }
+
+        mostrarAvisoFormulario(
+            (data && data.message) || 'No se pudo guardar la actividad. Intenta nuevamente.',
+            null,
+            avisoId
+        );
+    } catch (networkErr) {
+        mostrarAvisoFormulario('Error de conexión al guardar la actividad. Intenta nuevamente.', null, avisoId);
+    }
+}
+
 function validacionesformulario(form) {
     // OJO: no usar `form.id` aquí. Como el formulario tiene un campo
     // <input name="id" id="editar-id">, el navegador crea automáticamente
@@ -353,7 +404,13 @@ function validacionesformulario(form) {
         }
     }
 
-    return true;
+    // Las validaciones de campo pasaron. El chequeo de conflicto de
+    // horario (misma actividad, mismo lugar, misma fecha/hora) solo se
+    // puede hacer en el servidor, así que el envío se hace por AJAX para
+    // poder mostrar ese mensaje de error en el propio modal en vez de
+    // dejar que el navegador navegue a otra página.
+    enviarFormularioActividad(form, avisoId);
+    return false;
 }
 document.addEventListener("DOMContentLoaded", () => {
     const selectMunicipios = document.getElementById("planificacion-municipios");
