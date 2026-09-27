@@ -1,6 +1,5 @@
 <?php
 include '../include/guardian.php';
-include '../include/header.php';
 require_once __DIR__ . '/../modelos/usuario.php';
 require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
@@ -161,10 +160,12 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración de usuario</title>
     <link rel="stylesheet" href="./css/main.css">
+    <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="./css/configuracion.css?v=4">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
 <body>
+    <?php include '../include/header.php'; ?>
     <main class="config-page">
         <div class="config-container">
             <div class="config-card">

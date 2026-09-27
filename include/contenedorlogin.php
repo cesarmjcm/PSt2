@@ -18,11 +18,11 @@
                 <img src="./assets/user-svgrepo-com.svg" class="input-icon" alt="user">
             
                 
-            <input type="text" id="username" name="username" placeholder="Usuario" maxlength="30" required>
+            <input type="text" id="username" name="username" placeholder="Usuario" maxlength="30" autocomplete="off" required>
             </div>
             <div class="pass">
                 <img src="./assets/password-svgrepo-com.svg" class="input-icon" alt="lock">
-                <input type="password" id="password" name="password" placeholder="Contraseña" required>
+                <input type="password" id="password" name="password" placeholder="Contraseña" autocomplete="off" required>
             </div>
             <button type="submit">Ingresar</button>
             

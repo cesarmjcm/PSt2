@@ -485,18 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const planTipo = document.getElementById('plan-tipo');
-    const fieldsHidden = document.getElementById('fields-hidden');
-
-    const toggleFields = () => {
-        if (!fieldsHidden || !planTipo) return;
-        const show = planTipo.value.trim().length > 0;
-        fieldsHidden.classList.toggle('hidden', !show);
-    };
-
-    if (planTipo) {
-        planTipo.addEventListener('input', toggleFields);
-        toggleFields();
-    }
 
     const planMunicipio = document.getElementById('planificacion-municipios');
     const municipioHidden = document.getElementById('municipio-hidden');
@@ -585,7 +573,6 @@ document.addEventListener('DOMContentLoaded', () => {
         limpiarCamposInvalidos(form);
         ocultarAvisoFormulario();
 
-        toggleFields();
         toggleMunicipio();
         toggleTipoFormulario();
         toggleTipoUbicacion();

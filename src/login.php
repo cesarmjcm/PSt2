@@ -9,7 +9,8 @@ if (!empty($_SESSION['user'])) {
 <html lang="es">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="icon" href="./assets/icon__icey.png" type="image/png">
+    <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="./css/login.css">
 </head>
 <body>

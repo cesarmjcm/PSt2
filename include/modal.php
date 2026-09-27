@@ -84,10 +84,8 @@ $empleado=$empleadoModel->mostrarEmpleados();
                                     <label for="plan-tipo">Nombre de la actividad</label>
                                     <input type="text" id="plan-tipo" maxlength="30" name="nombre" placeholder="Nombre de la actividad">
 
-                                    <div id="fields-hidden" class="hidden">
-                                        <label for="plan-descripcion">Descripción de la actividad</label>
-                                        <textarea id="plan-descripcion" maxlength="200" name="descripcion" placeholder="Descripción breve"></textarea>
-                                    </div>
+                                    <label for="plan-descripcion">Descripción de la actividad</label>
+                                    <textarea id="plan-descripcion" maxlength="200" name="descripcion" placeholder="Descripción breve"></textarea>
                                 </fieldset>
 
                                 <fieldset>
