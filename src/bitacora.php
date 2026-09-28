@@ -123,7 +123,7 @@ $registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, 
                         <tr>
                             <td data-label="Fecha"><?= htmlspecialchars($r['fecha']) ?></td>
                             <td data-label="Día"><?= htmlspecialchars($r['nom_dia']) ?></td>
-                            <td data-label="Hora"><?= htmlspecialchars($r['hora']) ?></td>
+                            <td data-label="Hora"><?= htmlspecialchars(date('g:i:s A', strtotime($r['hora']))) ?></td>
                             <td data-label="Usuario"><?= htmlspecialchars($r['nombre_usuario']) ?></td>
                             <td data-label="Acción">
                                 <span class="bitacora__badge <?= $accionClase ?>"><?= htmlspecialchars($r['accion']) ?></span>

@@ -17,9 +17,10 @@ function registrar_bitacora($conex, $id_usu, $accion, $descripcion, $detalle) {
         return false;
     }
 
-    $nom_dia = obtener_nombre_dia(date("D"));
-    $hora = date("H:i:s");
-    $fecha = date("Y-m-d");
+    $ahora = new DateTimeImmutable('now', new DateTimeZone('America/Caracas'));
+    $nom_dia = obtener_nombre_dia($ahora->format('D'));
+    $hora = $ahora->format('H:i:s');
+    $fecha = $ahora->format('Y-m-d');
 
     try {
         

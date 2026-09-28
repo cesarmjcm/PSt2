@@ -414,6 +414,7 @@ function validacionesformulario(form) {
 }
 document.addEventListener("DOMContentLoaded", () => {
     const selectMunicipios = document.getElementById("planificacion-municipios");
+    if (!selectMunicipios) return;
 
     fetch("../controladores/municipio_contr.php?action=listar")
         .then(response => response.json())

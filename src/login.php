@@ -15,6 +15,6 @@ if (!empty($_SESSION['user'])) {
 </head>
 <body>
     <?php include '../include/contenedorlogin.php'; ?>
-    <script src="./js/app.js"></script>
+    <script src="./js/app.js?v=<?= filemtime(__DIR__ . '/js/app.js') ?>"></script>
 </body>
 </html>
