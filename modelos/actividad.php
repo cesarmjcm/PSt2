@@ -46,15 +46,15 @@ class Actividad {
                 a.id_biblioteca,
                 a.id_espacio_cultural,
                 a.id_tipo_actividad,
+                a.responsable,
+                a.telefono_responsable,
                 ta.nombre AS tipo_actividad,
                 b.nombre AS biblioteca,
                 m.id AS municipio_id,
                 m.nombre AS municipio,
                 p.nombre AS parroquia,
                 GROUP_CONCAT(DISTINCT ni.nombre_impacto SEPARATOR ', ') AS nivel_impacto,
-                GROUP_CONCAT(DISTINCT co.nombre SEPARATOR ', ') AS comuna,
-                GROUP_CONCAT(DISTINCT r.nombre SEPARATOR ', ') AS responsable,
-                GROUP_CONCAT(DISTINCT r.telefono SEPARATOR ', ') AS telefono_responsable
+                GROUP_CONCAT(DISTINCT co.nombre SEPARATOR ', ') AS comuna
             FROM actividad a
             LEFT JOIN tipo_actividad ta ON ta.id = a.id_tipo_actividad
             LEFT JOIN biblioteca b ON b.id = a.id_biblioteca
@@ -64,7 +64,6 @@ class Actividad {
             LEFT JOIN nivel_impacto ni ON ni.id = ia.id_impacto
             LEFT JOIN actividad_comuna ac ON ac.id_actividad = a.id
             LEFT JOIN comuna co ON co.id = ac.id_comuna
-            LEFT JOIN responsable r ON r.id_actividad = a.id
             GROUP BY a.id
             ORDER BY a.fecha DESC
         ";
@@ -116,7 +115,7 @@ class Actividad {
             $errors[] = 'Día de la semana inválido.';
         }
 
-        $estadosValidos = ['confirmada', 'ejecutada', 'cancelada'];
+        $estadosValidos = ['pendiente', 'confirmada', 'ejecutada', 'cancelada'];
         $estado = trim($d['estado'] ?? '');
         if (!in_array($estado, $estadosValidos, true)) {
             $errors[] = 'Estado de la actividad inválido.';
@@ -161,12 +160,14 @@ class Actividad {
             $errors[] = 'Tipo de actividad inválido.';
         }
 
-        if (!empty(trim($d['responsable'] ?? '')) && !Validador::esNombrePropioValido(trim($d['responsable']), 2, 30)) {
-            $errors[] = 'Responsable inválido.';
+        $responsable = trim($d['responsable'] ?? '');
+        if ($responsable !== '' && !Validador::esNombrePropioValido($responsable, 2, 100)) {
+            $errors[] = 'El responsable debe tener entre 2 y 100 caracteres y solo puede contener letras, espacios, apóstrofos o guiones.';
         }
 
-        if (!empty(trim($d['telefono_responsable'] ?? '')) && !Validador::esTelefonoValido(trim($d['telefono_responsable']))) {
-            $errors[] = 'Teléfono del responsable inválido.';
+        $telefonoResponsable = trim($d['telefono_responsable'] ?? '');
+        if ($telefonoResponsable !== '' && !preg_match('/^[0-9\-\+ ]{7,15}$/', $telefonoResponsable)) {
+            $errors[] = 'El teléfono del responsable debe tener entre 7 y 15 caracteres y solo puede contener números, espacios, guiones o el signo +.';
         }
 
         return $errors;
@@ -247,7 +248,7 @@ class Actividad {
     
     
     
-    public function crearActividad($nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca, $estado = 'confirmada') {
+    public function crearActividad($nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca, $estado = 'pendiente') {
         $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, dia_semana, id_biblioteca, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca ?: null, $estado]);
@@ -276,14 +277,14 @@ class Actividad {
             
             $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
             $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
-
-            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad, estado)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad, estado, responsable, telefono_responsable)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
-                $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'confirmada'
+                $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
+                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null
             ]);
             $idActividad = (int)$pdo->lastInsertId();
 
@@ -306,13 +307,13 @@ class Actividad {
             
             $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
             $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
-
-            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=?, estado=? WHERE id=?";
+            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=?, estado=?, responsable=?, telefono_responsable=? WHERE id=?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
-                $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'confirmada', $id
+                $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
+                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null, $id
             ]);
 
             
@@ -322,7 +323,6 @@ class Actividad {
             foreach (['impacto_actividad', 'actividad_comuna'] as $tabla) {
                 $pdo->prepare("DELETE FROM {$tabla} WHERE id_actividad = ?")->execute([$id]);
             }
-            $pdo->prepare("DELETE FROM responsable WHERE id_actividad = ?")->execute([$id]);
 
             $this->guardarRelaciones($pdo, $id, $d);
 
@@ -373,10 +373,6 @@ class Actividad {
         
 
         
-        if (!empty($d['responsable'])) {
-            $pdo->prepare("INSERT INTO responsable (id_actividad, nombre, telefono) VALUES (?, ?, ?)")
-                ->execute([$idActividad, $d['responsable'], $d['telefono_responsable'] ?? null]);
-        }
     }
 }
 ?>

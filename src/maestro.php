@@ -110,6 +110,25 @@ $camposPorMaestro = [
             'maxLength' => 40,
             'noNumeros' => true,
         ],
+        'rif' => [
+            'label' => 'RIF',
+            'type' => 'text',
+            'maxLength' => 12,
+            'esRif' => true,
+        ],
+        'correo' => [
+            'label' => 'Correo',
+            'type' => 'email',
+            'maxLength' => 50,
+            'opcional' => true,
+            'esCorreo' => true,
+        ],
+        'direccion' => [
+            'label' => 'Dirección',
+            'type' => 'text',
+            'maxLength' => 100,
+            'opcional' => true,
+        ],
     ],
     
     'cargo'      => [
@@ -117,14 +136,26 @@ $camposPorMaestro = [
         'descripcion' => ['label' => 'Descripción', 'type' => 'text', 'maxLength' => 40, 'opcional' => true],
     ],
     'empleado'   => [
+        'cedula'   => ['label' => 'Cédula', 'type' => 'number', 'minLength' => 6, 'maxLength' => 8],
         'nombre'   => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 40, 'noNumeros' => true],
         'apellido' => ['label' => 'Apellido', 'type' => 'text', 'maxLength' => 20, 'noNumeros' => true],
         'telefono' => ['label' => 'Teléfono', 'type' => 'text', 'maxLength' => 11, 'formatoVenezolano' => true],
-        'id_cargo' => [ 'label'       => 'Cargo', 'type'        => 'select','fuente'      => '../controladores/cargo_contr.php','optionValue' => 'id','optionLabel' => 'nombre', ],
-        'cedula'   => ['label' => 'Cédula', 'type' => 'number', 'minLength' => 6, 'maxLength' => 8],
+
         'genero'   => ['label' => 'Género', 'type' => 'select', 'options' => ['M' => 'Masculino', 'F' => 'Femenino']],
         'edad'     => ['label' => 'Edad', 'type' => 'number', 'min' => 0],
+        'id_cargo' => [ 'label'       => 'Cargo', 'type'        => 'select','fuente'      => '../controladores/cargo_contr.php','optionValue' => 'id','optionLabel' => 'nombre', ],
+        'id_biblioteca' => [
+            'label'       => 'Biblioteca donde trabaja',
+            'type'        => 'select',
+            'fuente'      => '../controladores/biblioteca_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        ],
         'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0],
+
+        'fecha_inicio_cargo' => ['label' => 'Inicio del cargo', 'type' => 'date'],
+        // Sin fecha final = el cargo sigue vigente.
+        'fecha_fin_cargo'    => ['label' => 'Fin del cargo', 'type' => 'date', 'opcional' => true, 'noAnteriorA' => 'fecha_inicio_cargo'],
     ],
     'nv_act'     => [
         'nombre_impacto' => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 20, 'noNumeros' => true],
@@ -353,7 +384,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         }
 
         
-        const CAMPOS_SIN_CHEQUEO_REPETICION = ['telefono', 'capacidad'];
+        const CAMPOS_SIN_CHEQUEO_REPETICION = ['telefono', 'capacidad', 'rif'];
 
        
         const REGEX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü '\-]+$/u;
@@ -363,6 +394,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
         // Formato de correo electrónico (para campos con esCorreo: true)
         const REGEX_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // RIF venezolano (para campos con esRif: true): letra + 8 dígitos + dígito verificador, con o sin guiones
+        const REGEX_RIF = /^[JGVEPCjgvepc]-?\d{8}-?\d$/;
 
   
         function validarCampoMaestro(key, campo, valorCrudo, esOpcional) {
@@ -390,6 +424,10 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             if (campo.formatoVenezolano && !REGEX_TELEFONO_VENEZUELA.test(valor)) {
                 return 'El campo "' + campo.label + '" debe tener el formato venezolano: empieza en 0, solo números, 11 dígitos en total (ej. 04141234567).';
+            }
+
+            if (campo.esRif && !REGEX_RIF.test(valor)) {
+                return 'El campo "' + campo.label + '" debe tener el formato J-12345678-9 (letra J, G, V, E, P o C, 8 dígitos y un dígito verificador).';
             }
 
             if (campo.esCorreo && !REGEX_CORREO.test(valor)) {
@@ -583,6 +621,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             let html = '';
             camposKeys.forEach(key => {
                 const campo = campos[key];
+                if (tablaActual === 'empleado' && key === 'id_cargo') {
+                    html += '<fieldset class="empleado-datos-laborales"><legend>Datos laborales</legend>';
+                }
                 const esOpcionalPorEdicion = campo.optionalOnEdit && formId.value !== '';
                 const esOpcional = esOpcionalPorEdicion || campo.opcional;
                 const valor = valores[key] !== undefined ? valores[key] : '';
@@ -616,6 +657,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 }
 
                 html += '</div>';
+                if (tablaActual === 'empleado' && key === 'fecha_fin_cargo') {
+                    html += '</fieldset>';
+                }
             });
             formCampos.innerHTML = html;
 
@@ -729,6 +773,23 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     const otroValor = otroInput ? otroInput.value : '';
                     if (valor !== otroValor) {
                         mostrarErrorModal('El campo "' + campo.label + '" no coincide con "' + campos[campo.confirmaCampo].label + '".');
+                        if (input) input.focus();
+                        return;
+                    }
+                }
+
+                // Validación cruzada de fechas: ej. el fin del cargo no puede ser
+                // anterior al inicio.
+                if (campo.noAnteriorA && valor.trim() !== '') {
+                    const inputInicio = document.getElementById('campo_' + campo.noAnteriorA);
+                    const valorInicio = inputInicio ? inputInicio.value.trim() : '';
+                    if (valorInicio === '') {
+                        mostrarErrorModal('Para indicar "' + campo.label + '" debe indicar también "' + campos[campo.noAnteriorA].label + '".');
+                        if (inputInicio) inputInicio.focus();
+                        return;
+                    }
+                    if (valor.trim() < valorInicio) {
+                        mostrarErrorModal('El campo "' + campo.label + '" no puede ser anterior a "' + campos[campo.noAnteriorA].label + '".');
                         if (input) input.focus();
                         return;
                     }

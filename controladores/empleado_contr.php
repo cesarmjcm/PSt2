@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../modelos/biblioteca.php';
 require_once __DIR__ . '/../helpers/validador.php';
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
@@ -42,7 +43,7 @@ class EmpleadoController
         }
     }
 
-    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $anios_servicio): ?string
+    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = ''): ?string
     {
         if ($nombre === '' || $apellido === '' || $telefono === '' || $cedula === '' || $genero === '') {
             return 'Nombre, apellido, teléfono, cédula y género son obligatorios.';
@@ -68,6 +69,27 @@ class EmpleadoController
         if ($edad < 0 || $anios_servicio < 0) {
             return 'La edad y los años de servicio no pueden ser negativos.';
         }
+        if ($id_biblioteca <= 0) {
+            return 'Debe seleccionar la biblioteca donde trabaja el empleado.';
+        }
+        if (!(new Biblioteca())->obtenerBibliotecaPorId($id_biblioteca)) {
+            return 'La biblioteca seleccionada no existe.';
+        }
+        if ($fecha_inicio === '') {
+            return 'Debe indicar la fecha de inicio del cargo.';
+        }
+        if (!Validador::esFechaValida($fecha_inicio)) {
+            return 'La fecha de inicio del cargo no es válida.';
+        }
+        if ($fecha_fin !== '' && !Validador::esFechaValida($fecha_fin)) {
+            return 'La fecha final del cargo no es válida.';
+        }
+        if ($fecha_fin !== '' && $fecha_inicio === '') {
+            return 'Para indicar la fecha final del cargo debe indicar también la fecha de inicio.';
+        }
+        if ($fecha_fin !== '' && $fecha_inicio !== '' && $fecha_fin < $fecha_inicio) {
+            return 'La fecha final del cargo no puede ser anterior a la fecha de inicio.';
+        }
         return null;
     }
 
@@ -86,8 +108,11 @@ class EmpleadoController
         $genero = trim($_POST['genero'] ?? '');
         $edad = intval($_POST['edad'] ?? 0);
         $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
+        $id_biblioteca = intval($_POST['id_biblioteca'] ?? 0);
+        $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
+        $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
 
-        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio);
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
         if ($errorValidacion !== null) {
             $this->error($errorValidacion);
             return;
@@ -101,7 +126,7 @@ class EmpleadoController
         }
 
         try {
-            $created = $this->model->crearEmpleado($nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio);
+            $created = $this->model->crearEmpleado($nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
@@ -138,13 +163,16 @@ class EmpleadoController
         $genero = trim($_POST['genero'] ?? '');
         $edad = intval($_POST['edad'] ?? 0);
         $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
+        $id_biblioteca = intval($_POST['id_biblioteca'] ?? 0);
+        $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
+        $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
 
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
         }
 
-        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio);
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
         if ($errorValidacion !== null) {
             $this->error($errorValidacion);
             return;
@@ -158,7 +186,7 @@ class EmpleadoController
         }
 
         try {
-            $updated = $this->model->actualizarEmpleado($id, $nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio);
+            $updated = $this->model->actualizarEmpleado($id, $nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();

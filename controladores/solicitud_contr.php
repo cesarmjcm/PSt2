@@ -14,6 +14,14 @@ class SolicitudController
 {
     private $model;
 
+    // Estados a los que se puede pasar desde cada estado (incluye mantenerse igual).
+    private const TRANSICIONES_ESTADO = [
+        'pendiente' => ['pendiente', 'aprobada', 'rechazada', 'cancelada'],
+        'aprobada'  => ['aprobada', 'cancelada'],
+        'rechazada' => ['rechazada', 'cancelada'],
+        'cancelada' => ['cancelada'],
+    ];
+
     public function __construct()
     {
         $this->model = new Solicitud();
@@ -43,6 +51,25 @@ class SolicitudController
     }
 
     
+    private function esAdmin(): bool
+    {
+        return ($_SESSION['user_rol'] ?? '') === 'administrador';
+    }
+
+    private function obtenerSolicitud(int $id): ?array
+    {
+        $filas = $this->model->mostrarSolicitudes();
+        if (!is_array($filas)) {
+            return null;
+        }
+        foreach ($filas as $fila) {
+            if ((int) ($fila['id'] ?? 0) === $id) {
+                return $fila;
+            }
+        }
+        return null;
+    }
+
     private function esCampoEnBlanco(string $valor): bool
     {
         
@@ -60,7 +87,7 @@ class SolicitudController
             'responsable' => trim($_POST['responsable'] ?? ''),
             'participantes' => intval($_POST['participantes'] ?? 0),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
-            'estado' => trim($_POST['estado'] ?? 'Pendiente'),
+            'estado' => strtolower(trim($_POST['estado'] ?? 'pendiente')),
         ];
     }
 
@@ -105,6 +132,8 @@ class SolicitudController
         }
         if (!Validador::esFechaValida($data['fecha_solicitud'])) {
             $errors[] = 'Fecha de solicitud inválida: debe tener el formato AAAA-MM-DD.';
+        } elseif ($data['fecha_solicitud'] < (new DateTimeImmutable('today'))->format('Y-m-d')) {
+            $errors[] = 'La fecha de solicitud no puede ser anterior a la fecha actual.';
         }
         if (!Validador::esHoraValida($data['hora_solicitud'])) {
             $errors[] = 'Hora de solicitud inválida: debe tener el formato HH:MM (24 horas).';
@@ -190,6 +219,11 @@ class SolicitudController
             return;
         }
 
+        if (!$this->esAdmin()) {
+            $this->error('No tiene permisos para editar solicitudes.');
+            return;
+        }
+
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->error('ID inválido.');
@@ -200,6 +234,18 @@ class SolicitudController
         $errors = $this->validarSolicitud($data);
         if (!empty($errors)) {
             $this->error(implode(' ', $errors));
+            return;
+        }
+
+        $actual = $this->obtenerSolicitud($id);
+        if ($actual === null) {
+            $this->error('La solicitud no existe.');
+            return;
+        }
+        $estadoActual = strtolower(trim((string) ($actual['estado'] ?? 'pendiente')));
+        $permitidos = self::TRANSICIONES_ESTADO[$estadoActual] ?? [$estadoActual];
+        if (!in_array($data['estado'], $permitidos, true)) {
+            $this->error("No se puede cambiar una solicitud de {$estadoActual} a {$data['estado']}.");
             return;
         }
 
@@ -235,6 +281,11 @@ class SolicitudController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+
+        if (!$this->esAdmin()) {
+            $this->error('No tiene permisos para eliminar solicitudes.');
             return;
         }
 

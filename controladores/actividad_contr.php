@@ -6,17 +6,27 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../helpers/validador.php';
 require_once __DIR__ . '/../modelos/actividad.php';
+require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 
 class ActividadController
 {
     private $model;
+    private $empleadoModel;
     private $conex;
+
+    private const TRANSICIONES_ESTADO = [
+        'pendiente' => ['pendiente', 'confirmada', 'cancelada'],
+        'confirmada' => ['confirmada', 'ejecutada', 'cancelada'],
+        'ejecutada' => ['ejecutada'],
+        'cancelada' => ['cancelada'],
+    ];
 
     public function __construct()
     {
         $this->model = new Actividad();
+        $this->empleadoModel = new Empleado();
         
         
         
@@ -57,6 +67,11 @@ class ActividadController
         }
 
         $data = $this->collectInput();
+        $errorResponsable = $this->completarDatosResponsable($data);
+        if ($errorResponsable !== null) {
+            $this->error($errorResponsable);
+            return;
+        }
         $errors = $this->model->validarActividad($data);
         if (!empty($errors)) {
             
@@ -119,7 +134,25 @@ class ActividadController
             return;
         }
 
+        $actual = $this->model->obtenerActividadPorId($id);
+        if (!$actual) {
+            $this->error('La actividad no existe.');
+            return;
+        }
+
         $data = $this->collectInput();
+        $errorResponsable = $this->completarDatosResponsable($data, $actual);
+        if ($errorResponsable !== null) {
+            $this->error($errorResponsable);
+            return;
+        }
+        $estadoActual = strtolower(Validador::normalizarTexto($actual['estado'] ?? 'pendiente'));
+        $estadosPermitidos = self::TRANSICIONES_ESTADO[$estadoActual] ?? [$estadoActual];
+        if (!in_array($data['estado'], $estadosPermitidos, true)) {
+            $this->error("No se puede cambiar una actividad de {$estadoActual} a {$data['estado']}.");
+            return;
+        }
+
         $errors = $this->model->validarActividad($data);
         if (!empty($errors)) {
             error_log('[ActividadController::actualizar] Validación falló: ' . implode(' | ', $errors)
@@ -236,10 +269,10 @@ class ActividadController
             $idBiblioteca = 0;
         }
 
-        $estadosValidos = ['confirmada', 'ejecutada', 'cancelada'];
+        $estadosValidos = ['pendiente', 'confirmada', 'ejecutada', 'cancelada'];
         $estado = Validador::normalizarTexto($_POST['estado'] ?? '');
         if (!in_array($estado, $estadosValidos, true)) {
-            $estado = 'confirmada';
+            $estado = 'pendiente';
         }
 
         return [
@@ -259,9 +292,37 @@ class ActividadController
             'comuna'               => Validador::normalizarTexto($_POST['comuna'] ?? ''),
             'id_espacio_cultural'  => $idEspacioCultural,
             'id_tipo_actividad'    => intval($_POST['id_tipo_actividad'] ?? 0),
-            'responsable'          => Validador::normalizarTexto($_POST['responsable'] ?? $_POST['id_responsable'] ?? ''),
-            'telefono_responsable' => Validador::normalizarTexto($_POST['telefono_responsable'] ?? $_POST['telefonoResponsable'] ?? ''),
+            'id_empleado'          => trim((string)($_POST['id_empleado'] ?? '')),
         ];
+    }
+
+    private function completarDatosResponsable(array &$data, ?array $actual = null): ?string
+    {
+        $idEmpleado = $data['id_empleado'];
+        if ($idEmpleado === '') {
+            $data['responsable'] = '';
+            $data['telefono_responsable'] = '';
+            return null;
+        }
+
+        if ($idEmpleado === '__actual__' && $actual !== null) {
+            $data['responsable'] = (string)($actual['responsable'] ?? '');
+            $data['telefono_responsable'] = (string)($actual['telefono_responsable'] ?? '');
+            return null;
+        }
+
+        if (!ctype_digit($idEmpleado) || (int)$idEmpleado <= 0) {
+            return 'Seleccione un responsable válido de la lista.';
+        }
+
+        $empleado = $this->empleadoModel->obtenerEmpleadoPorId((int)$idEmpleado);
+        if (!$empleado) {
+            return 'El empleado responsable seleccionado ya no existe.';
+        }
+
+        $data['responsable'] = trim((string)($empleado['nombre'] ?? '') . ' ' . (string)($empleado['apellido'] ?? ''));
+        $data['telefono_responsable'] = trim((string)($empleado['telefono'] ?? ''));
+        return null;
     }
 
     private function calcularDiaSemana(string $fecha): string

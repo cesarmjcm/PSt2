@@ -592,55 +592,51 @@ fieldset{
         background-color: #d2d6eb;
         transform: translateY(-1px);
         box-shadow: 0 6px 12px rgba(37, 52, 107, 0.12);
-        
+    }
 
+    .solicitudes-selector {
+        display: grid;
+        gap: 8px;
         margin: 16px 0 0;
         padding: 12px;
         border: 1px solid #c8d2e8;
         border-radius: 16px;
         background: #f6f8ff;
-        max-height: 260px;
-        overflow-y: auto;
-        display: grid;
-        gap: 10px;
     }
 
-    .solicitudes-selector__item {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-        padding: 14px 16px;
-        border: 1px solid transparent;
-        border-radius: 14px;
-        background: #ffffff;
-        cursor: pointer;
-        transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-        text-align: left;
+    .solicitudes-selector[hidden] {
+        display: none;
     }
 
-    .solicitudes-selector__item:hover,
-    .solicitudes-selector__item:focus-visible {
-        background: #eef3ff;
-        border-color: #7c96ed;
-        transform: translateY(-1px);
-        outline: none;
+    .solicitudes-selector label {
+        color: #25346b;
+        font-size: 0.92rem;
+        font-weight: 600;
     }
 
-    .solicitudes-selector__item strong {
-        font-size: 0.96rem;
-        color: #1f2f5f;
-    }
-
-    .solicitudes-selector__item span {
-        font-size: 0.89rem;
-        color: #5c6a8e;
-    }
-
-    .solicitudes-selector__empty {
-        color: #5e6c8e;
-        font-size: 0.95rem;
+    .solicitudes-selector__select {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
         padding: 12px 14px;
+        border: 1px solid #c8d2e8;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #25346b;
+        font: inherit;
+        line-height: 1.4;
+    }
+
+    .solicitudes-selector__select:focus {
+        outline: none;
+        border-color: #7188d4;
+        box-shadow: 0 0 0 3px rgba(113, 136, 212, 0.18);
+    }
+
+    .solicitudes-selector__select:disabled {
+        background: #eef1f8;
+        color: #66718c;
+        cursor: not-allowed;
     }
 
     .btn-container {

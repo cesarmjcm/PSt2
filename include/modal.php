@@ -40,7 +40,6 @@ $empleados = $empleadoModel->mostrarEmpleados();
 $bibliotecas = $bibliotecaModel->mostrarBibliotecas();
 $tiposActividad = $tipoActividadModel->mostrarTipos();
 $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
-$empleado=$empleadoModel->mostrarEmpleados();
 ?>
 
 <section>
@@ -50,7 +49,7 @@ $empleado=$empleadoModel->mostrarEmpleados();
         <div class="modal-content-wrapper">
             <section class="formulario-planificacion">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                    <h2 class="section-title" id="planModalTitulo" style="margin: 0;">Nueva Planificación de Actividad</h2>
+                    <h2 class="section-title" id="planModalTitulo" style="margin: 0;">Planificación de Actividad</h2>
                     <span class="close-button" style="cursor:pointer; font-size: 1.5rem;">&times;</span>
                 </div>
                 <div class="container__planificacion">
@@ -74,7 +73,12 @@ $empleado=$empleadoModel->mostrarEmpleados();
                             </fieldset>
                             <button type="button" class="btn-secondary" id="btnCargarSolicitud" style="white-space:nowrap;">Cargar solicitud</button>
                         </div>
-                        <div id="solicitudesSelector" class="solicitudes-selector" hidden></div>
+                        <div id="solicitudesSelector" class="solicitudes-selector" hidden>
+                            <label for="solicitudSeleccion">Selecciona una solicitud para cargar</label>
+                            <select id="solicitudSeleccion" class="solicitudes-selector__select">
+                                <option value="">Seleccione una solicitud...</option>
+                            </select>
+                        </div>
 
                         <div id="form-planificacion-aviso" class="form-aviso" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
 
@@ -97,6 +101,7 @@ $empleado=$empleadoModel->mostrarEmpleados();
 
                                     <label for="plan-estado">Estado de la actividad</label>
                                     <select id="plan-estado" name="estado">
+                                        <option value="pendiente" selected>Pendiente</option>
                                         <option value="confirmada">Confirmada</option>
                                         <option value="ejecutada">Ejecutada</option>
                                         <option value="cancelada">Cancelada</option>
@@ -207,15 +212,15 @@ $empleado=$empleadoModel->mostrarEmpleados();
                                     <fieldset>
                                         <legend>Responsable</legend>
                                         <label for="plan-responsable">Nombre</label>
-                                        <select name="responsable" id="plan-responsable">
+                                        <select name="id_empleado" id="plan-responsable">
                                             <option value="">Seleccione un responsable</option>
                                             <?php foreach ($empleados as $e): ?>
                                                 <?php $nombreCompleto = trim($e['nombre'].' '.$e['apellido']); ?>
-                                                <option value="<?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
+                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <label for="plan-telefono">Teléfono responsable</label>
-                                        <input type="tel" id="plan-telefono" maxlength="11" name="telefono_responsable" inputmode="tel" placeholder="Ej. 04123456789" readonly>
+                                        <input type="tel" id="plan-telefono" maxlength="15" inputmode="tel" placeholder="Teléfono del empleado" readonly>
                                     </fieldset>
                                 </fieldset>
                             </fieldset>
@@ -233,17 +238,9 @@ $empleado=$empleadoModel->mostrarEmpleados();
     (function () {
         const selectResponsable = document.getElementById('plan-responsable');
         const inputTelefono = document.getElementById('plan-telefono');
-
         if (selectResponsable && inputTelefono) {
             selectResponsable.addEventListener('change', () => {
-                const opcion = selectResponsable.options[selectResponsable.selectedIndex];
-                if (opcion && opcion.value !== '') {
-                    inputTelefono.value = opcion.dataset.telefono || '';
-                    inputTelefono.readOnly = true;
-                } else {
-                    inputTelefono.value = '';
-                    inputTelefono.readOnly = false;
-                }
+                inputTelefono.value = selectResponsable.selectedOptions[0]?.dataset.telefono || '';
             });
         }
 

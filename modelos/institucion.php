@@ -5,7 +5,7 @@ class Institucion
 {
     public function mostrarInstituciones()
     {
-        $sql = "SELECT i.id, i.nombre, i.id_municipio, m.nombre AS id_municipio_nombre
+        $sql = "SELECT i.id, i.nombre, i.rif, i.correo, i.direccion, i.id_municipio, m.nombre AS id_municipio_nombre
                 FROM institucion i
                 JOIN municipio m ON i.id_municipio = m.id
                 ORDER BY i.nombre";
@@ -36,18 +36,32 @@ class Institucion
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearInstitucion(string $nombre, int $id_municipio)
+    public function existeRif(string $rif, ?int $idExcluir = null): bool
     {
-        $sql = "INSERT INTO institucion (nombre, id_municipio) VALUES (?, ?)";
+        $sql = "SELECT id FROM institucion WHERE rif = ?";
+        $params = [$rif];
+        if ($idExcluir !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $idExcluir;
+        }
+        $sql .= " LIMIT 1";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $id_municipio]);
+        $stmt->execute($params);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function actualizarInstitucion(int $id, string $nombre, int $id_municipio)
+    public function crearInstitucion(string $nombre, int $id_municipio, string $rif, string $correo = '', string $direccion = '')
     {
-        $sql = "UPDATE institucion SET nombre = ?, id_municipio = ? WHERE id = ?";
+        $sql = "INSERT INTO institucion (nombre, id_municipio, rif, correo, direccion) VALUES (?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $id_municipio, $id]);
+        return $stmt->execute([$nombre, $id_municipio, $rif !== '' ? $rif : null, $correo !== '' ? $correo : null, $direccion !== '' ? $direccion : null]);
+    }
+
+    public function actualizarInstitucion(int $id, string $nombre, int $id_municipio, string $rif, string $correo = '', string $direccion = '')
+    {
+        $sql = "UPDATE institucion SET nombre = ?, id_municipio = ?, rif = ?, correo = ?, direccion = ? WHERE id = ?";
+        $stmt = Conexion::conectar()->prepare($sql);
+        return $stmt->execute([$nombre, $id_municipio, $rif !== '' ? $rif : null, $correo !== '' ? $correo : null, $direccion !== '' ? $direccion : null, $id]);
     }
 
     public function tieneSolicitudesAsociadas(int $id): bool

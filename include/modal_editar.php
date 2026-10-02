@@ -65,6 +65,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
 
                                     <label for="editar-estado">Estado de la actividad</label>
                                     <select id="editar-estado" name="estado">
+                                        <option value="pendiente">Pendiente</option>
                                         <option value="confirmada">Confirmada</option>
                                         <option value="ejecutada">Ejecutada</option>
                                         <option value="cancelada">Cancelada</option>
@@ -165,15 +166,15 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                     <fieldset>
                                         <legend>Responsable</legend>
                                         <label for="editar-responsable">Nombre</label>
-                                        <select name="responsable" id="editar-responsable">
+                                        <select name="id_empleado" id="editar-responsable">
                                             <option value="">Seleccione un responsable</option>
                                             <?php foreach ($empleados as $e): ?>
                                                 <?php $nombreCompleto = trim($e['nombre'].' '.$e['apellido']); ?>
-                                                <option value="<?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
+                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <label for="editar-telefono">Teléfono responsable</label>
-                                        <input type="tel" id="editar-telefono" maxlength="11" name="telefono_responsable" inputmode="tel" placeholder="Ej. 04123456789" readonly>
+                                        <input type="tel" id="editar-telefono" maxlength="15" inputmode="tel" placeholder="Teléfono del empleado" readonly>
                                     </fieldset>
                                 </fieldset>
                             </fieldset>
@@ -190,22 +191,6 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
 <script>
     (function () {
         
-        const selectResponsable = document.getElementById('editar-responsable');
-        const inputTelefono = document.getElementById('editar-telefono');
-
-        if (selectResponsable && inputTelefono) {
-            selectResponsable.addEventListener('change', () => {
-                const opcion = selectResponsable.options[selectResponsable.selectedIndex];
-                if (opcion && opcion.value !== '') {
-                    inputTelefono.value = opcion.dataset.telefono || '';
-                    inputTelefono.readOnly = true;
-                } else {
-                    inputTelefono.value = '';
-                    inputTelefono.readOnly = false;
-                }
-            });
-        }
-
         
         const radiosUbicacion = document.querySelectorAll('#form-editar-actividad input[name="tipo_ubicacion"]');
         const ubicacionBiblioteca = document.getElementById('editar-ubicacion-biblioteca');
@@ -218,6 +203,50 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
         }
 
         radiosUbicacion.forEach(radio => radio.addEventListener('change', actualizarUbicacion));
+
+        const selectResponsable = document.getElementById('editar-responsable');
+        const inputTelefono = document.getElementById('editar-telefono');
+        selectResponsable.addEventListener('change', () => {
+            inputTelefono.value = selectResponsable.selectedOptions[0]?.dataset.telefono || '';
+        });
+
+        window.seleccionarResponsableActividad = function (nombre, telefono) {
+            selectResponsable.querySelector('option[value="__actual__"]')?.remove();
+            const nombreBuscado = String(nombre || '').trim().toLocaleLowerCase();
+            const opcion = Array.from(selectResponsable.options).find(item =>
+                item.textContent.trim().toLocaleLowerCase() === nombreBuscado
+            );
+            if (opcion && nombreBuscado) {
+                selectResponsable.value = opcion.value;
+                selectResponsable.dispatchEvent(new Event('change'));
+                return;
+            }
+
+            if (nombreBuscado) {
+                const opcionActual = new Option(`${nombre} (actual)`, '__actual__');
+                opcionActual.dataset.telefono = telefono || '';
+                selectResponsable.add(opcionActual);
+                selectResponsable.value = '__actual__';
+            } else {
+                selectResponsable.value = '';
+            }
+            inputTelefono.value = telefono || '';
+        };
+
+        window.restringirEstadoActividad = function (estadoActual) {
+            const transiciones = {
+                pendiente: ['pendiente', 'confirmada', 'cancelada'],
+                confirmada: ['confirmada', 'ejecutada', 'cancelada'],
+                ejecutada: ['ejecutada'],
+                cancelada: ['cancelada'],
+            };
+            const selectEstado = document.getElementById('editar-estado');
+            const estado = String(estadoActual || 'pendiente').toLowerCase();
+            const permitidos = transiciones[estado] || [estado];
+            Array.from(selectEstado.options).forEach(opcion => {
+                opcion.disabled = !permitidos.includes(opcion.value);
+            });
+        };
 
         
         
@@ -237,7 +266,8 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             document.getElementById('editar-descripcion').value = actividad.descripcion ?? '';
             document.getElementById('editar-fecha').value = actividad.fecha ?? '';
             document.getElementById('editar-hora').value = actividad.horaActividad ?? '';
-            document.getElementById('editar-estado').value = actividad.estado ?? 'confirmada';
+            document.getElementById('editar-estado').value = actividad.estado ?? 'pendiente';
+            window.restringirEstadoActividad(actividad.estado ?? 'pendiente');
             document.getElementById('editar-objetivo').value = actividad.objetivo ?? '';
             document.getElementById('editar-participantes').value = actividad.participantes ?? '';
             document.getElementById('editar-nivel-impacto').value = actividad.nivel_impacto ?? '';
@@ -247,8 +277,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             document.getElementById('editar-biblioteca').value = actividad.id_biblioteca ?? '';
             document.getElementById('editar-espacio').value = actividad.id_espacio_cultural ?? '';
             document.getElementById('editar-tipo-actividad').value = actividad.id_tipo_actividad ?? '';
-            document.getElementById('editar-responsable').value = actividad.responsable ?? '';
-            document.getElementById('editar-telefono').value = actividad.telefono_responsable ?? '';
+            window.seleccionarResponsableActividad(actividad.responsable, actividad.telefono_responsable);
 
             const esEspacio = !!actividad.id_espacio_cultural;
             document.getElementById('editar-tipo-ubicacion-' + (esEspacio ? 'espacio' : 'biblioteca')).checked = true;

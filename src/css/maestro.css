@@ -216,6 +216,21 @@
     box-shadow: 0 0 0 4px rgba(53, 112, 216, 0.08);
 }
 
+.empleado-datos-laborales {
+    min-width: 0;
+    margin: 0 0 16px;
+    padding: 16px 16px 0;
+    border: 1px solid #cdd5e5;
+    border-radius: 14px;
+    background-color: #f9fbff;
+}
+
+.empleado-datos-laborales legend {
+    padding: 0 8px;
+    color: #25346b;
+    font-weight: 700;
+}
+
 .maestro-modal .config-field input,
 .maestro-modal .config-field select {
     width: 100%;
@@ -224,6 +239,169 @@
 .maestro-modal[hidden] {
     display: none !important;
 }
+
+.solicitud-modal__dialog {
+    box-sizing: border-box;
+    width: min(760px, calc(100vw - 32px));
+    max-width: 760px;
+}
+
+.solicitud-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 20px;
+}
+
+.solicitud-form .config-field {
+    min-width: 0;
+}
+
+.solicitud-form .config-field input,
+.solicitud-form .config-field select,
+.solicitud-form .config-field textarea {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.solicitud-form .config-field--descripcion,
+.solicitud-form #modalError,
+.solicitud-form .maestro-modal__actions {
+    grid-column: 1 / -1;
+}
+
+.solicitud-form .config-field textarea {
+    display: block;
+    min-height: 112px;
+    padding: 14px 16px;
+    border: 1px solid #cdd5e5;
+    border-radius: 14px;
+    background-color: #f9fbff;
+    color: #25346b;
+    font: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.solicitud-form .config-field textarea:focus {
+    outline: none;
+    border-color: #8aa1d5;
+    box-shadow: 0 0 0 4px rgba(53, 112, 216, 0.08);
+}
+
+.solicitud-form__nota {
+    display: block;
+    margin-top: 9px;
+    padding: 10px 12px;
+    border-left: 3px solid #7188d4;
+    border-radius: 0 8px 8px 0;
+    background-color: #f1f4ff;
+    color: #4a587e;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.tabla__container--solicitudes {
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.tabla__container--solicitudes .tabla-buscador--solicitudes {
+    width: min(100%, 360px);
+    min-width: min(100%, 240px);
+    margin: 0 0 12px;
+}
+
+.solicitudes-tabla {
+    width: 100%;
+    min-width: 1120px;
+    table-layout: fixed;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.solicitudes-tabla th,
+.solicitudes-tabla td {
+    padding: 8px 10px;
+    vertical-align: top;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.solicitudes-tabla th {
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+}
+
+.solicitudes-tabla th:nth-child(1),
+.solicitudes-tabla td:nth-child(1) {
+    width: 48px;
+}
+
+.solicitudes-tabla th:nth-child(2),
+.solicitudes-tabla td:nth-child(2) {
+    width: 150px;
+}
+
+.solicitudes-tabla th:nth-child(3),
+.solicitudes-tabla td:nth-child(3) {
+    width: 95px;
+}
+
+.solicitudes-tabla th:nth-child(4),
+.solicitudes-tabla td:nth-child(4) {
+    width: 132px;
+}
+
+.solicitudes-tabla th:nth-child(5),
+.solicitudes-tabla td:nth-child(5) {
+    width: 76px;
+}
+
+.solicitudes-tabla th:nth-child(6),
+.solicitudes-tabla td:nth-child(6) {
+    width: 125px;
+}
+
+.solicitudes-tabla th:nth-child(7),
+.solicitudes-tabla td:nth-child(7) {
+    width: 135px;
+}
+
+.solicitudes-tabla th:nth-child(8),
+.solicitudes-tabla td:nth-child(8) {
+    width: 94px;
+}
+
+.solicitudes-tabla th:nth-child(9),
+.solicitudes-tabla td:nth-child(9) {
+    width: 170px;
+}
+
+.solicitudes-tabla th:nth-child(10),
+.solicitudes-tabla td:nth-child(10) {
+    width: 95px;
+}
+
+.solicitudes-tabla td:nth-child(1),
+.solicitudes-tabla td:nth-child(3),
+.solicitudes-tabla td:nth-child(4),
+.solicitudes-tabla td:nth-child(5),
+.solicitudes-tabla td:nth-child(8),
+.solicitudes-tabla td:nth-child(10) {
+    white-space: nowrap;
+}
+
+.solicitudes-tabla--admin th:nth-child(11),
+.solicitudes-tabla--admin td:nth-child(11) {
+    width: 100px;
+    white-space: nowrap;
+}
+
+.solicitudes-tabla .col-acciones {
+    text-align: center;
+}
+
 @media (max-width: 640px) {
     .maestro__header {
         flex-direction: column;
@@ -233,6 +411,26 @@
     .maestro-modal__dialog {
         margin: 16px;
         max-width: none;
+    }
+
+    .solicitud-modal__dialog {
+        width: calc(100vw - 24px);
+        margin: 12px;
+    }
+
+    .solicitud-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .solicitud-form .config-field--descripcion,
+    .solicitud-form #modalError,
+    .solicitud-form .maestro-modal__actions {
+        grid-column: auto;
+    }
+
+    .tabla__container--solicitudes {
+        padding-right: 12px;
+        padding-left: 12px;
     }
 }
 

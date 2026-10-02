@@ -41,7 +41,9 @@ CREATE TABLE `actividad` (
   `fecha` date NOT NULL,
   `hora` time DEFAULT NULL,
   `dia_semana` text NOT NULL,
-  `estado` enum('confirmada','ejecutada','cancelada') NOT NULL DEFAULT 'confirmada'
+  `estado` enum('pendiente','confirmada','ejecutada','cancelada') NOT NULL DEFAULT 'pendiente',
+  `responsable` varchar(100) DEFAULT NULL,
+  `telefono_responsable` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -273,16 +275,19 @@ CREATE TABLE `empleado` (
   `genero` varchar(10) NOT NULL,
   `edad` int(2) UNSIGNED NOT NULL,
   `anios_de_servicio` int(2) UNSIGNED NOT NULL,
-  `id_cargo` int(10) NOT NULL
+  `id_cargo` int(10) NOT NULL,
+  `id_biblioteca` int(10) NOT NULL,
+  `fecha_inicio_cargo` date DEFAULT NULL,
+  `fecha_fin_cargo` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `empleado`
 --
 
-INSERT INTO `empleado` (`id`, `nombre`, `apellido`, `cedula`, `telefono`, `genero`, `edad`, `anios_de_servicio`, `id_cargo`) VALUES
-(13, 'jesus', 'serrano', 31982637, '04125240489', 'M', 1, 0, 1),
-(15, 'jesus', 'soto', 32435607, '04125240489', '', 0, 0, 1);
+INSERT INTO `empleado` (`id`, `nombre`, `apellido`, `cedula`, `telefono`, `genero`, `edad`, `anios_de_servicio`, `id_cargo`, `id_biblioteca`) VALUES
+(13, 'jesus', 'serrano', 31982637, '04125240489', 'M', 1, 0, 1, 15),
+(15, 'jesus', 'soto', 32435607, '04125240489', '', 0, 0, 1, 15);
 
 -- --------------------------------------------------------
 
@@ -339,7 +344,10 @@ INSERT INTO `impacto_actividad` (`id`, `id_impacto`, `id_actividad`) VALUES
 CREATE TABLE `institucion` (
   `id` int(10) NOT NULL,
   `id_municipio` int(10) NOT NULL,
-  `nombre` varchar(40) NOT NULL
+  `nombre` varchar(40) NOT NULL,
+  `rif` varchar(12) DEFAULT NULL,
+  `correo` varchar(50) DEFAULT NULL,
+  `direccion` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -515,6 +523,7 @@ CREATE TABLE `solicitud` (
   `id` int(10) NOT NULL,
   `id_institucion` int(10) NOT NULL,
   `fecha_solicitud` date NOT NULL,
+  `fecha_registro` datetime NOT NULL DEFAULT current_timestamp(),
   `hora_solicitud` time NOT NULL,
   `lugar` varchar(100) NOT NULL,
   `responsable` varchar(50) NOT NULL,
@@ -658,7 +667,8 @@ ALTER TABLE `comuna`
 ALTER TABLE `empleado`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `cedula` (`cedula`),
-  ADD KEY `id_cargo` (`id_cargo`);
+  ADD KEY `id_cargo` (`id_cargo`),
+  ADD KEY `id_biblioteca` (`id_biblioteca`);
 
 --
 -- Indices de la tabla `espacio_cultural`
@@ -680,6 +690,7 @@ ALTER TABLE `impacto_actividad`
 --
 ALTER TABLE `institucion`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_institucion_rif` (`rif`),
   ADD KEY `id_municipio` (`id_municipio`);
 
 --
@@ -896,7 +907,9 @@ ALTER TABLE `comuna`
 -- Filtros para la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  ADD CONSTRAINT `empleado_ibfk_1` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`);
+  ADD CONSTRAINT `empleado_ibfk_1` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`),
+  ADD CONSTRAINT `empleado_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
+  ADD CONSTRAINT `chk_empleado_fechas_cargo` CHECK (`fecha_fin_cargo` IS NULL OR `fecha_inicio_cargo` IS NULL OR `fecha_fin_cargo` >= `fecha_inicio_cargo`);
 
 --
 -- Filtros para la tabla `institucion`
@@ -915,6 +928,14 @@ ALTER TABLE `solicitud`
 --
 ALTER TABLE `usuario`
   ADD CONSTRAINT `fk_usuario_empleado` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id`) ON DELETE SET NULL;
+
+--
+-- Datos existentes: vincular empleados con su biblioteca y copiar responsables históricos a actividad
+--
+UPDATE `actividad` a
+JOIN `responsable` r ON r.`id_actividad` = a.`id`
+SET a.`responsable` = NULLIF(r.`nombre`, ''),
+    a.`telefono_responsable` = NULLIF(r.`telefono`, '');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

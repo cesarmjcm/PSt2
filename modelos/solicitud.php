@@ -10,6 +10,7 @@ class Solicitud
                     s.id_institucion,
                     i.nombre AS institucion,
                     s.fecha_solicitud,
+                    s.fecha_registro,
                     s.hora_solicitud,
                     s.lugar,
                     s.responsable,

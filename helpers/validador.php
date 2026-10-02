@@ -182,6 +182,28 @@ class Validador
         return in_array($valor, $dias, true);
     }
 
+    /**
+     * Normaliza un RIF venezolano al formato J-12345678-9 (mayúscula y guiones).
+     * Si el valor no tiene la forma de un RIF, lo devuelve solo en mayúsculas y sin espacios.
+     */
+    public static function normalizarRif(string $valor): string
+    {
+        $valor = strtoupper(preg_replace('/\s+/', '', self::normalizarTexto($valor)));
+        if (preg_match('/^([JGVEPC])-?(\d{8})-?(\d)$/', $valor, $m)) {
+            return $m[1] . '-' . $m[2] . '-' . $m[3];
+        }
+        return $valor;
+    }
+
+    /**
+     * RIF venezolano: una letra (J, G, V, E, P o C), 8 dígitos y un dígito verificador.
+     * Acepta con o sin guiones (J-12345678-9 / J123456789).
+     */
+    public static function esRifValido(string $valor): bool
+    {
+        return (bool) preg_match('/^[JGVEPC]-\d{8}-\d$/', self::normalizarRif($valor));
+    }
+
     public static function esClaveValida(string $valor, int $min = 6, int $max = 100): bool
     {
         $len = self::longitud($valor);

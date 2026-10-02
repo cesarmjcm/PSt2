@@ -42,6 +42,27 @@ class InstitucionController
         }
     }
 
+    /**
+     * Valida y normaliza rif, correo y dirección (comunes a crear y actualizar).
+     * Devuelve [mensajeDeError|null, rifNormalizado].
+     */
+    private function validarContacto(string $rif, string $correo, string $direccion): array
+    {
+        if ($rif === '') {
+            return ['El RIF de la institución es obligatorio.', ''];
+        }
+        if (!Validador::esRifValido($rif)) {
+            return ['El RIF debe tener el formato J-12345678-9 (letra J, G, V, E, P o C, 8 dígitos y un dígito verificador).', ''];
+        }
+        if ($correo !== '' && !Validador::esCorreoValido($correo, 50)) {
+            return ['El correo tiene un formato inválido o supera los 50 caracteres.', ''];
+        }
+        if ($direccion !== '' && !Validador::esDescripcionValida($direccion, 0, 100)) {
+            return ['La dirección tiene un formato o longitud inválida (máx. 100 caracteres; solo letras, números y . , - # ( ) \').', ''];
+        }
+        return [null, Validador::normalizarRif($rif)];
+    }
+
     private function crear(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -51,6 +72,9 @@ class InstitucionController
 
         $nombre = trim($_POST['nombre'] ?? '');
         $id_municipio = intval($_POST['id_municipio'] ?? 0);
+        $rifRaw = trim($_POST['rif'] ?? '');
+        $correo = trim($_POST['correo'] ?? '');
+        $direccion = trim($_POST['direccion'] ?? '');
 
         if ($nombre === '') {
             $this->error('Nombre de la institución es obligatorio.');
@@ -64,13 +88,22 @@ class InstitucionController
             $this->error('Debe seleccionar un municipio.');
             return;
         }
+        [$errorContacto, $rif] = $this->validarContacto($rifRaw, $correo, $direccion);
+        if ($errorContacto !== null) {
+            $this->error($errorContacto);
+            return;
+        }
         if ($this->model->existeNombre($nombre, $id_municipio)) {
             $this->error('Ya existe una institución con ese nombre en este municipio.');
             return;
         }
+        if ($this->model->existeRif($rif)) {
+            $this->error('Ya existe una institución con ese RIF.');
+            return;
+        }
 
         try {
-            $created = $this->model->crearInstitucion($nombre, $id_municipio);
+            $created = $this->model->crearInstitucion($nombre, $id_municipio, $rif, $correo, $direccion);
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
@@ -81,7 +114,7 @@ class InstitucionController
             }
         } catch (PDOException $e) {
             if ($e->getCode() === '23000') {
-                $this->error('Ya existe una institución con ese nombre en este municipio.');
+                $this->error('Ya existe una institución con ese nombre en este municipio o con ese RIF.');
                 return;
             }
             $this->error('No se pudo crear la institución.');
@@ -101,6 +134,9 @@ class InstitucionController
         $id = intval($_POST['id'] ?? 0);
         $nombre = trim($_POST['nombre'] ?? '');
         $id_municipio = intval($_POST['id_municipio'] ?? 0);
+        $rifRaw = trim($_POST['rif'] ?? '');
+        $correo = trim($_POST['correo'] ?? '');
+        $direccion = trim($_POST['direccion'] ?? '');
 
         if ($id <= 0 || $nombre === '') {
             $this->error('ID y nombre de la institución son obligatorios.');
@@ -114,13 +150,22 @@ class InstitucionController
             $this->error('Debe seleccionar un municipio.');
             return;
         }
+        [$errorContacto, $rif] = $this->validarContacto($rifRaw, $correo, $direccion);
+        if ($errorContacto !== null) {
+            $this->error($errorContacto);
+            return;
+        }
         if ($this->model->existeNombre($nombre, $id_municipio, $id)) {
             $this->error('Ya existe otra institución con ese nombre en este municipio.');
             return;
         }
+        if ($this->model->existeRif($rif, $id)) {
+            $this->error('Ya existe otra institución con ese RIF.');
+            return;
+        }
 
         try {
-            $updated = $this->model->actualizarInstitucion($id, $nombre, $id_municipio);
+            $updated = $this->model->actualizarInstitucion($id, $nombre, $id_municipio, $rif, $correo, $direccion);
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
@@ -131,7 +176,7 @@ class InstitucionController
             }
         } catch (PDOException $e) {
             if ($e->getCode() === '23000') {
-                $this->error('Ya existe otra institución con ese nombre en este municipio.');
+                $this->error('Ya existe otra institución con ese nombre en este municipio o con ese RIF.');
                 return;
             }
             $this->error('No se pudo actualizar la institución.');

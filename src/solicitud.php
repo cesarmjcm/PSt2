@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/../include/guardian.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -17,7 +21,7 @@ require_once __DIR__ . '/../include/guardian.php';
 
     <div class="page-layout">
         <main class="page-content">
-            <div class="tabla__container">
+            <div class="tabla__container tabla__container--solicitudes">
                 <div class="maestro__header">
                     <h1 class="planificacion__title">Solicitudes de Escuelas</h1>
                     <button type="button" class="btn-primary" id="btnNuevaSolicitud">
@@ -27,7 +31,7 @@ require_once __DIR__ . '/../include/guardian.php';
 
                 <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
 
-                <form class="tabla-buscador tabla-buscador--solicitudes" style="margin-bottom: 12px; max-width: 40px;" id="buscarSolicitudesForm" role="search">
+                <form class="tabla-buscador tabla-buscador--solicitudes" id="buscarSolicitudesForm" role="search">
                     <label class="sr-only" for="buscarSolicitudes">Buscar solicitud</label>
                     <i class="fas fa-search" aria-hidden="true"></i>
                     <input type="search"
@@ -39,19 +43,20 @@ require_once __DIR__ . '/../include/guardian.php';
                     </button>
                 </form>
 
-                <table class="tabla-planificacion" id="tablaSolicitudes">
+                <table class="tabla-planificacion solicitudes-tabla<?= $esAdmin ? ' solicitudes-tabla--admin' : '' ?>" id="tablaSolicitudes">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Institución</th>
                             <th>Fecha</th>
+                            <th>Fecha de registro</th>
                             <th>Hora</th>
                             <th>Lugar</th>
                             <th>Responsable</th>
                             <th>Participantes</th>
                             <th>Descripción</th>
                             <th>Estado</th>
-                            <th class="col-acciones">Acciones</th>
+                            <?php if ($esAdmin): ?><th class="col-acciones">Acciones</th><?php endif; ?>
                         </tr>
                     </thead>
                     <tbody id="tablaBody">
@@ -65,14 +70,14 @@ require_once __DIR__ . '/../include/guardian.php';
 
     <div class="maestro-modal" id="solicitudModal" hidden>
         <div class="maestro-modal__backdrop" id="modalBackdrop"></div>
-        <div class="maestro-modal__dialog">
+        <div class="maestro-modal__dialog solicitud-modal__dialog">
             <div class="maestro-modal__header">
                 <h2 id="modalTitulo">Nueva solicitud</h2>
                 <button type="button" class="maestro-modal__close" id="modalClose" aria-label="Cerrar">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <form id="solicitudForm" novalidate>
+            <form id="solicitudForm" class="solicitud-form" novalidate>
                 <input type="hidden" id="formId" value="">
                 <div id="modalError" class="maestro__alert maestro__alert--error" hidden></div>
                 <div class="config-field">
@@ -90,32 +95,25 @@ require_once __DIR__ . '/../include/guardian.php';
                     <input type="time" id="campo_hora_solicitud" name="hora_solicitud" required>
                 </div>
                 <div class="config-field">
-                    <label for="campo_biblioteca">Biblioteca</label>
-                    <select id="campo_biblioteca" name="biblioteca">
+                    <label for="campo_biblioteca">Lugar (biblioteca)</label>
+                    <select id="campo_biblioteca" name="biblioteca" required>
                         <option value="">-- Seleccione --</option>
                     </select>
                 </div>
                 <div class="config-field">
-                    <label for="campo_lugar">Lugar</label>
-                    <input type="text" id="campo_lugar" name="lugar" maxlength="100" required>
-                </div>
-                <div class="config-field">
-                    <label for="campo_empleado">Empleado</label>
-                    <select id="campo_empleado" name="empleado">
+                    <label for="campo_empleado">Responsable (empleado)</label>
+                    <select id="campo_empleado" name="empleado" required>
                         <option value="">-- Seleccione --</option>
                     </select>
-                </div>
-                <div class="config-field">
-                    <label for="campo_responsable">Responsable</label>
-                    <input type="text" id="campo_responsable" name="responsable" maxlength="50" required>
                 </div>
                 <div class="config-field">
                     <label for="campo_participantes">Participantes</label>
                     <input type="number" id="campo_participantes" name="participantes" min="0" max="99999" required>
                 </div>
-                <div class="config-field">
+                <div class="config-field config-field--descripcion">
                     <label for="campo_descripcion">Descripción</label>
                     <textarea id="campo_descripcion" name="descripcion" maxlength="250" rows="3"></textarea>
+                    <span class="solicitud-form__nota">Importante: La descripción aparece al cargar una solicitud.</span>
                 </div>
                 <div class="config-field">
                     <label for="campo_estado">Estado</label>
@@ -137,6 +135,15 @@ require_once __DIR__ . '/../include/guardian.php';
     <script>
     (function () {
         const endpoint = '../controladores/solicitud_contr.php';
+        const esAdmin = <?= json_encode($esAdmin) ?>;
+        // Debe coincidir con TRANSICIONES_ESTADO de solicitud_contr.php (el servidor es quien manda).
+        const TRANSICIONES_ESTADO = {
+            pendiente: ['pendiente', 'aprobada', 'rechazada', 'cancelada'],
+            aprobada:  ['aprobada', 'cancelada'],
+            rechazada: ['rechazada', 'cancelada'],
+            cancelada: ['cancelada'],
+        };
+        const columnasTabla = esAdmin ? 11 : 10;
         const tablaBody = document.getElementById('tablaBody');
         const paginacion = document.getElementById('solicitudPagination');
         const alertBox = document.getElementById('alertBox');
@@ -202,28 +209,41 @@ require_once __DIR__ . '/../include/guardian.php';
             formId.value = '';
             modalTitulo.textContent = 'Nueva solicitud';
             solicitudForm.reset();
+            establecerFechaMinimaSolicitud();
             ocultarErrorModal();
             llenarInstituciones();
             llenarBibliotecas();
             llenarEmpleados();
+            restringirEstados('');
             modal.hidden = false;
+        }
+
+        function establecerFechaMinimaSolicitud() {
+            const ahora = new Date();
+            const hoy = [
+                ahora.getFullYear(),
+                String(ahora.getMonth() + 1).padStart(2, '0'),
+                String(ahora.getDate()).padStart(2, '0'),
+            ].join('-');
+            document.getElementById('campo_fecha_solicitud').min = hoy;
         }
 
         function abrirModalEditar(solicitud) {
             formId.value = solicitud.id;
             modalTitulo.textContent = 'Editar solicitud';
             solicitudForm.reset();
+            establecerFechaMinimaSolicitud();
             ocultarErrorModal();
+            const estadoActual = String(solicitud.estado || 'pendiente').toLowerCase();
             llenarInstituciones(solicitud.id_institucion);
-            llenarBibliotecas();
-            llenarEmpleados();
+            llenarBibliotecas(solicitud.lugar);
+            llenarEmpleados(solicitud.responsable);
             document.getElementById('campo_fecha_solicitud').value = solicitud.fecha_solicitud;
             document.getElementById('campo_hora_solicitud').value = String(solicitud.hora_solicitud || '').slice(0, 5);
-            document.getElementById('campo_lugar').value = solicitud.lugar;
-            document.getElementById('campo_responsable').value = solicitud.responsable;
             document.getElementById('campo_participantes').value = solicitud.participantes;
             document.getElementById('campo_descripcion').value = solicitud.descripcion;
-            document.getElementById('campo_estado').value = solicitud.estado || 'pendiente';
+            document.getElementById('campo_estado').value = estadoActual;
+            restringirEstados(estadoActual);
             modal.hidden = false;
         }
 
@@ -245,48 +265,64 @@ require_once __DIR__ . '/../include/guardian.php';
             });
         }
 
-        function llenarBibliotecas(seleccionado = '') {
+        // Se guardan solo los nombres (lugar / responsable), así que al editar
+        // se busca la opción por nombre. Si el registro es antiguo y su valor ya
+        // no coincide con ninguna opción, se conserva como opción actual.
+        function agregarOpcionActual(select, texto) {
+            const option = document.createElement('option');
+            option.value = '__actual__';
+            option.textContent = texto;
+            option.selected = true;
+            select.appendChild(option);
+        }
+
+        function llenarBibliotecas(nombreActual = '') {
             const select = document.getElementById('campo_biblioteca');
             select.innerHTML = '<option value="">-- Seleccione --</option>';
+            let encontrada = false;
             bibliotecas.forEach(bib => {
                 const option = document.createElement('option');
                 option.value = bib.id;
                 option.textContent = bib.nombre;
-                if (String(bib.id) === String(seleccionado)) {
+                if (nombreActual && normalizarTexto(bib.nombre) === normalizarTexto(nombreActual)) {
                     option.selected = true;
+                    encontrada = true;
                 }
                 select.appendChild(option);
             });
+            if (nombreActual && !encontrada) agregarOpcionActual(select, nombreActual);
         }
 
-        function llenarEmpleados(seleccionado = '') {
+        function llenarEmpleados(nombreActual = '') {
             const select = document.getElementById('campo_empleado');
             select.innerHTML = '<option value="">-- Seleccione --</option>';
+            let encontrado = false;
             empleados.forEach(emp => {
+                const nombreCompleto = `${emp.nombre} ${emp.apellido}`.trim();
                 const option = document.createElement('option');
                 option.value = emp.id;
-                option.textContent = `${emp.nombre} ${emp.apellido}`.trim();
-                if (String(emp.id) === String(seleccionado)) {
+                option.textContent = nombreCompleto;
+                if (nombreActual && normalizarTexto(nombreCompleto) === normalizarTexto(nombreActual)) {
                     option.selected = true;
+                    encontrado = true;
                 }
                 select.appendChild(option);
             });
+            if (nombreActual && !encontrado) agregarOpcionActual(select, nombreActual);
         }
 
-        function sincronizarLugarDesdeBiblioteca() {
-            const selected = bibliotecas.find(b => String(b.id) === String(campoBiblioteca.value));
-            const campoLugar = document.getElementById('campo_lugar');
-            if (selected && selected.nombre) {
-                campoLugar.value = selected.nombre;
-            }
+        function textoSeleccionado(select) {
+            const option = select.selectedOptions[0];
+            return select.value && option ? option.textContent.trim() : '';
         }
 
-        function sincronizarResponsableDesdeEmpleado() {
-            const selected = empleados.find(e => String(e.id) === String(campoEmpleado.value));
-            const campoResponsable = document.getElementById('campo_responsable');
-            if (selected) {
-                campoResponsable.value = `${selected.nombre} ${selected.apellido}`.trim();
-            }
+        // Deshabilita los estados a los que no se puede pasar desde el estado actual.
+        function restringirEstados(estadoActual) {
+            const select = document.getElementById('campo_estado');
+            const permitidos = estadoActual ? (TRANSICIONES_ESTADO[estadoActual] || [estadoActual]) : null;
+            Array.from(select.options).forEach(opt => {
+                opt.disabled = permitidos ? !permitidos.includes(opt.value) : false;
+            });
         }
 
         async function cargarInstituciones() {
@@ -329,12 +365,12 @@ require_once __DIR__ . '/../include/guardian.php';
         }
 
         async function cargarSolicitudes() {
-            tablaBody.innerHTML = '<tr><td>Cargando...</td></tr>';
+            tablaBody.innerHTML = '<tr><td colspan="' + columnasTabla + '">Cargando...</td></tr>';
             try {
                 const resp = await fetch(endpoint + '?action=listar');
                 const json = await resp.json();
                 if (!json.success) {
-                    tablaBody.innerHTML = '<tr><td>No se pudieron cargar las solicitudes.</td></tr>';
+                    tablaBody.innerHTML = '<tr><td colspan="' + columnasTabla + '">No se pudieron cargar las solicitudes.</td></tr>';
                     return;
                 }
                 solicitudesCargadas = json.data || [];
@@ -342,7 +378,7 @@ require_once __DIR__ . '/../include/guardian.php';
                 paginaActual = Math.min(paginaActual, totalPaginas);
                 renderTabla();
             } catch (e) {
-                tablaBody.innerHTML = '<tr><td>Error al conectar con el servidor.</td></tr>';
+                tablaBody.innerHTML = '<tr><td colspan="' + columnasTabla + '">Error al conectar con el servidor.</td></tr>';
             }
         }
 
@@ -352,7 +388,7 @@ require_once __DIR__ . '/../include/guardian.php';
             const inicio = (paginaActual - 1) * filasPorPagina;
             const rows = solicitudes.slice(inicio, inicio + filasPorPagina);
             if (!rows.length) {
-                tablaBody.innerHTML = '<tr><td colspan="10">' + (buscarSolicitudes.value.trim() ? 'No se encontraron solicitudes para esa búsqueda.' : 'No hay solicitudes registradas.') + '</td></tr>';
+                tablaBody.innerHTML = '<tr><td colspan="' + columnasTabla + '">' + (buscarSolicitudes.value.trim() ? 'No se encontraron solicitudes para esa búsqueda.' : 'No hay solicitudes registradas.') + '</td></tr>';
                 renderPaginacion(totalPaginas);
                 return;
             }
@@ -361,16 +397,17 @@ require_once __DIR__ . '/../include/guardian.php';
                     <td>${row.id}</td>
                     <td>${escapeHtml(row.institucion)}</td>
                     <td>${escapeHtml(row.fecha_solicitud)}</td>
+                    <td>${escapeHtml(String(row.fecha_registro || '').replace('T', ' ').slice(0, 16))}</td>
                     <td>${escapeHtml(row.hora_solicitud)}</td>
                     <td>${escapeHtml(row.lugar)}</td>
                     <td>${escapeHtml(row.responsable)}</td>
                     <td>${escapeHtml(row.participantes)}</td>
                     <td>${escapeHtml(row.descripcion)}</td>
                     <td>${escapeHtml(formatearEstado(row.estado))}</td>
-                    <td class="col-acciones">
+                    ${esAdmin ? `<td class="col-acciones">
                         <button type="button" class="btn-icon btn-edit" data-id="${row.id}"><i class="fas fa-pen"></i></button>
                         <button type="button" class="btn-icon btn-delete" data-id="${row.id}"><i class="fas fa-trash"></i></button>
-                    </td>
+                    </td>` : ''}
                 </tr>
             `).join('');
             tablaBody.innerHTML = html;
@@ -459,8 +496,8 @@ require_once __DIR__ . '/../include/guardian.php';
                 id_institucion: document.getElementById('campo_id_institucion').value,
                 fecha_solicitud: document.getElementById('campo_fecha_solicitud').value,
                 hora_solicitud: document.getElementById('campo_hora_solicitud').value,
-                lugar: document.getElementById('campo_lugar').value.trim(),
-                responsable: document.getElementById('campo_responsable').value.trim(),
+                lugar: textoSeleccionado(campoBiblioteca),
+                responsable: textoSeleccionado(campoEmpleado),
                 participantes: document.getElementById('campo_participantes').value,
                 descripcion: document.getElementById('campo_descripcion').value.trim(),
                 estado: document.getElementById('campo_estado').value,
@@ -468,9 +505,14 @@ require_once __DIR__ . '/../include/guardian.php';
 
             if (!data.id_institucion) { mostrarErrorModal('Seleccione una institución.'); return; }
             if (!data.fecha_solicitud) { mostrarErrorModal('Seleccione la fecha de la solicitud.'); return; }
+            establecerFechaMinimaSolicitud();
+            if (data.fecha_solicitud < document.getElementById('campo_fecha_solicitud').min) {
+                mostrarErrorModal('La fecha de solicitud no puede ser anterior a la fecha actual.');
+                return;
+            }
             if (!data.hora_solicitud) { mostrarErrorModal('Indique la hora de la solicitud.'); return; }
-            if (!data.lugar) { mostrarErrorModal('Indique el lugar de la solicitud.'); return; }
-            if (!data.responsable) { mostrarErrorModal('Indique el responsable de la solicitud.'); return; }
+            if (!data.lugar) { mostrarErrorModal('Seleccione la biblioteca (lugar) de la solicitud.'); return; }
+            if (!data.responsable) { mostrarErrorModal('Seleccione el empleado responsable de la solicitud.'); return; }
             if (data.participantes === '') { mostrarErrorModal('Indique la cantidad de participantes.'); return; }
 
             const body = new URLSearchParams();
@@ -493,9 +535,6 @@ require_once __DIR__ . '/../include/guardian.php';
                 mostrarErrorModal('Error de conexión con el servidor.');
             }
         });
-
-        campoBiblioteca.addEventListener('change', sincronizarLugarDesdeBiblioteca);
-        campoEmpleado.addEventListener('change', sincronizarResponsableDesdeEmpleado);
 
         btnNuevaSolicitud.addEventListener('click', abrirModalNuevo);
         modalClose.addEventListener('click', cerrarModal);
