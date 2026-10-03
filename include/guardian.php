@@ -50,7 +50,7 @@ function guardian_redirigirALogin(string $motivo = ''): void
     );
 
   
-    unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['ultima_actividad'], $_SESSION['creada_en']);
+    unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['id_empleado'], $_SESSION['id_biblioteca'], $_SESSION['ultima_actividad'], $_SESSION['creada_en']);
 
     $esControlador = $urlActual && strpos(parse_url($urlActual, PHP_URL_PATH) ?? '', '/controladores/') !== false;
     if ($urlActual && !$esControlador) {
@@ -79,6 +79,45 @@ function esAdministrador(): bool
 {
     $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
     return $rol === 'administrador';
+}
+
+function guardian_idBibliotecaSesion(): ?int
+{
+    if (esAdministrador()) {
+        return null;
+    }
+
+    static $resuelto = false;
+    static $idBibliotecaResuelto = 0;
+    if ($resuelto) {
+        return $idBibliotecaResuelto;
+    }
+
+    $idUsuario = (int) ($_SESSION['user_id'] ?? 0);
+    if ($idUsuario <= 0) {
+        return 0;
+    }
+
+    $stmt = Conexion::conectar()->prepare(
+        'SELECT e.id, e.id_biblioteca
+         FROM usuario u
+         JOIN empleado e ON e.id = u.id_empleado
+         WHERE u.id = ?'
+    );
+    $stmt->execute([$idUsuario]);
+    $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
+    $idBiblioteca = (int) ($empleado['id_biblioteca'] ?? 0);
+    if ($idBiblioteca > 0) {
+        $_SESSION['id_biblioteca'] = $idBiblioteca;
+        $_SESSION['id_empleado'] = (int) $empleado['id'];
+        $idBibliotecaResuelto = $idBiblioteca;
+        $resuelto = true;
+        return $idBiblioteca;
+    }
+
+    unset($_SESSION['id_biblioteca'], $_SESSION['id_empleado']);
+    $resuelto = true;
+    return 0;
 }
 
 

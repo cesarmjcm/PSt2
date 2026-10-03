@@ -10,7 +10,7 @@ if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
 
     try {
         $actividadModel = new Actividad();
-        $actividades = $actividadModel->mostrarActividades();
+        $actividades = $actividadModel->mostrarActividades(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
 
         
         foreach ($actividades as &$act) {

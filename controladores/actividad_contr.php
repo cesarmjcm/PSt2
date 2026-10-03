@@ -67,6 +67,14 @@ class ActividadController
         }
 
         $data = $this->collectInput();
+        if (!esAdministrador()) {
+            $idBibliotecaUsuario = (int) (guardian_idBibliotecaSesion() ?? 0);
+            if ($idBibliotecaUsuario <= 0) {
+                $this->error('El usuario no tiene una biblioteca asociada.');
+                return;
+            }
+            $data['id_biblioteca'] = $idBibliotecaUsuario;
+        }
         $errorResponsable = $this->completarDatosResponsable($data);
         if ($errorResponsable !== null) {
             $this->error($errorResponsable);
@@ -204,6 +212,12 @@ class ActividadController
             return;
         }
 
+        $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        if (!$this->model->obtenerActividadPorId($id, $idBibliotecaUsuario)) {
+            $this->error('No tienes permisos para eliminar actividades de otra biblioteca.');
+            return;
+        }
+
         $deleted = $this->model->eliminarActividad($id);
         if ($deleted) {
             if (!empty($_SESSION['user_id'])) {
@@ -223,7 +237,7 @@ class ActividadController
     {
         
         
-        $actividades = $this->model->mostrarActividadesCompletas();
+        $actividades = $this->model->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
         $this->respond(['success' => true, 'data' => $actividades]);
     }
 
@@ -315,7 +329,8 @@ class ActividadController
             return 'Seleccione un responsable válido de la lista.';
         }
 
-        $empleado = $this->empleadoModel->obtenerEmpleadoPorId((int)$idEmpleado);
+        $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $empleado = $this->empleadoModel->obtenerEmpleadoPorId((int)$idEmpleado, $idBibliotecaUsuario);
         if (!$empleado) {
             return 'El empleado responsable seleccionado ya no existe.';
         }

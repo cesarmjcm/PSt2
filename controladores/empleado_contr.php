@@ -93,6 +93,11 @@ class EmpleadoController
         return null;
     }
 
+    private function idBibliotecaUsuario(): int
+    {
+        return (int) (guardian_idBibliotecaSesion() ?? 0);
+    }
+
     private function crear(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -108,7 +113,7 @@ class EmpleadoController
         $genero = trim($_POST['genero'] ?? '');
         $edad = intval($_POST['edad'] ?? 0);
         $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
-        $id_biblioteca = intval($_POST['id_biblioteca'] ?? 0);
+        $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
         $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
         $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
 
@@ -163,12 +168,16 @@ class EmpleadoController
         $genero = trim($_POST['genero'] ?? '');
         $edad = intval($_POST['edad'] ?? 0);
         $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
-        $id_biblioteca = intval($_POST['id_biblioteca'] ?? 0);
+        $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
         $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
         $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
 
         if ($id <= 0) {
             $this->error('ID inválido.');
+            return;
+        }
+        if (!$this->model->obtenerEmpleadoPorId($id, esAdministrador() ? null : $this->idBibliotecaUsuario())) {
+            $this->error('No tienes permisos para modificar empleados de otra biblioteca.');
             return;
         }
 
@@ -219,6 +228,10 @@ class EmpleadoController
             $this->error('ID inválido.');
             return;
         }
+        if (!$this->model->obtenerEmpleadoPorId($id, esAdministrador() ? null : $this->idBibliotecaUsuario())) {
+            $this->error('No tienes permisos para eliminar empleados de otra biblioteca.');
+            return;
+        }
 
         try {
             $deleted = $this->model->eliminarEmpleado($id);
@@ -240,7 +253,7 @@ class EmpleadoController
 
     private function listar(): void
     {
-        $data = $this->model->mostrarEmpleados();
+        $data = $this->model->mostrarEmpleados(esAdministrador() ? null : $this->idBibliotecaUsuario());
         $this->respond(['success' => true, 'data' => $data]);
     }
 

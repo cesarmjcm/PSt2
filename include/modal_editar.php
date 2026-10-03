@@ -19,8 +19,9 @@ $municipios = $municipioModel->mostrarMunicipios();
 $comunas = $comunaModel->mostrarComunas();
 $parroquias = $parroquiaModel->mostrarParroquias();
 $espacios = $espacioModel->mostrarEspacios();
-$empleados = $empleadoModel->mostrarEmpleados();
-$bibliotecas = $bibliotecaModel->mostrarBibliotecas();
+$idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+$empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
+$bibliotecas = $bibliotecaModel->mostrarBibliotecas($idBibliotecaUsuario);
 $tiposActividad = $tipoActividadModel->mostrarTipos();
 ?>
 

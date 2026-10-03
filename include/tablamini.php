@@ -11,7 +11,7 @@ try {
     $actividadModel = new Actividad();
     
     
-    $actividades = $actividadModel->mostrarActividadesCompletas();
+    $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
     if ($busqueda !== '') {
         $actividades = array_values(array_filter($actividades, static function (array $actividad) use ($busqueda): bool {
             $textoActividad = implode(' ', array_map('strval', $actividad));

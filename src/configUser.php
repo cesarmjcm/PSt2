@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
         $errorUsuarios = 'No tienes permisos para editar este usuario.';
     }
 
-    if ($usuarioAction === 'crear' || $usuarioAction === 'actualizar') {
+    if (($usuarioAction === 'crear' || $usuarioAction === 'actualizar') && $errorUsuarios === '') {
         $esActualizacion = ($usuarioAction === 'actualizar');
 
         $id = intval($_POST['id'] ?? 0);
@@ -62,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 $datosValidar['rol'] = $rol;
             }
             $errors = $model->validarUsuario($datosValidar, $esActualizacion);
+            if (!$esAdmin && $id_empleado !== (int) ($_SESSION['id_empleado'] ?? 0)) {
+                $errors[] = 'No puedes cambiar el empleado vinculado a tu usuario.';
+            }
 
             if ($clave !== '' && $clave !== $claveConfirmacion) {
                 $errors[] = 'La confirmación de la clave no coincide.';
@@ -148,7 +151,15 @@ try {
 
 $empleados = [];
 try {
-    $empleados = $empleadoModel->mostrarEmpleados();
+    if ($esAdmin) {
+        $empleados = $empleadoModel->mostrarEmpleados();
+    } else {
+        $empleado = $empleadoModel->obtenerEmpleadoPorId(
+            (int) ($_SESSION['id_empleado'] ?? 0),
+            (int) (guardian_idBibliotecaSesion() ?? 0)
+        );
+        $empleados = $empleado ? [$empleado] : [];
+    }
 } catch (Exception $e) {
     $empleados = [];
 }
@@ -220,7 +231,7 @@ try {
 
                                 <div class="config-field">
                                     <label for="nuevo_id_empleado">Empleado</label>
-                                    <select id="nuevo_id_empleado" name="nuevo_id_empleado" required>
+                                    <select id="nuevo_id_empleado" name="nuevo_id_empleado" required<?php echo !$esAdmin ? ' disabled' : ''; ?>>
                                         <option value="">Seleccione un empleado</option>
                                         <?php foreach ($empleados as $emp): ?>
                                             <option value="<?php echo htmlspecialchars($emp['id']); ?>"
@@ -230,6 +241,9 @@ try {
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
+                                    <?php if (!$esAdmin): ?>
+                                        <input type="hidden" name="nuevo_id_empleado" value="<?php echo htmlspecialchars((string) ($_SESSION['id_empleado'] ?? '')); ?>">
+                                    <?php endif; ?>
                                     <small>Cada empleado solo puede tener un usuario.</small>
                                 </div>
 

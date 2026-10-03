@@ -36,8 +36,9 @@ foreach ($parroquias as $parroquia) {
 }
 $parroquias = array_values($parroquiasUnicas);
 $espacios = $espacioModel->mostrarEspacios();
-$empleados = $empleadoModel->mostrarEmpleados();
-$bibliotecas = $bibliotecaModel->mostrarBibliotecas();
+$idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+$empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
+$bibliotecas = $bibliotecaModel->mostrarBibliotecas($idBibliotecaUsuario);
 $tiposActividad = $tipoActividadModel->mostrarTipos();
 $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
 ?>
@@ -182,7 +183,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                                 <select name="id_biblioteca" id="plan-biblioteca">
                                                     <option value="">Seleccione una biblioteca</option>
                                                     <?php foreach ($bibliotecas as $b): ?>
-                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>"<?= !$esAdmin ? ' selected' : '' ?>><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>

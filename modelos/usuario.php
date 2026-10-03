@@ -67,7 +67,10 @@ ORDER BY u.nombre";
     }
 
     public function obtenerUsuarioPorNombre(string $nombre) {
-        $sql = "SELECT id, nombre, clave, rol FROM usuario WHERE nombre = ?";
+        $sql = "SELECT u.id, u.nombre, u.clave, u.rol, u.id_empleado, e.id_biblioteca
+                FROM usuario u
+                LEFT JOIN empleado e ON e.id = u.id_empleado
+                WHERE u.nombre = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$nombre]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);

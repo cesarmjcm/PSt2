@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Biblioteca {
 
-public function mostrarBibliotecas() {
+public function mostrarBibliotecas(?int $idBiblioteca = null) {
     $sql = "SELECT
                 b.id,
                 b.nombre,
@@ -14,10 +14,11 @@ public function mostrarBibliotecas() {
                 b.Direccion AS direccion
             FROM biblioteca b
             LEFT JOIN parroquia p ON b.id_parroquia = p.id
+            " . ($idBiblioteca !== null ? "WHERE b.id = ? " : "") . "
             ORDER BY b.nombre";
 
     $stmt = Conexion::conectar()->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($idBiblioteca !== null ? [$idBiblioteca] : []);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

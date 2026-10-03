@@ -4,6 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../modelos/solicitud.php';
+require_once __DIR__ . '/../modelos/biblioteca.php';
+require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../helpers/validador.php';
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
@@ -58,15 +60,35 @@ class SolicitudController
 
     private function obtenerSolicitud(int $id): ?array
     {
-        $filas = $this->model->mostrarSolicitudes();
-        if (!is_array($filas)) {
-            return null;
+        return $this->model->obtenerSolicitudPorId(
+            $id,
+            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0)
+        ) ?: null;
+    }
+
+    private function prepararAlcanceBiblioteca(array &$data): ?string
+    {
+        if (!$this->esAdmin()) {
+            $data['id_biblioteca'] = (int) (guardian_idBibliotecaSesion() ?? 0);
         }
-        foreach ($filas as $fila) {
-            if ((int) ($fila['id'] ?? 0) === $id) {
-                return $fila;
-            }
+        if ($data['id_biblioteca'] <= 0) {
+            return 'Debe seleccionar una biblioteca válida.';
         }
+
+        $biblioteca = (new Biblioteca())->obtenerBibliotecaPorId($data['id_biblioteca']);
+        if (!$biblioteca) {
+            return 'La biblioteca seleccionada no existe.';
+        }
+        $data['lugar'] = trim((string) $biblioteca['nombre']);
+
+        $idEmpleado = (int) $data['id_empleado'];
+        $empleado = $idEmpleado > 0
+            ? (new Empleado())->obtenerEmpleadoPorId($idEmpleado, $data['id_biblioteca'])
+            : null;
+        if (!$empleado) {
+            return 'Seleccione un empleado responsable de la biblioteca asignada.';
+        }
+        $data['responsable'] = trim((string) $empleado['nombre'] . ' ' . (string) $empleado['apellido']);
         return null;
     }
 
@@ -81,6 +103,8 @@ class SolicitudController
     {
         return [
             'id_institucion' => intval($_POST['id_institucion'] ?? 0),
+            'id_biblioteca' => intval($_POST['id_biblioteca'] ?? 0),
+            'id_empleado' => intval($_POST['id_empleado'] ?? 0),
             'fecha_solicitud' => trim($_POST['fecha_solicitud'] ?? ''),
             'hora_solicitud' => trim($_POST['hora_solicitud'] ?? ''),
             'lugar' => trim($_POST['lugar'] ?? ''),
@@ -179,6 +203,11 @@ class SolicitudController
         }
 
         $data = $this->collectInput();
+        $errorAlcance = $this->prepararAlcanceBiblioteca($data);
+        if ($errorAlcance !== null) {
+            $this->error($errorAlcance);
+            return;
+        }
         $errors = $this->validarSolicitud($data);
         if (!empty($errors)) {
             $this->error(implode(' ', $errors));
@@ -188,6 +217,7 @@ class SolicitudController
         try {
             $created = $this->model->crearSolicitud(
                 $data['id_institucion'],
+                $data['id_biblioteca'],
                 $data['fecha_solicitud'],
                 $data['hora_solicitud'],
                 $data['lugar'],
@@ -230,18 +260,24 @@ class SolicitudController
             return;
         }
 
+        $actual = $this->obtenerSolicitud($id);
+        if ($actual === null) {
+            $this->error('La solicitud no existe.');
+            return;
+        }
+
         $data = $this->collectInput();
+        $errorAlcance = $this->prepararAlcanceBiblioteca($data);
+        if ($errorAlcance !== null) {
+            $this->error($errorAlcance);
+            return;
+        }
         $errors = $this->validarSolicitud($data);
         if (!empty($errors)) {
             $this->error(implode(' ', $errors));
             return;
         }
 
-        $actual = $this->obtenerSolicitud($id);
-        if ($actual === null) {
-            $this->error('La solicitud no existe.');
-            return;
-        }
         $estadoActual = strtolower(trim((string) ($actual['estado'] ?? 'pendiente')));
         $permitidos = self::TRANSICIONES_ESTADO[$estadoActual] ?? [$estadoActual];
         if (!in_array($data['estado'], $permitidos, true)) {
@@ -253,6 +289,7 @@ class SolicitudController
             $updated = $this->model->actualizarSolicitud(
                 $id,
                 $data['id_institucion'],
+                $data['id_biblioteca'],
                 $data['fecha_solicitud'],
                 $data['hora_solicitud'],
                 $data['lugar'],
@@ -315,7 +352,9 @@ class SolicitudController
 
     private function listar(): void
     {
-        $data = $this->model->mostrarSolicitudes();
+        $data = $this->model->mostrarSolicitudes(
+            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0)
+        );
         $this->respond(['success' => true, 'data' => $data]);
     }
 

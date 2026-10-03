@@ -3,22 +3,23 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Empleado {
 
-    public function mostrarEmpleados() {
+    public function mostrarEmpleados(?int $idBiblioteca = null) {
         $sql = "SELECT e.*, e.genero AS genero, e.edad AS edad, e.`anios_de_servicio` AS anios_servicio, c.nombre AS id_cargo_nombre,
                        b.nombre AS id_biblioteca_nombre
                 FROM empleado e
                 JOIN cargo c ON e.id_cargo = c.id
                 LEFT JOIN biblioteca b ON e.id_biblioteca = b.id
+                " . ($idBiblioteca !== null ? "WHERE e.id_biblioteca = ? " : "") . "
                 ORDER BY e.nombre, e.apellido";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca] : []);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerEmpleadoPorId(int $id) {
-        $sql = "SELECT * FROM empleado WHERE id = ?";
+    public function obtenerEmpleadoPorId(int $id, ?int $idBiblioteca = null) {
+        $sql = "SELECT * FROM empleado WHERE id = ?" . ($idBiblioteca !== null ? " AND id_biblioteca = ?" : "");
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute([$id]);
+        $stmt->execute($idBiblioteca !== null ? [$id, $idBiblioteca] : [$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 

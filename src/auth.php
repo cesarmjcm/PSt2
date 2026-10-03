@@ -34,18 +34,26 @@ if ($username !== '' && $password !== '') {
                 $userModel->actualizarClave((int) $user['id'], $password);
             }
 
-            $_SESSION['user'] = $user['nombre'];
-            $_SESSION['user_id'] = $user['id'];
             $rol = trim(strtolower($user['rol'] ?? 'usuario'));
-            $_SESSION['user_rol'] = $rol === 'administrador' ? 'administrador' : 'usuario';
-            $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';
-            unset($_SESSION['redirect_after_login']);
-            $ok = true;
-            $message = 'Autenticación correcta.';
+            $rol = $rol === 'administrador' ? 'administrador' : 'usuario';
+            $idBiblioteca = (int) ($user['id_biblioteca'] ?? 0);
+            if ($rol !== 'administrador' && ((int) ($user['id_empleado'] ?? 0) <= 0 || $idBiblioteca <= 0)) {
+                $message = 'El usuario no tiene un empleado vinculado a una biblioteca.';
+            } else {
+                session_regenerate_id(true);
+                $_SESSION['user'] = $user['nombre'];
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_rol'] = $rol;
+                $_SESSION['id_empleado'] = (int) ($user['id_empleado'] ?? 0);
+                $_SESSION['id_biblioteca'] = $idBiblioteca > 0 ? $idBiblioteca : null;
+                $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';
+                unset($_SESSION['redirect_after_login']);
+                $ok = true;
+                $message = 'Autenticación correcta.';
 
-            
-            $conex = Conexion::conectar();
-            registrar_bitacora($conex, $_SESSION['user_id'], 'Login', 'Usuario', 'Inicio de sesión: ' . $_SESSION['user']);
+                $conex = Conexion::conectar();
+                registrar_bitacora($conex, $_SESSION['user_id'], 'Login', 'Usuario', 'Inicio de sesión: ' . $_SESSION['user']);
+            }
         }
     }
 }

@@ -38,7 +38,7 @@
         
         
         
-        $actividades = $actividadModel->mostrarActividadesCompletas();
+        $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
         $errorMessage = '';
     } catch (Exception $e) {
         $actividades = [];

@@ -522,6 +522,7 @@ INSERT INTO `responsable` (`id`, `id_actividad`, `nombre`, `telefono`) VALUES
 CREATE TABLE `solicitud` (
   `id` int(10) NOT NULL,
   `id_institucion` int(10) NOT NULL,
+  `id_biblioteca` int(10) DEFAULT NULL,
   `fecha_solicitud` date NOT NULL,
   `fecha_registro` datetime NOT NULL DEFAULT current_timestamp(),
   `hora_solicitud` time NOT NULL,
@@ -727,7 +728,8 @@ ALTER TABLE `responsable`
 --
 ALTER TABLE `solicitud`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_institucion` (`id_institucion`);
+  ADD KEY `id_institucion` (`id_institucion`),
+  ADD KEY `idx_solicitud_id_biblioteca` (`id_biblioteca`);
 
 --
 -- Indices de la tabla `tipo_actividad`
@@ -921,7 +923,8 @@ ALTER TABLE `institucion`
 -- Filtros para la tabla `solicitud`
 --
 ALTER TABLE `solicitud`
-  ADD CONSTRAINT `solicitud_ibfk_1` FOREIGN KEY (`id_institucion`) REFERENCES `institucion` (`id`);
+  ADD CONSTRAINT `solicitud_ibfk_1` FOREIGN KEY (`id_institucion`) REFERENCES `institucion` (`id`),
+  ADD CONSTRAINT `solicitud_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`);
 
 --
 -- Filtros para la tabla `usuario`

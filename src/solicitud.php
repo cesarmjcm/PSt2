@@ -236,7 +236,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             ocultarErrorModal();
             const estadoActual = String(solicitud.estado || 'pendiente').toLowerCase();
             llenarInstituciones(solicitud.id_institucion);
-            llenarBibliotecas(solicitud.lugar);
+            llenarBibliotecas(solicitud.id_biblioteca);
             llenarEmpleados(solicitud.responsable);
             document.getElementById('campo_fecha_solicitud').value = solicitud.fecha_solicitud;
             document.getElementById('campo_hora_solicitud').value = String(solicitud.hora_solicitud || '').slice(0, 5);
@@ -265,9 +265,8 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             });
         }
 
-        // Se guardan solo los nombres (lugar / responsable), así que al editar
-        // se busca la opción por nombre. Si el registro es antiguo y su valor ya
-        // no coincide con ninguna opción, se conserva como opción actual.
+        // El responsable se conserva como nombre; si no está en el maestro,
+        // se muestra temporalmente como opción actual al editar.
         function agregarOpcionActual(select, texto) {
             const option = document.createElement('option');
             option.value = '__actual__';
@@ -276,21 +275,16 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             select.appendChild(option);
         }
 
-        function llenarBibliotecas(nombreActual = '') {
+        function llenarBibliotecas(idActual = '') {
             const select = document.getElementById('campo_biblioteca');
             select.innerHTML = '<option value="">-- Seleccione --</option>';
-            let encontrada = false;
             bibliotecas.forEach(bib => {
                 const option = document.createElement('option');
                 option.value = bib.id;
                 option.textContent = bib.nombre;
-                if (nombreActual && normalizarTexto(bib.nombre) === normalizarTexto(nombreActual)) {
-                    option.selected = true;
-                    encontrada = true;
-                }
+                option.selected = idActual !== '' && String(bib.id) === String(idActual);
                 select.appendChild(option);
             });
-            if (nombreActual && !encontrada) agregarOpcionActual(select, nombreActual);
         }
 
         function llenarEmpleados(nombreActual = '') {
@@ -494,6 +488,8 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
 
             const data = {
                 id_institucion: document.getElementById('campo_id_institucion').value,
+                id_biblioteca: campoBiblioteca.value,
+                id_empleado: campoEmpleado.value,
                 fecha_solicitud: document.getElementById('campo_fecha_solicitud').value,
                 hora_solicitud: document.getElementById('campo_hora_solicitud').value,
                 lugar: textoSeleccionado(campoBiblioteca),
@@ -504,6 +500,8 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             };
 
             if (!data.id_institucion) { mostrarErrorModal('Seleccione una institución.'); return; }
+            if (!data.id_biblioteca) { mostrarErrorModal('Seleccione la biblioteca de la solicitud.'); return; }
+            if (!data.id_empleado) { mostrarErrorModal('Seleccione el empleado responsable.'); return; }
             if (!data.fecha_solicitud) { mostrarErrorModal('Seleccione la fecha de la solicitud.'); return; }
             establecerFechaMinimaSolicitud();
             if (data.fecha_solicitud < document.getElementById('campo_fecha_solicitud').min) {

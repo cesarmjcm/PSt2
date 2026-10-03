@@ -17,7 +17,7 @@ try {
     require_once __DIR__ . '/../modelos/actividad.php';
     $actividadModel = new Actividad();
    
-    $actividades = $actividadModel->mostrarActividadesCompletas();
+    $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
     $totalActividades = count($actividades);
 
     foreach ($actividades as $actividad) {

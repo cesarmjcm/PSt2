@@ -47,6 +47,10 @@ class BibliotecaController
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador()) {
+            $this->error('No tienes permisos para crear bibliotecas.');
+            return;
+        }
 
         $nombre = trim($_POST['nombre'] ?? '');
         $id_parroquia = intval($_POST['id_parroquia'] ?? 0);
@@ -141,6 +145,10 @@ $id_parroquia = intval($_POST['id_parroquia'] ?? 0);
 $correo = trim($_POST['correo'] ?? '');
 $redes_sociales = trim($_POST['redes_sociales'] ?? '');
 $direccion = trim($_POST['direccion'] ?? '');
+        if (!esAdministrador() && $id !== (int) (guardian_idBibliotecaSesion() ?? 0)) {
+            $this->error('No tienes permisos para modificar bibliotecas de otra unidad.');
+            return;
+        }
         if ($id <= 0 || $nombre === '' || $id_parroquia <= 0) {
             $this->error('ID, nombre y parroquia son obligatorios.');
             return;
@@ -215,10 +223,18 @@ $direccion = trim($_POST['direccion'] ?? '');
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede eliminar bibliotecas.');
+            return;
+        }
 
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->error('ID inválido.');
+            return;
+        }
+        if (!esAdministrador() && $id !== (int) (guardian_idBibliotecaSesion() ?? 0)) {
+            $this->error('No tienes permisos para eliminar bibliotecas de otra unidad.');
             return;
         }
 
@@ -242,7 +258,7 @@ $direccion = trim($_POST['direccion'] ?? '');
 
     private function listar(): void
     {
-        $data = $this->model->mostrarBibliotecas();
+        $data = $this->model->mostrarBibliotecas(esAdministrador() ? null : guardian_idBibliotecaSesion());
         $this->respond(['success' => true, 'data' => $data]);
     }
 

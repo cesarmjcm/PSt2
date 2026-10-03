@@ -4,10 +4,37 @@ require_once __DIR__ . '/../helpers/validador.php';
 
 class Actividad {
 
-    public function mostrarActividades() {
-        $sql = "SELECT * FROM actividad ORDER BY fecha DESC";
+    private function condicionBiblioteca(?int $idBiblioteca, string $alias = 'a'): string
+    {
+        if ($idBiblioteca === null) {
+            return '';
+        }
+
+        return "(
+                    {$alias}.id_biblioteca = ?
+                    OR (
+                        {$alias}.id_biblioteca IS NULL
+                        AND {$alias}.id_espacio_cultural IS NOT NULL
+                        AND EXISTS (
+                            SELECT 1
+                            FROM actividad_comuna ac_scope
+                            JOIN comuna co_scope ON co_scope.id = ac_scope.id_comuna
+                            JOIN parroquia pa_scope ON pa_scope.id = co_scope.id_parroquia
+                            JOIN biblioteca bi_scope ON bi_scope.id = ?
+                            JOIN parroquia pb_scope ON pb_scope.id = bi_scope.id_parroquia
+                            WHERE ac_scope.id_actividad = {$alias}.id
+                                AND pa_scope.id_municipio = pb_scope.id_municipio
+                        )
+                    )
+                )";
+    }
+
+    public function mostrarActividades(?int $idBiblioteca = null) {
+        $sql = "SELECT a.* FROM actividad a" .
+            ($idBiblioteca !== null ? " WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") .
+            " ORDER BY a.fecha DESC";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
@@ -25,7 +52,7 @@ class Actividad {
         return $actividad;
     }
 
-    public function mostrarActividadesCompletas() {
+    public function mostrarActividadesCompletas(?int $idBiblioteca = null) {
         
         
         
@@ -50,9 +77,28 @@ class Actividad {
                 a.telefono_responsable,
                 ta.nombre AS tipo_actividad,
                 b.nombre AS biblioteca,
-                m.id AS municipio_id,
-                m.nombre AS municipio,
-                p.nombre AS parroquia,
+                COALESCE(m.id, (
+                    SELECT MIN(pa_espacio.id_municipio)
+                    FROM actividad_comuna ac_espacio
+                    JOIN comuna co_espacio ON co_espacio.id = ac_espacio.id_comuna
+                    JOIN parroquia pa_espacio ON pa_espacio.id = co_espacio.id_parroquia
+                    WHERE ac_espacio.id_actividad = a.id
+                )) AS municipio_id,
+                COALESCE(m.nombre, (
+                    SELECT MIN(mu_espacio.nombre)
+                    FROM actividad_comuna ac_espacio
+                    JOIN comuna co_espacio ON co_espacio.id = ac_espacio.id_comuna
+                    JOIN parroquia pa_espacio ON pa_espacio.id = co_espacio.id_parroquia
+                    JOIN municipio mu_espacio ON mu_espacio.id = pa_espacio.id_municipio
+                    WHERE ac_espacio.id_actividad = a.id
+                )) AS municipio,
+                COALESCE(p.nombre, (
+                    SELECT MIN(pa_espacio.nombre)
+                    FROM actividad_comuna ac_espacio
+                    JOIN comuna co_espacio ON co_espacio.id = ac_espacio.id_comuna
+                    JOIN parroquia pa_espacio ON pa_espacio.id = co_espacio.id_parroquia
+                    WHERE ac_espacio.id_actividad = a.id
+                )) AS parroquia,
                 GROUP_CONCAT(DISTINCT ni.nombre_impacto SEPARATOR ', ') AS nivel_impacto,
                 GROUP_CONCAT(DISTINCT co.nombre SEPARATOR ', ') AS comuna
             FROM actividad a
@@ -64,11 +110,12 @@ class Actividad {
             LEFT JOIN nivel_impacto ni ON ni.id = ia.id_impacto
             LEFT JOIN actividad_comuna ac ON ac.id_actividad = a.id
             LEFT JOIN comuna co ON co.id = ac.id_comuna
+            " . ($idBiblioteca !== null ? "WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") . "
             GROUP BY a.id
             ORDER BY a.fecha DESC
         ";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
@@ -188,10 +235,11 @@ class Actividad {
         }
     }
 
-    public function obtenerActividadPorId(int $id) {
-        $sql = "SELECT * FROM actividad WHERE id = ?";
+    public function obtenerActividadPorId(int $id, ?int $idBiblioteca = null) {
+        $sql = "SELECT a.* FROM actividad a WHERE a.id = ?" .
+            ($idBiblioteca !== null ? " AND " . $this->condicionBiblioteca($idBiblioteca) : "");
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute([$id]);
+        $stmt->execute($idBiblioteca !== null ? [$id, $idBiblioteca, $idBiblioteca] : [$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
