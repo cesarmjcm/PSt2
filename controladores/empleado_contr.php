@@ -37,10 +37,56 @@ class EmpleadoController
             case 'listar':
                 $this->listar();
                 break;
+            case 'validar_cedula':
+                $this->validarCedula();
+                break;
             default:
                 $this->error('Acción inválida.');
                 break;
         }
+    }
+
+    private function validarCedula(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+
+        $cedulaRaw = trim($_POST['cedula'] ?? '');
+        if (!Validador::esCedulaValida($cedulaRaw)) {
+            $this->error('La cédula debe contener solo números y tener entre 6 y 8 dígitos.');
+            return;
+        }
+
+        $idExcluirRaw = trim($_POST['id'] ?? '');
+        $idExcluir = null;
+        if ($idExcluirRaw !== '') {
+            if (!ctype_digit($idExcluirRaw) || (int) $idExcluirRaw <= 0) {
+                $this->error('ID inválido.');
+                return;
+            }
+            $idExcluir = (int) $idExcluirRaw;
+            if (!$this->model->obtenerEmpleadoPorId($idExcluir, esAdministrador() ? null : $this->idBibliotecaUsuario())) {
+                $this->error('No tienes permisos para modificar empleados de otra biblioteca.');
+                return;
+            }
+        }
+
+        if ($this->model->existeCedula((int) $cedulaRaw, $idExcluir)) {
+            $this->respond([
+                'success' => true,
+                'disponible' => false,
+                'message' => 'Ya existe un empleado con esa cédula.',
+            ]);
+            return;
+        }
+
+        $this->respond([
+            'success' => true,
+            'disponible' => true,
+            'message' => 'Cédula disponible.',
+        ]);
     }
 
     private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = ''): ?string

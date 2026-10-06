@@ -136,7 +136,7 @@ $camposPorMaestro = [
         'descripcion' => ['label' => 'Descripción', 'type' => 'text', 'maxLength' => 40, 'opcional' => true],
     ],
     'empleado'   => [
-        'cedula'   => ['label' => 'Cédula', 'type' => 'number', 'minLength' => 6, 'maxLength' => 8],
+        'cedula'   => ['label' => 'Cédula', 'type' => 'text', 'inputmode' => 'numeric', 'soloNumeros' => true, 'minLength' => 6, 'maxLength' => 8],
         'nombre'   => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 40, 'noNumeros' => true],
         'apellido' => ['label' => 'Apellido', 'type' => 'text', 'maxLength' => 20, 'noNumeros' => true],
         'telefono' => ['label' => 'Teléfono', 'type' => 'text', 'maxLength' => 11, 'formatoVenezolano' => true],
@@ -337,6 +337,8 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         const filasPorPagina = 10;
         let paginaActual = 1;
         let filasCargadas = [];
+        let temporizadorCedula = null;
+        let solicitudCedula = 0;
 
         function mostrarAlerta(mensaje, tipo) {
             if (alertTimeoutId) clearTimeout(alertTimeoutId);
@@ -356,6 +358,64 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         function ocultarErrorModal() {
             modalErrorBox.textContent = '';
             modalErrorBox.hidden = true;
+        }
+
+        function mostrarEstadoCedula(mensaje, tipo) {
+            const estadoCedula = document.getElementById('estado_cedula');
+            const inputCedula = document.getElementById('campo_cedula');
+            if (!estadoCedula || !inputCedula) return;
+            estadoCedula.textContent = mensaje;
+            estadoCedula.className = 'maestro__field-status' + (tipo ? ' maestro__field-status--' + tipo : '');
+            inputCedula.setAttribute('aria-invalid', tipo === 'error' ? 'true' : 'false');
+        }
+
+        async function consultarCedula(valor) {
+            const solicitudActual = ++solicitudCedula;
+            const inputCedula = document.getElementById('campo_cedula');
+            const body = new URLSearchParams();
+            body.append('action', 'validar_cedula');
+            body.append('cedula', valor);
+            if (formId.value !== '') body.append('id', formId.value);
+
+            mostrarEstadoCedula('Verificando cédula...', 'pendiente');
+
+            try {
+                const resp = await fetch(endpoint, { method: 'POST', body });
+                const json = await resp.json();
+                if (solicitudActual !== solicitudCedula || inputCedula.value.trim() !== valor) return false;
+                if (!resp.ok || !json.success) {
+                    throw new Error(json.message || 'No se pudo validar la cédula.');
+                }
+                if (!json.disponible) {
+                    mostrarEstadoCedula(json.message, 'error');
+                    return false;
+                }
+                mostrarEstadoCedula(json.message, 'correcto');
+                return true;
+            } catch (error) {
+                if (solicitudActual === solicitudCedula && inputCedula.value.trim() === valor) {
+                    mostrarEstadoCedula(error.message || 'No se pudo validar la cédula. Intente nuevamente.', 'error');
+                }
+                return false;
+            }
+        }
+
+        function validarCedulaAlEscribir() {
+            if (temporizadorCedula) clearTimeout(temporizadorCedula);
+            solicitudCedula++;
+            const inputCedula = document.getElementById('campo_cedula');
+            const valor = inputCedula.value.trim();
+
+            if (valor === '') {
+                mostrarEstadoCedula('', '');
+                return;
+            }
+            if (!/^\d{6,8}$/.test(valor)) {
+                mostrarEstadoCedula('La cédula debe contener solo números y tener entre 6 y 8 dígitos.', 'error');
+                return;
+            }
+
+            temporizadorCedula = setTimeout(() => consultarCedula(valor), 250);
         }
 
         
@@ -416,6 +476,10 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             if (campo.minLength && valor.length < campo.minLength) {
                 return 'El campo "' + campo.label + '" debe tener al menos ' + campo.minLength + ' caracteres.';
+            }
+
+            if (campo.soloNumeros && !/^\d+$/.test(valor)) {
+                return 'El campo "' + campo.label + '" solo puede contener números.';
             }
 
             if (campo.noNumeros && !REGEX_SOLO_LETRAS.test(valor)) {
@@ -587,6 +651,11 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
         async function renderFormCampos(valores) {
             valores = valores || {};
+            if (tablaActual === 'empleado') {
+                if (temporizadorCedula) clearTimeout(temporizadorCedula);
+                temporizadorCedula = null;
+                solicitudCedula++;
+            }
 
             
             const opcionesPorCampo = {};
@@ -651,9 +720,14 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     html += '</select>';
                 } else {
                     const maxLengthAttr = campo.maxLength ? ' maxlength="' + campo.maxLength + '"' : '';
-                    
-                    const patternAttr = campo.noNumeros ? ' pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü \'\\-]+" title="Solo letras y espacios, sin números"' : '';
-                    html += '<input id="campo_' + key + '" name="' + key + '" type="' + campo.type + '" value="' + escapeHtml(valor) + '"' + maxLengthAttr + patternAttr + (esOpcional ? '' : (campo.optionalOnEdit ? '' : ' required')) + ' />';
+                    const patternAttr = campo.noNumeros
+                        ? ' pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü \'\\-]+" title="Solo letras y espacios, sin números"'
+                        : (campo.soloNumeros ? ' pattern="[0-9]+"' : '');
+                    const inputmodeAttr = campo.inputmode ? ' inputmode="' + campo.inputmode + '"' : '';
+                    html += '<input id="campo_' + key + '" name="' + key + '" type="' + campo.type + '" value="' + escapeHtml(valor) + '"' + maxLengthAttr + patternAttr + inputmodeAttr + (esOpcional ? '' : (campo.optionalOnEdit ? '' : ' required')) + ' />';
+                    if (tablaActual === 'empleado' && key === 'cedula') {
+                        html += '<small id="estado_cedula" class="maestro__field-status" aria-live="polite"></small>';
+                    }
                 }
 
                 html += '</div>';
@@ -692,6 +766,12 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     selectDependiente.disabled = opciones.length === 0;
                 });
             });
+
+            if (tablaActual === 'empleado') {
+                const inputCedula = document.getElementById('campo_cedula');
+                inputCedula.addEventListener('input', validarCedulaAlEscribir);
+                if (inputCedula.value.trim() !== '') validarCedulaAlEscribir();
+            }
         }
 
         async function abrirModalNuevo() {
@@ -800,6 +880,18 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 if (campo.noEnviar) continue;
 
                 body.append(key, valor.trim());
+            }
+
+            if (tablaActual === 'empleado') {
+                const inputCedula = document.getElementById('campo_cedula');
+                const cedula = inputCedula.value.trim();
+                if (temporizadorCedula) clearTimeout(temporizadorCedula);
+                temporizadorCedula = null;
+                const disponible = await consultarCedula(cedula);
+                if (!disponible) {
+                    inputCedula.focus();
+                    return;
+                }
             }
 
             try {

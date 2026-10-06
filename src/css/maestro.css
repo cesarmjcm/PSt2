@@ -183,6 +183,28 @@
     font-weight: 700;
 }
 
+.maestro__field-status {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.875rem;
+}
+
+.maestro__field-status--error {
+    color: #b3261e;
+}
+
+.maestro__field-status--correcto {
+    color: #156939;
+}
+
+.maestro__field-status--pendiente {
+    color: #4a587e;
+}
+
+.maestro-modal .config-field input[aria-invalid="true"] {
+    border-color: #b3261e;
+}
+
 .maestro-modal .config-field input {
     width: 100%;
     padding: 14px 16px;
