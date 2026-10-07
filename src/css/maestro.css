@@ -11,6 +11,20 @@
     margin: 0;
 }
 
+.maestro__acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-exportar {
+    background-color: #b3261e;
+}
+
+.btn-exportar:hover {
+    box-shadow: 0 12px 24px rgba(179, 38, 30, 0.24);
+}
+
 
 .maestro__alert {
     padding: 14px 18px;

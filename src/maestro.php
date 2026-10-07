@@ -238,9 +238,16 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
                     <div class="maestro__header">
                         <h1 class="planificacion__title"><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <button type="button" class="btn-primary" id="btnNuevo">
-                            <i class="fas fa-plus"></i> Nuevo
-                        </button>
+                        <div class="maestro__acciones">
+                            <?php if ($tabla === 'cargo' && $esAdmin): ?>
+                                <button type="button" class="btn-primary btn-exportar" id="btnExportar">
+                                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                                </button>
+                            <?php endif; ?>
+                            <button type="button" class="btn-primary" id="btnNuevo">
+                                <i class="fas fa-plus"></i> Nuevo
+                            </button>
+                        </div>
                     </div>
 
                     <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
@@ -326,6 +333,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         const formId = document.getElementById('formId');
         const modalErrorBox = document.getElementById('modalError');
         const btnNuevo = document.getElementById('btnNuevo');
+        const btnExportar = document.getElementById('btnExportar');
 
         const confirmModal = document.getElementById('confirmModal');
         const confirmBackdrop = document.getElementById('confirmBackdrop');
@@ -822,6 +830,66 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             }
         }
 
+        async function exportarCargosPdf() {
+            const textoOriginal = btnExportar.innerHTML;
+            let ventanaReporte = null;
+            let urlReporte = null;
+            btnExportar.disabled = true;
+            btnExportar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+
+            try {
+                ventanaReporte = window.open('', '_blank');
+                if (!ventanaReporte) {
+                    throw new Error('Permite las ventanas emergentes para abrir el reporte PDF.');
+                }
+
+                ventanaReporte.document.title = 'Generando reporte de cargos';
+                ventanaReporte.document.body.textContent = 'Generando reporte PDF...';
+
+                const response = await fetch('../reportes/exportar_cargos.php', {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store'
+                });
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    throw new Error('La sesión pudo expirar. Recarga la página e inténtalo de nuevo.');
+                }
+                const resultado = await response.json();
+                if (!response.ok || !resultado.success) {
+                    throw new Error(resultado.message || 'No se pudo generar el PDF.');
+                }
+
+                const contenido = atob(resultado.pdf);
+                const bytes = new Uint8Array(contenido.length);
+                for (let i = 0; i < contenido.length; i++) {
+                    bytes[i] = contenido.charCodeAt(i);
+                }
+
+                const archivo = new Blob([bytes], { type: 'application/pdf' });
+                urlReporte = URL.createObjectURL(archivo);
+                ventanaReporte.location.replace(urlReporte);
+
+                const liberarUrl = window.setInterval(() => {
+                    if (ventanaReporte.closed) {
+                        window.clearInterval(liberarUrl);
+                        URL.revokeObjectURL(urlReporte);
+                    }
+                }, 1000);
+                mostrarAlerta('El reporte PDF se abrió en una nueva pestaña.', 'success');
+            } catch (error) {
+                if (ventanaReporte && !ventanaReporte.closed) {
+                    ventanaReporte.close();
+                }
+                if (urlReporte) {
+                    URL.revokeObjectURL(urlReporte);
+                }
+                mostrarAlerta(error.message || 'No se pudo generar el PDF.', 'error');
+            } finally {
+                btnExportar.disabled = false;
+                btnExportar.innerHTML = textoOriginal;
+            }
+        }
+
         maestroForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             ocultarErrorModal();
@@ -917,6 +985,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         });
 
         btnNuevo.addEventListener('click', abrirModalNuevo);
+        if (btnExportar) {
+            btnExportar.addEventListener('click', exportarCargosPdf);
+        }
         modalClose.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);
         modalBackdrop.addEventListener('click', cerrarModal);
