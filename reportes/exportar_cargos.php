@@ -6,10 +6,10 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
-function responderReporte(array $respuesta, int $estado = 200)
+function responderReporte(array $respuesta, int $estado = 200): void
 {
     http_response_code($estado);
-    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -55,6 +55,17 @@ try {
         throw new RuntimeException('No se pudo cargar el estilo del reporte.');
     }
 
+    $logoGobiernoPath = __DIR__ . '/assets/membrete_gobierno.jpg';
+    $logoCulturaPath = __DIR__ . '/assets/membrete_cultura.jpg';
+    $logoGobierno = file_get_contents($logoGobiernoPath);
+    $logoCultura = file_get_contents($logoCulturaPath);
+    if ($logoGobierno === false || $logoCultura === false) {
+        throw new RuntimeException('No se pudieron cargar los logos del membrete.');
+    }
+
+    $logoGobierno = 'data:image/jpeg;base64,' . base64_encode($logoGobierno);
+    $logoCultura = 'data:image/jpeg;base64,' . base64_encode($logoCultura);
+
     $escapar = static function ($valor): string {
         return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     };
@@ -72,7 +83,17 @@ try {
     </head>
     <body>
         <header class="reporte-header">
-            <p class="reporte-etiqueta">Sistema de gestión</p>
+            <table class="membrete-logos">
+                <tr>
+                    <td><img src="<?php echo $logoGobierno; ?>" alt="Gobierno Bolivariano de Yaracuy"></td>
+                    <td><img src="<?php echo $logoCultura; ?>" alt="Instituto de Cultura del Estado Yaracuy"></td>
+                </tr>
+            </table>
+            <div class="membrete-instituciones">
+                <p>Gobierno Bolivariano de Yaracuy</p>
+                <p>Instituto de Cultura del Estado Yaracuy</p>
+                <p>Red de Bibliotecas Públicas del Estado Yaracuy</p>
+            </div>
             <h1>Reporte de cargos</h1>
             <p class="reporte-fecha">Generado el <?php echo $escapar($fechaGeneracion); ?></p>
         </header>

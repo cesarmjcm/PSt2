@@ -23,11 +23,11 @@ if (session_status() === PHP_SESSION_NONE) {
         session_set_cookie_params($cookieParams);
     } else {
         session_set_cookie_params(
-            0,
-            '/',
+            $cookieParams['lifetime'],
+            $cookieParams['path'],
             '',
             !empty($cookieParams['secure']),
-            true
+            $cookieParams['httponly']
         );
     }
     session_start();
@@ -46,7 +46,7 @@ if (!defined('GUARDIAN_TIEMPO_INACTIVIDAD_MIN')) {
 }
 
 
-function guardian_redirigirALogin(string $motivo = '')
+function guardian_redirigirALogin(string $motivo = ''): void
 {
     $urlActual = $_SERVER['REQUEST_URI'] ?? null;
 
@@ -91,7 +91,7 @@ function esAdministrador(): bool
     return $rol === 'administrador';
 }
 
-function guardian_idBibliotecaSesion()
+function guardian_idBibliotecaSesion(): ?int
 {
     if (esAdministrador()) {
         return null;
@@ -131,7 +131,7 @@ function guardian_idBibliotecaSesion()
 }
 
 
-function guardian_requerirAdmin(string $modo = 'vista')
+function guardian_requerirAdmin(string $modo = 'vista'): void
 {
     if (esAdministrador()) {
         return;
