@@ -58,7 +58,8 @@ try {
     $escapar = static function ($valor): string {
         return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     };
-    $fechaGeneracion = date('d/m/Y h:i A');
+    $fechaActual = new DateTimeImmutable('now', new DateTimeZone('America/Caracas'));
+    $fechaGeneracion = $fechaActual->format('d/m/Y h:i A');
 
     ob_start();
     ?>
@@ -121,7 +122,7 @@ try {
 
     responderReporte([
         'success' => true,
-        'filename' => 'reporte_cargos_' . date('Ymd_His') . '.pdf',
+        'filename' => 'reporte_cargos_' . $fechaActual->format('Ymd_His') . '.pdf',
         'pdf' => base64_encode($dompdf->output()),
     ]);
 } catch (Throwable $error) {
