@@ -42,7 +42,8 @@ CREATE TABLE `actividad` (
   `dia_semana` text NOT NULL,
   `estado` enum('pendiente','confirmada','ejecutada','cancelada') NOT NULL DEFAULT 'pendiente',
   `responsable` varchar(100) DEFAULT NULL,
-  `telefono_responsable` varchar(20) DEFAULT NULL
+  `telefono_responsable` varchar(20) DEFAULT NULL,
+  `id_asignacion` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -107,6 +108,19 @@ CREATE TABLE `actividad_espaciocultural` (
   `id_actividad` int(10) NOT NULL,
   `id_biblioteca` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Estructura de tabla para la tabla `asignacion`
+--
+
+CREATE TABLE `asignacion` (
+  `id` int(10) NOT NULL,
+  `id_empleado` int(10) NOT NULL,
+  `id_cargo` int(11) NOT NULL,
+  `id_biblioteca` int(10) NOT NULL,
+  `fecha_desde` date DEFAULT NULL,
+  `fecha_hasta` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -596,7 +610,8 @@ ALTER TABLE `actividad`
   ADD KEY `id_solicitud` (`id_solicitud`),
   ADD KEY `id_biblioteca` (`id_biblioteca`),
   ADD KEY `id_espacio_cultural` (`id_espacio_cultural`),
-  ADD KEY `id_tipo_actividad` (`id_tipo_actividad`);
+  ADD KEY `id_tipo_actividad` (`id_tipo_actividad`),
+  ADD KEY `id_asignacion` (`id_asignacion`);
 
 --
 -- Indices de la tabla `actividad_comuna`
@@ -613,6 +628,15 @@ ALTER TABLE `actividad_espaciocultural`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_actividad` (`id_actividad`,`id_biblioteca`),
   ADD KEY `actividad_espaciocultural_ibfk_1` (`id_biblioteca`);
+
+--
+-- Indices de la tabla `asignacion`
+--
+ALTER TABLE `asignacion`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_biblioteca` (`id_biblioteca`),
+  ADD KEY `id_cargo` (`id_cargo`),
+  ADD KEY `id_empleado` (`id_empleado`);
 
 --
 -- Indices de la tabla `biblioteca`
@@ -754,6 +778,12 @@ ALTER TABLE `actividad_espaciocultural`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `asignacion`
+--
+ALTER TABLE `asignacion`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `biblioteca`
 --
 ALTER TABLE `biblioteca`
@@ -848,6 +878,7 @@ ALTER TABLE `actividad`
   ADD CONSTRAINT `actividad_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
   ADD CONSTRAINT `actividad_ibfk_2` FOREIGN KEY (`id_espacio_cultural`) REFERENCES `espacio_cultural` (`id`),
   ADD CONSTRAINT `actividad_ibfk_3` FOREIGN KEY (`id_tipo_actividad`) REFERENCES `tipo_actividad` (`id`),
+  ADD CONSTRAINT `actividad_ibfk_4` FOREIGN KEY (`id_asignacion`) REFERENCES `asignacion` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_solicitud` FOREIGN KEY (`id_solicitud`) REFERENCES `solicitud` (`id`) ON DELETE SET NULL;
 
 --
@@ -856,6 +887,14 @@ ALTER TABLE `actividad`
 ALTER TABLE `actividad_comuna`
   ADD CONSTRAINT `actividad_comuna_ibfk_1` FOREIGN KEY (`id_actividad`) REFERENCES `actividad` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `actividad_comuna_ibfk_2` FOREIGN KEY (`id_comuna`) REFERENCES `comuna` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `asignacion`
+--
+ALTER TABLE `asignacion`
+  ADD CONSTRAINT `asignacion_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
+  ADD CONSTRAINT `asignacion_ibfk_2` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`),
+  ADD CONSTRAINT `asignacion_ibfk_3` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id`);
 
 --
 -- Filtros para la tabla `biblioteca`
