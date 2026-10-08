@@ -22,7 +22,7 @@ class TipoActividad {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, ?int $idExcluir = null): bool {
+    public function existeNombre(string $nombre, int $idExcluir = null): bool {
         $sql = "SELECT id FROM tipo_actividad WHERE LOWER(nombre) = LOWER(?)";
         $params = [$nombre];
         if ($idExcluir !== null) {

@@ -20,7 +20,7 @@ class EmpleadoController
         $this->model = new Empleado();
     }
 
-    public function dispatch(): void
+    public function dispatch()
     {
         $action = $_REQUEST['action'] ?? '';
 
@@ -46,7 +46,7 @@ class EmpleadoController
         }
     }
 
-    private function validarCedula(): void
+    private function validarCedula()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -89,7 +89,7 @@ class EmpleadoController
         ]);
     }
 
-    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = ''): ?string
+    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = '')
     {
         if ($nombre === '' || $apellido === '' || $telefono === '' || $cedula === '' || $genero === '') {
             return 'Nombre, apellido, teléfono, cédula y género son obligatorios.';
@@ -144,7 +144,7 @@ class EmpleadoController
         return (int) (guardian_idBibliotecaSesion() ?? 0);
     }
 
-    private function crear(): void
+    private function crear()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -198,7 +198,7 @@ class EmpleadoController
         $this->error('No se pudo crear el empleado.');
     }
 
-    private function actualizar(): void
+    private function actualizar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -262,7 +262,7 @@ class EmpleadoController
         $this->error('No se pudo actualizar el empleado.');
     }
 
-    private function eliminar(): void
+    private function eliminar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -297,23 +297,23 @@ class EmpleadoController
         $this->error('No se pudo eliminar el empleado.');
     }
 
-    private function listar(): void
+    private function listar()
     {
         $data = $this->model->mostrarEmpleados(esAdministrador() ? null : $this->idBibliotecaUsuario());
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = []): void
+    private function success(string $message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message): void
+    private function error(string $message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }
 
-    private function respond(array $payload): void
+    private function respond(array $payload)
     {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);

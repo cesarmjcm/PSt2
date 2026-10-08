@@ -6,7 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
-function responderReporte(array $respuesta, int $estado = 200): void
+function responderReporte(array $respuesta, int $estado = 200)
 {
     http_response_code($estado);
     echo json_encode($respuesta, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);

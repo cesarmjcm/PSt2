@@ -91,7 +91,7 @@ ORDER BY u.nombre";
         return $stmt->execute([$hash, $id]);
     }
 
-    public function existeUsuario(string $nombre, ?int $idExcluir = null): bool
+    public function existeUsuario(string $nombre, int $idExcluir = null): bool
     {
         $sql = "SELECT id FROM usuario WHERE nombre = ?";
         $params = [$nombre];
@@ -106,7 +106,7 @@ ORDER BY u.nombre";
     }
 
     
-    public function existeUsuarioPorEmpleado(int $id_empleado, ?int $idExcluir = null): bool
+    public function existeUsuarioPorEmpleado(int $id_empleado, int $idExcluir = null): bool
     {
         $sql = "SELECT id FROM usuario WHERE id_empleado = ?";
         $params = [$id_empleado];
@@ -138,7 +138,7 @@ ORDER BY u.nombre";
 
     
     
-    public function actualizarUsuario(int $id, string $nombre, string $telefono, int $id_empleado, ?string $clave = null, ?string $rol = null)
+    public function actualizarUsuario(int $id, string $nombre, string $telefono, int $id_empleado, string $clave = null, string $rol = null)
     {
         try {
             $campos = ['nombre = ?', 'telefono = ?', 'id_empleado = ?'];

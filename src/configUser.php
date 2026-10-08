@@ -143,7 +143,9 @@ $usuarios = [];
 try {
     $usuarios = $model->mostrarUsuarios();
     if (!$esAdmin) {
-        $usuarios = array_values(array_filter($usuarios, fn($u) => (int) $u['id'] === $idSesion));
+        $usuarios = array_values(array_filter($usuarios, function ($u) use ($idSesion) {
+            return (int) $u['id'] === $idSesion;
+        }));
     }
 } catch (Exception $e) {
     $usuarios = [];

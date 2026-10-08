@@ -22,7 +22,7 @@ class Institucion
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, int $id_municipio, ?int $idExcluir = null): bool
+    public function existeNombre(string $nombre, int $id_municipio, int $idExcluir = null): bool
     {
         $sql = "SELECT id FROM institucion WHERE LOWER(nombre) = LOWER(?) AND id_municipio = ?";
         $params = [$nombre, $id_municipio];
@@ -36,7 +36,7 @@ class Institucion
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeRif(string $rif, ?int $idExcluir = null): bool
+    public function existeRif(string $rif, int $idExcluir = null): bool
     {
         $sql = "SELECT id FROM institucion WHERE rif = ?";
         $params = [$rif];

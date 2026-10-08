@@ -208,11 +208,11 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
         const selectResponsable = document.getElementById('editar-responsable');
         const inputTelefono = document.getElementById('editar-telefono');
         selectResponsable.addEventListener('change', () => {
-            inputTelefono.value = selectResponsable.selectedOptions[0]?.dataset.telefono || '';
+            inputTelefono.value = (selectResponsable.selectedOptions[0] && selectResponsable.selectedOptions[0].dataset.telefono) || '';
         });
 
         window.seleccionarResponsableActividad = function (nombre, telefono) {
-            selectResponsable.querySelector('option[value="__actual__"]')?.remove();
+            (function () { var o = selectResponsable.querySelector('option[value="__actual__"]'); if (o) o.remove(); })();
             const nombreBuscado = String(nombre || '').trim().toLocaleLowerCase();
             const opcion = Array.from(selectResponsable.options).find(item =>
                 item.textContent.trim().toLocaleLowerCase() === nombreBuscado
@@ -261,23 +261,23 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
 
         
         window.precargarFormularioEditar = function (actividad) {
-            document.getElementById('editar-id').value = actividad.id ?? '';
-            document.getElementById('editar-dia').value = actividad.dia_semana ?? '';
-            document.getElementById('editar-nombre').value = actividad.nombre ?? '';
-            document.getElementById('editar-descripcion').value = actividad.descripcion ?? '';
-            document.getElementById('editar-fecha').value = actividad.fecha ?? '';
-            document.getElementById('editar-hora').value = actividad.horaActividad ?? '';
-            document.getElementById('editar-estado').value = actividad.estado ?? 'pendiente';
-            window.restringirEstadoActividad(actividad.estado ?? 'pendiente');
-            document.getElementById('editar-objetivo').value = actividad.objetivo ?? '';
-            document.getElementById('editar-participantes').value = actividad.participantes ?? '';
-            document.getElementById('editar-nivel-impacto').value = actividad.nivel_impacto ?? '';
-            document.getElementById('editar-municipio').value = actividad.municipio_id ?? '';
-            document.getElementById('editar-parroquia').value = actividad.parroquia ?? '';
-            document.getElementById('editar-comuna').value = actividad.comuna ?? '';
-            document.getElementById('editar-biblioteca').value = actividad.id_biblioteca ?? '';
-            document.getElementById('editar-espacio').value = actividad.id_espacio_cultural ?? '';
-            document.getElementById('editar-tipo-actividad').value = actividad.id_tipo_actividad ?? '';
+            document.getElementById('editar-id').value = (actividad.id != null ? actividad.id : '');
+            document.getElementById('editar-dia').value = (actividad.dia_semana != null ? actividad.dia_semana : '');
+            document.getElementById('editar-nombre').value = (actividad.nombre != null ? actividad.nombre : '');
+            document.getElementById('editar-descripcion').value = (actividad.descripcion != null ? actividad.descripcion : '');
+            document.getElementById('editar-fecha').value = (actividad.fecha != null ? actividad.fecha : '');
+            document.getElementById('editar-hora').value = (actividad.horaActividad != null ? actividad.horaActividad : '');
+            document.getElementById('editar-estado').value = (actividad.estado != null ? actividad.estado : 'pendiente');
+            window.restringirEstadoActividad(actividad.estado != null ? actividad.estado : 'pendiente');
+            document.getElementById('editar-objetivo').value = (actividad.objetivo != null ? actividad.objetivo : '');
+            document.getElementById('editar-participantes').value = (actividad.participantes != null ? actividad.participantes : '');
+            document.getElementById('editar-nivel-impacto').value = (actividad.nivel_impacto != null ? actividad.nivel_impacto : '');
+            document.getElementById('editar-municipio').value = (actividad.municipio_id != null ? actividad.municipio_id : '');
+            document.getElementById('editar-parroquia').value = (actividad.parroquia != null ? actividad.parroquia : '');
+            document.getElementById('editar-comuna').value = (actividad.comuna != null ? actividad.comuna : '');
+            document.getElementById('editar-biblioteca').value = (actividad.id_biblioteca != null ? actividad.id_biblioteca : '');
+            document.getElementById('editar-espacio').value = (actividad.id_espacio_cultural != null ? actividad.id_espacio_cultural : '');
+            document.getElementById('editar-tipo-actividad').value = (actividad.id_tipo_actividad != null ? actividad.id_tipo_actividad : '');
             window.seleccionarResponsableActividad(actividad.responsable, actividad.telefono_responsable);
 
             const esEspacio = !!actividad.id_espacio_cultural;

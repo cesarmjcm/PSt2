@@ -25,11 +25,13 @@ class UsuarioController
     
     private function telefonosCoinciden(string $a, string $b): bool
     {
-        $limpiar = static fn(string $v): string => preg_replace('/[^0-9]/', '', $v);
+        $limpiar = function ($v) {
+            return preg_replace('/[^0-9]/', '', (string) $v);
+        };
         return $limpiar($a) === $limpiar($b) && $limpiar($a) !== '';
     }
 
-    public function dispatch(): void
+    public function dispatch()
     {
         $action = $_REQUEST['action'] ?? '';
 
@@ -52,7 +54,7 @@ class UsuarioController
         }
     }
 
-    private function crear(): void
+    private function crear()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -131,7 +133,7 @@ class UsuarioController
         $this->error('No se pudo crear el usuario.');
     }
 
-    private function actualizar(): void
+    private function actualizar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -236,7 +238,7 @@ class UsuarioController
         $this->error('No se pudo actualizar el usuario.');
     }
 
-    private function eliminar(): void
+    private function eliminar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -267,29 +269,31 @@ class UsuarioController
         $this->error('No se pudo eliminar el usuario.');
     }
 
-    private function listar(): void
+    private function listar()
     {
         $data = $this->model->mostrarUsuarios();
 
         if (!esAdministrador()) {
             $idSesion = intval($_SESSION['user_id'] ?? 0);
-            $data = array_values(array_filter($data, fn($u) => (int) $u['id'] === $idSesion));
+            $data = array_values(array_filter($data, function ($u) use ($idSesion) {
+                return (int) $u['id'] === $idSesion;
+            }));
         }
 
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = []): void
+    private function success(string $message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message): void
+    private function error(string $message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }
 
-    private function respond(array $payload): void
+    private function respond(array $payload)
     {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);

@@ -4,7 +4,7 @@ require_once __DIR__ . '/../helpers/validador.php';
 
 class Actividad {
 
-    private function condicionBiblioteca(?int $idBiblioteca, string $alias = 'a'): string
+    private function condicionBiblioteca($idBiblioteca, string $alias = 'a'): string
     {
         if ($idBiblioteca === null) {
             return '';
@@ -29,7 +29,7 @@ class Actividad {
                 )";
     }
 
-    public function mostrarActividades(?int $idBiblioteca = null) {
+    public function mostrarActividades(int $idBiblioteca = null) {
         $sql = "SELECT a.* FROM actividad a" .
             ($idBiblioteca !== null ? " WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") .
             " ORDER BY a.fecha DESC";
@@ -52,7 +52,7 @@ class Actividad {
         return $actividad;
     }
 
-    public function mostrarActividadesCompletas(?int $idBiblioteca = null) {
+    public function mostrarActividadesCompletas(int $idBiblioteca = null) {
         
         
         
@@ -235,7 +235,7 @@ class Actividad {
         }
     }
 
-    public function obtenerActividadPorId(int $id, ?int $idBiblioteca = null) {
+    public function obtenerActividadPorId(int $id, int $idBiblioteca = null) {
         $sql = "SELECT a.* FROM actividad a WHERE a.id = ?" .
             ($idBiblioteca !== null ? " AND " . $this->condicionBiblioteca($idBiblioteca) : "");
         $stmt = Conexion::conectar()->prepare($sql);
@@ -254,7 +254,7 @@ class Actividad {
      * @param int|null $idExcluir ID de la actividad actual, para no compararla consigo misma al editar.
      * @return bool True si hay conflicto de horario/lugar.
      */
-    public function existeConflictoHorario(array $d, ?int $idExcluir = null): bool
+    public function existeConflictoHorario(array $d, int $idExcluir = null): bool
     {
         $fecha = trim($d['fecha'] ?? '');
         $hora = trim($d['hora'] ?? '');
@@ -383,7 +383,7 @@ class Actividad {
     }
 
     
-    private function buscarOCrearId(PDO $pdo, string $tabla, string $columnaNombre, string $valor): ?int {
+    private function buscarOCrearId(PDO $pdo, string $tabla, string $columnaNombre, string $valor) {
         $valor = Validador::normalizarTexto($valor);
         if ($valor === '') return null;
 
@@ -397,7 +397,7 @@ class Actividad {
         return (int)$pdo->lastInsertId();
     }
 
-    private function guardarRelaciones(PDO $pdo, int $idActividad, array $d): void {
+    private function guardarRelaciones(PDO $pdo, int $idActividad, array $d) {
         
         if (!empty($d['nivel_impacto'])) {
             $idImpacto = $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']);

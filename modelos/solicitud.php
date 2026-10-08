@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Solicitud
 {
-    public function mostrarSolicitudes(?int $idBiblioteca = null)
+    public function mostrarSolicitudes(int $idBiblioteca = null)
     {
         $sql = "SELECT
                     s.id,
@@ -29,7 +29,7 @@ class Solicitud
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerSolicitudPorId(int $id, ?int $idBiblioteca = null)
+    public function obtenerSolicitudPorId(int $id, int $idBiblioteca = null)
     {
         $sql = "SELECT s.*, i.nombre AS nombre_institucion
                 FROM solicitud s
@@ -55,7 +55,7 @@ class Solicitud
         return $stmt->execute([$id_institucion, $id_biblioteca, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado, $id]);
     }
 
-    public function eliminarSolicitud(int $id, ?int $idBiblioteca = null)
+    public function eliminarSolicitud(int $id, int $idBiblioteca = null)
     {
         $sql = "DELETE FROM solicitud WHERE id = ?" . ($idBiblioteca !== null ? " AND id_biblioteca = ?" : "");
         $stmt = Conexion::conectar()->prepare($sql);

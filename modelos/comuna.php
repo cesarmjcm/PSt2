@@ -21,7 +21,7 @@ class Comuna {
     }
 
     
-    public function existeNombre(string $nombre, int $id_parroquia, ?int $idExcluir = null): bool {
+    public function existeNombre(string $nombre, int $id_parroquia, int $idExcluir = null): bool {
         $sql = "SELECT id FROM comuna WHERE LOWER(nombre) = LOWER(?) AND id_parroquia = ?";
         $params = [$nombre, $id_parroquia];
         if ($idExcluir !== null) {

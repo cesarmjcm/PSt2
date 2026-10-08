@@ -17,7 +17,7 @@ class SolicitudController
     private $model;
 
     // Estados a los que se puede pasar desde cada estado (incluye mantenerse igual).
-    private const TRANSICIONES_ESTADO = [
+    const TRANSICIONES_ESTADO = [
         'pendiente' => ['pendiente', 'aprobada', 'rechazada', 'cancelada'],
         'aprobada'  => ['aprobada', 'cancelada'],
         'rechazada' => ['rechazada', 'cancelada'],
@@ -29,7 +29,7 @@ class SolicitudController
         $this->model = new Solicitud();
     }
 
-    public function dispatch(): void
+    public function dispatch()
     {
         $action = $_REQUEST['action'] ?? '';
 
@@ -58,7 +58,7 @@ class SolicitudController
         return ($_SESSION['user_rol'] ?? '') === 'administrador';
     }
 
-    private function obtenerSolicitud(int $id): ?array
+    private function obtenerSolicitud(int $id)
     {
         return $this->model->obtenerSolicitudPorId(
             $id,
@@ -66,7 +66,7 @@ class SolicitudController
         ) ?: null;
     }
 
-    private function prepararAlcanceBiblioteca(array &$data): ?string
+    private function prepararAlcanceBiblioteca(array &$data)
     {
         if (!$this->esAdmin()) {
             $data['id_biblioteca'] = (int) (guardian_idBibliotecaSesion() ?? 0);
@@ -195,7 +195,7 @@ class SolicitudController
         return $errors;
     }
 
-    private function crear(): void
+    private function crear()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -242,7 +242,7 @@ class SolicitudController
         $this->error('No se pudo crear la solicitud.');
     }
 
-    private function actualizar(): void
+    private function actualizar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -314,7 +314,7 @@ class SolicitudController
         $this->error('No se pudo actualizar la solicitud.');
     }
 
-    private function eliminar(): void
+    private function eliminar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -350,7 +350,7 @@ class SolicitudController
         $this->error('No se pudo eliminar la solicitud.');
     }
 
-    private function listar(): void
+    private function listar()
     {
         $data = $this->model->mostrarSolicitudes(
             $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0)
@@ -358,17 +358,17 @@ class SolicitudController
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = []): void
+    private function success(string $message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message): void
+    private function error(string $message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }
 
-    private function respond(array $payload): void
+    private function respond(array $payload)
     {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);

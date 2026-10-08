@@ -169,7 +169,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
         let solicitudesCargadas = [];
 
         function normalizarTexto(valor) {
-            return String(valor ?? '')
+            return String(valor != null ? valor : '')
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase();

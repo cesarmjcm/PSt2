@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function escapeHtml(texto) {
         const div = document.createElement('div');
-        div.textContent = texto ?? '';
+        div.textContent = (texto != null ? texto : '');
         return div.innerHTML;
     }
 });

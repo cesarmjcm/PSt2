@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Empleado {
 
-    public function mostrarEmpleados(?int $idBiblioteca = null) {
+    public function mostrarEmpleados(int $idBiblioteca = null) {
         $sql = "SELECT e.*, e.genero AS genero, e.edad AS edad, e.`anios_de_servicio` AS anios_servicio, c.nombre AS id_cargo_nombre,
                        b.nombre AS id_biblioteca_nombre
                 FROM empleado e
@@ -16,7 +16,7 @@ class Empleado {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerEmpleadoPorId(int $id, ?int $idBiblioteca = null) {
+    public function obtenerEmpleadoPorId(int $id, int $idBiblioteca = null) {
         $sql = "SELECT * FROM empleado WHERE id = ?" . ($idBiblioteca !== null ? " AND id_biblioteca = ?" : "");
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute($idBiblioteca !== null ? [$id, $idBiblioteca] : [$id]);
@@ -24,7 +24,7 @@ class Empleado {
     }
 
     
-    public function existeCedula(int $cedula, ?int $idExcluir = null): bool {
+    public function existeCedula(int $cedula, int $idExcluir = null): bool {
         $sql = "SELECT id FROM empleado WHERE cedula = ?";
         $params = [$cedula];
         if ($idExcluir !== null) {

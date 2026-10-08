@@ -112,13 +112,12 @@ $registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, 
                     </tr>
                 <?php else: ?>
                     <?php foreach ($registros as $r):
-                        $accionClase = match (strtolower($r['accion'])) {
-                            'crear'    => 'bitacora__badge--crear',
-                            'editar'   => 'bitacora__badge--editar',
-                            'eliminar' => 'bitacora__badge--eliminar',
-                            'login'    => 'bitacora__badge--login',
-                            default    => 'bitacora__badge--login',
-                        };
+                        switch (strtolower($r['accion'])) {
+                            case 'crear':    $accionClase = 'bitacora__badge--crear';    break;
+                            case 'editar':   $accionClase = 'bitacora__badge--editar';   break;
+                            case 'eliminar': $accionClase = 'bitacora__badge--eliminar'; break;
+                            default:         $accionClase = 'bitacora__badge--login';    break;
+                        }
                     ?>
                         <tr>
                             <td data-label="Fecha"><?= htmlspecialchars($r['fecha']) ?></td>

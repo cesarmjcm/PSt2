@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const solicitudesSelector = document.getElementById('solicitudesSelector');
 
         if (form) form.reset();
-        document.querySelector('#plan-responsable option[value="__actual__"]')?.remove();
+        (function () { var o = document.querySelector('#plan-responsable option[value="__actual__"]'); if (o) o.remove(); })();
         if (titulo) titulo.textContent = 'Nueva Planificación de Actividad';
         if (planAction) planAction.value = 'crear';
         if (actividadId) actividadId.value = '';
@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (planResponsable) {
-            planResponsable.querySelector('option[value="__actual__"]')?.remove();
+            (function () { var o = planResponsable.querySelector('option[value="__actual__"]'); if (o) o.remove(); })();
             const nombreResponsable = String(solicitud.responsable || '').trim().toLocaleLowerCase();
             const opcion = Array.from(planResponsable.options).find(item =>
                 item.textContent.trim().toLocaleLowerCase() === nombreResponsable
@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 planResponsable.value = '';
             }
         }
-        if (planTelefono && planResponsable?.value === '') planTelefono.value = '';
+        if (planTelefono && (planResponsable && planResponsable.value === '')) planTelefono.value = '';
 
         if (solicitudesSelector) solicitudesSelector.hidden = true;
         if (solicitudSeleccion) solicitudSeleccion.value = '';
@@ -753,7 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.restringirEstadoActividad(btn.dataset.estado);
         }
 
-        setValue('editar-tipo-actividad', btn.dataset.tipoActividad ?? btn.dataset.idTipoActividad);
+        setValue('editar-tipo-actividad', (btn.dataset.tipoActividad != null ? btn.dataset.tipoActividad : btn.dataset.idTipoActividad));
         if (typeof window.seleccionarResponsableActividad === 'function') {
             window.seleccionarResponsableActividad(btn.dataset.responsable, btn.dataset.telefono);
         }

@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Biblioteca {
 
-public function mostrarBibliotecas(?int $idBiblioteca = null) {
+public function mostrarBibliotecas(int $idBiblioteca = null) {
     $sql = "SELECT
                 b.id,
                 b.nombre,
@@ -30,7 +30,7 @@ public function mostrarBibliotecas(?int $idBiblioteca = null) {
     }
 
     
-    public function existeNombre(string $nombre, int $id_parroquia, ?int $idExcluir = null): bool {
+    public function existeNombre(string $nombre, int $id_parroquia, int $idExcluir = null): bool {
         $sql = "SELECT id FROM biblioteca WHERE LOWER(nombre) = LOWER(?) AND id_parroquia = ?";
         $params = [$nombre, $id_parroquia];
         if ($idExcluir !== null) {

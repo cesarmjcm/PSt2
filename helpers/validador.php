@@ -3,7 +3,7 @@
 class Validador
 {
  
-    public static function normalizarTexto(?string $valor): string
+    public static function normalizarTexto($valor): string
     {
         $valor = (string) $valor;
         

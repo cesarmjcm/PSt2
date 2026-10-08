@@ -241,7 +241,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
         const inputTelefono = document.getElementById('plan-telefono');
         if (selectResponsable && inputTelefono) {
             selectResponsable.addEventListener('change', () => {
-                inputTelefono.value = selectResponsable.selectedOptions[0]?.dataset.telefono || '';
+                inputTelefono.value = (selectResponsable.selectedOptions[0] && selectResponsable.selectedOptions[0].dataset.telefono) || '';
             });
         }
 
@@ -265,7 +265,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
             };
 
             const filtrarComunas = () => {
-                const parroquiaId = selectParroquia.selectedOptions[0]?.dataset.id || '';
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
                 selectComuna.replaceChildren(new Option('Seleccione una comuna', ''));
                 opcionesComunas.forEach((opcion) => {
                     if (opcion.dataset.parroquia === parroquiaId) {
