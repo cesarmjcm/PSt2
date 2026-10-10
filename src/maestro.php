@@ -239,7 +239,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     <div class="maestro__header">
                         <h1 class="planificacion__title"><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></h1>
                         <div class="maestro__acciones">
-                            <?php if ($tabla === 'cargo' && $esAdmin): ?>
+                           <?php if (in_array($tabla, ['cargo', 'empleado'], true) && $esAdmin): ?>
                                 <button type="button" class="btn-primary btn-exportar" id="btnExportar">
                                     <i class="fas fa-file-pdf"></i> Exportar PDF
                                 </button>
@@ -829,66 +829,76 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 mostrarAlerta('Error de conexión con el servidor.', 'error');
             }
         }
-
+          //se cambio esto para que sea la funcion "general" de exportar a pdf, todo quedo igual solo que el  fetch sale de un mapa segun la tabla
         async function exportarCargosPdf() {
-            const textoOriginal = btnExportar.innerHTML;
-            let ventanaReporte = null;
-            let urlReporte = null;
-            btnExportar.disabled = true;
-            btnExportar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+            const urlsReporte = {
+        cargo: '../reportes/exportar_cargos.php',
+        empleado: '../reportes/exportar_empleados.php'
+    };
+    const urlReporteActual = urlsReporte[tablaActual];
+    if (!urlReporteActual) {
+        mostrarAlerta('Esta tabla no tiene reporte PDF.', 'error');
+        return;
+    }
 
-            try {
-                ventanaReporte = window.open('', '_blank');
-                if (!ventanaReporte) {
-                    throw new Error('Permite las ventanas emergentes para abrir el reporte PDF.');
-                }
+    const textoOriginal = btnExportar.innerHTML;
+    let ventanaReporte = null;
+    let urlReporte = null;
+    btnExportar.disabled = true;
+    btnExportar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
 
-                ventanaReporte.document.title = 'Generando reporte de cargos';
-                ventanaReporte.document.body.textContent = 'Generando reporte PDF...';
-
-                const response = await fetch('../reportes/exportar_cargos.php', {
-                    headers: { 'Accept': 'application/json' },
-                    cache: 'no-store'
-                });
-                const contentType = response.headers.get('content-type') || '';
-                if (!contentType.includes('application/json')) {
-                    throw new Error('La sesión pudo expirar. Recarga la página e inténtalo de nuevo.');
-                }
-                const resultado = await response.json();
-                if (!response.ok || !resultado.success) {
-                    throw new Error(resultado.message || 'No se pudo generar el PDF.');
-                }
-
-                const contenido = atob(resultado.pdf);
-                const bytes = new Uint8Array(contenido.length);
-                for (let i = 0; i < contenido.length; i++) {
-                    bytes[i] = contenido.charCodeAt(i);
-                }
-
-                const archivo = new Blob([bytes], { type: 'application/pdf' });
-                urlReporte = URL.createObjectURL(archivo);
-                ventanaReporte.location.replace(urlReporte);
-
-                const liberarUrl = window.setInterval(() => {
-                    if (ventanaReporte.closed) {
-                        window.clearInterval(liberarUrl);
-                        URL.revokeObjectURL(urlReporte);
-                    }
-                }, 1000);
-                mostrarAlerta('El reporte PDF se abrió en una nueva pestaña.', 'success');
-            } catch (error) {
-                if (ventanaReporte && !ventanaReporte.closed) {
-                    ventanaReporte.close();
-                }
-                if (urlReporte) {
-                    URL.revokeObjectURL(urlReporte);
-                }
-                mostrarAlerta(error.message || 'No se pudo generar el PDF.', 'error');
-            } finally {
-                btnExportar.disabled = false;
-                btnExportar.innerHTML = textoOriginal;
-            }
+    try {
+        ventanaReporte = window.open('', '_blank');
+        if (!ventanaReporte) {
+            throw new Error('Permite las ventanas emergentes para abrir el reporte PDF.');
         }
+
+        ventanaReporte.document.title = 'Generando reporte PDF';
+        ventanaReporte.document.body.textContent = 'Generando reporte PDF...';
+
+        const response = await fetch(urlReporteActual, {
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+        });
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            throw new Error('La sesión pudo expirar. Recarga la página e inténtalo de nuevo.');
+        }
+        const resultado = await response.json();
+        if (!response.ok || !resultado.success) {
+            throw new Error(resultado.message || 'No se pudo generar el PDF.');
+        }
+
+        const contenido = atob(resultado.pdf);
+        const bytes = new Uint8Array(contenido.length);
+        for (let i = 0; i < contenido.length; i++) {
+            bytes[i] = contenido.charCodeAt(i);
+        }
+
+        const archivo = new Blob([bytes], { type: 'application/pdf' });
+        urlReporte = URL.createObjectURL(archivo);
+        ventanaReporte.location.replace(urlReporte);
+
+        const liberarUrl = window.setInterval(() => {
+            if (ventanaReporte.closed) {
+                window.clearInterval(liberarUrl);
+                URL.revokeObjectURL(urlReporte);
+            }
+        }, 1000);
+        mostrarAlerta('El reporte PDF se abrió en una nueva pestaña.', 'success');
+    } catch (error) {
+        if (ventanaReporte && !ventanaReporte.closed) {
+            ventanaReporte.close();
+        }
+        if (urlReporte) {
+            URL.revokeObjectURL(urlReporte);
+        }
+        mostrarAlerta(error.message || 'No se pudo generar el PDF.', 'error');
+    } finally {
+        btnExportar.disabled = false;
+        btnExportar.innerHTML = textoOriginal;
+    }
+}
 
         maestroForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -983,10 +993,10 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 mostrarErrorModal(e.message || 'Error de conexión con el servidor.');
             }
         });
-
-        btnNuevo.addEventListener('click', abrirModalNuevo);
+             //para la funcion de exportar en general
+               btnNuevo.addEventListener('click', abrirModalNuevo);
         if (btnExportar) {
-            btnExportar.addEventListener('click', exportarCargosPdf);
+            btnExportar.addEventListener('click', exportarCargosPdf);  
         }
         modalClose.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);
