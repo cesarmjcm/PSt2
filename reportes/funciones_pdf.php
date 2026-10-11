@@ -2,6 +2,7 @@
 
 function responderReportePdf(array $respuesta, $estado = 200)
 {
+    header('Content-Type: application/json; charset=utf-8');
     http_response_code($estado);
     echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     exit;
@@ -9,7 +10,6 @@ function responderReportePdf(array $respuesta, $estado = 200)
 
 function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $columnas, $nombreArchivo, $orientacion = 'landscape', $filtrarBiblioteca = false)
 {
-    header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');
 
@@ -39,13 +39,13 @@ function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $col
             ? $modelo->{$metodo}($idBiblioteca)
             : $modelo->{$metodo}();
 
-        responderReportePdf(generarReportePdf(
+        generarReportePdf(
             $titulo,
             $columnas,
             $filas,
             $nombreArchivo,
             $orientacion
-        ));
+        );
     } catch (Throwable $error) {
         error_log('Error al generar el reporte PDF ' . $nombreArchivo . ': ' . $error->getMessage());
         responderReportePdf([
@@ -79,6 +79,15 @@ function cargarDompdfReporte()
 function escaparReportePdf($valor)
 {
     return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function enviarReportePdf($dompdf, $nombreArchivo)
+{
+    $contenido = $dompdf->output();
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="' . $nombreArchivo . '"');
+    echo $contenido;
+    exit;
 }
 
 function valorReportePdf(array $fila, array $columna)
@@ -189,9 +198,5 @@ function generarReportePdf($titulo, array $columnas, array $filas, $nombreArchiv
     $dompdf->setPaper('A4', $orientacion);
     $dompdf->render();
 
-    return [
-        'success' => true,
-        'filename' => $nombreArchivo . '_' . $fechaActual->format('Ymd_His') . '.pdf',
-        'pdf' => base64_encode($dompdf->output()),
-    ];
+    enviarReportePdf($dompdf, $nombreArchivo . '_' . $fechaActual->format('Ymd_His') . '.pdf');
 }

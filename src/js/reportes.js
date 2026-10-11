@@ -19,22 +19,18 @@ async function abrirReportePdf(url, titulo, boton, mostrarAlerta) {
             cache: 'no-store'
         });
         const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-            throw new Error('La sesión pudo expirar. Recarga la página e inténtalo de nuevo.');
+        if (!response.ok || !contentType.includes('application/pdf')) {
+            let mensaje = 'No se pudo generar el PDF.';
+            if (contentType.includes('application/json')) {
+                const resultado = await response.json();
+                mensaje = resultado.message || mensaje;
+            } else if (response.status === 401 || response.status === 403) {
+                mensaje = 'La sesión expiró o no tienes permisos para generar este reporte.';
+            }
+            throw new Error(mensaje);
         }
 
-        const resultado = await response.json();
-        if (!response.ok || !resultado.success) {
-            throw new Error(resultado.message || 'No se pudo generar el PDF.');
-        }
-
-        const contenido = atob(resultado.pdf);
-        const bytes = new Uint8Array(contenido.length);
-        for (let i = 0; i < contenido.length; i++) {
-            bytes[i] = contenido.charCodeAt(i);
-        }
-
-        const archivo = new Blob([bytes], { type: 'application/pdf' });
+        const archivo = await response.blob();
         urlReporte = URL.createObjectURL(archivo);
         ventanaReporte.location.replace(urlReporte);
 

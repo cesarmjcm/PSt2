@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../include/guardian.php';
+require_once __DIR__ . '/funciones_pdf.php';
 guardian_requerirAdmin('json');
 
 header('Content-Type: application/json; charset=utf-8');
@@ -124,11 +125,7 @@ try {
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
 
-    responderReporte([
-        'success' => true,
-        'filename' => 'reporte_cargos_' . $fechaActual->format('Ymd_His') . '.pdf',
-        'pdf' => base64_encode($dompdf->output()),
-    ]);
+    enviarReportePdf($dompdf, 'reporte_cargos_' . $fechaActual->format('Ymd_His') . '.pdf');
 } catch (Throwable $error) {
     error_log('Error al generar el reporte PDF de cargos: ' . $error->getMessage());
     responderReporte([
