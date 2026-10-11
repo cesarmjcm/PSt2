@@ -24,9 +24,14 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             <div class="tabla__container tabla__container--solicitudes">
                 <div class="maestro__header">
                     <h1 class="planificacion__title">Solicitudes de Escuelas</h1>
-                    <button type="button" class="btn-primary" id="btnNuevaSolicitud">
-                        <i class="fas fa-plus"></i> Nueva Solicitud
-                    </button>
+                    <div class="maestro__acciones">
+                        <button type="button" class="btn-primary btn-exportar" id="btnExportarSolicitudes">
+                            <i class="fas fa-file-pdf"></i> Exportar PDF
+                        </button>
+                        <button type="button" class="btn-primary" id="btnNuevaSolicitud">
+                            <i class="fas fa-plus"></i> Nueva Solicitud
+                        </button>
+                    </div>
                 </div>
 
                 <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
@@ -132,6 +137,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
         </div>
     </div>
     <script src="./js/app.js"></script>
+    <script src="./js/reportes.js"></script>
     <script>
     (function () {
         const endpoint = '../controladores/solicitud_contr.php';
@@ -156,6 +162,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
         const formId = document.getElementById('formId');
         const modalErrorBox = document.getElementById('modalError');
         const btnNuevaSolicitud = document.getElementById('btnNuevaSolicitud');
+        const btnExportarSolicitudes = document.getElementById('btnExportarSolicitudes');
         const buscarSolicitudesForm = document.getElementById('buscarSolicitudesForm');
         const buscarSolicitudes = document.getElementById('buscarSolicitudes');
         const limpiarBusquedaSolicitud = document.getElementById('limpiarBusquedaSolicitud');
@@ -535,6 +542,14 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
         });
 
         btnNuevaSolicitud.addEventListener('click', abrirModalNuevo);
+        btnExportarSolicitudes.addEventListener('click', () => {
+            abrirReportePdf(
+                '../reportes/exportar_solicitudes.php',
+                'Reporte de solicitudes',
+                btnExportarSolicitudes,
+                mostrarAlerta
+            );
+        });
         modalClose.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);
         modalBackdrop.addEventListener('click', cerrarModal);

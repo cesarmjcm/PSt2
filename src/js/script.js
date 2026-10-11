@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const btnToggle = document.getElementById("btn-toggle-calendario");
     const calendario = document.querySelector(".calendar-container"); 
+    const btnExportarActividades = document.getElementById("btnExportarActividades");
 
     
     calendario.classList.add("mostrar");
@@ -32,6 +33,17 @@ document.addEventListener("DOMContentLoaded", () => {
             btnToggle.innerText = "Ver Calendario de Actividades";
         }
     });
+
+    if (btnExportarActividades) {
+        btnExportarActividades.addEventListener("click", () => {
+            abrirReportePdf(
+                '../reportes/exportar_actividades.php',
+                'Reporte de actividades',
+                btnExportarActividades,
+                (mensaje) => window.alert(mensaje)
+            );
+        });
+    }
 
     
     document.getElementById("prev-month").addEventListener("click", () => cambiarMes(-1));

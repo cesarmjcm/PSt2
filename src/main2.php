@@ -45,6 +45,7 @@ if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
     <?php include '../include/modal.php'; ?>
     <?php include '../include/calendario.php'; ?>
     <script src="./js/app.js"></script>
+    <script src="./js/reportes.js"></script>
     <script src="./js/script.js"></script>
 </body>
 </html>
