@@ -81,6 +81,28 @@ function escaparReportePdf($valor)
     return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function membreteReportePdf()
+{
+    $logoGobiernoPath = __DIR__ . '/assets/membrete_gobierno.jpg';
+    $logoCulturaPath = __DIR__ . '/assets/membrete_cultura.jpg';
+    $logoGobierno = file_get_contents($logoGobiernoPath);
+    $logoCultura = file_get_contents($logoCulturaPath);
+
+    if ($logoGobierno === false || $logoCultura === false) {
+        throw new RuntimeException('No se pudieron cargar los logos del membrete.');
+    }
+
+    return '<table class="membrete-logos"><tr>'
+        . '<td><img src="data:image/jpeg;base64,' . base64_encode($logoGobierno) . '" alt="Gobierno Bolivariano de Yaracuy"></td>'
+        . '<td><img src="data:image/jpeg;base64,' . base64_encode($logoCultura) . '" alt="Instituto de Cultura del Estado Yaracuy"></td>'
+        . '</tr></table>'
+        . '<div class="membrete-instituciones">'
+        . '<p>Gobierno Bolivariano de Yaracuy</p>'
+        . '<p>Instituto de Cultura del Estado Yaracuy</p>'
+        . '<p>Red de Bibliotecas Públicas del Estado Yaracuy</p>'
+        . '</div>';
+}
+
 function enviarReportePdf($dompdf, $nombreArchivo)
 {
     $contenido = $dompdf->output();
@@ -136,6 +158,11 @@ function generarReportePdf($titulo, array $columnas, array $filas, $nombreArchiv
             body { color: #25346b; font-family: "DejaVu Sans", sans-serif; font-size: 9px; }
             header { border-bottom: 2px solid #25346b; margin-bottom: 14px; padding-bottom: 9px; text-align: center; }
             header p { color: #62708f; font-size: 8px; margin: 3px 0; }
+            table.membrete-logos { border-collapse: collapse; margin: 0 auto 5px; width: 100%; }
+            .membrete-logos td { border: 0; padding: 0; text-align: center; vertical-align: middle; width: 50%; }
+            .membrete-logos img { display: inline-block; height: 48px; max-width: 100%; }
+            .membrete-instituciones { color: #25346b; font-size: 8px; font-weight: bold; line-height: 1.4; margin-bottom: 8px; text-align: center; text-transform: uppercase; }
+            .membrete-instituciones p { color: #25346b; font-size: 8px; margin: 0; }
             h1 { color: #25346b; font-size: 17px; margin: 8px 0 4px; }
             .resumen { background: #f0f3fa; border-left: 4px solid #156939; margin-bottom: 12px; padding: 7px 10px; }
             table { border-collapse: collapse; table-layout: fixed; width: 100%; }
@@ -148,9 +175,7 @@ function generarReportePdf($titulo, array $columnas, array $filas, $nombreArchiv
     </head>
     <body>
         <header>
-            <p>República Bolivariana de Venezuela</p>
-            <p>Instituto de Cultura del Estado Yaracuy</p>
-            <p>Red de Bibliotecas Públicas del Estado Yaracuy</p>
+            <?php echo membreteReportePdf(); ?>
             <h1><?php echo escaparReportePdf($titulo); ?></h1>
             <p>Generado el <?php echo escaparReportePdf($fechaGeneracion); ?></p>
         </header>

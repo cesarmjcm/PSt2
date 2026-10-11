@@ -73,11 +73,7 @@ try {
     </head>
     <body>
         <header class="reporte-header">
-            <div class="membrete-instituciones">
-                <p>Gobierno Bolivariano de Yaracuy</p>
-                <p>Instituto de Cultura del Estado Yaracuy</p>
-                <p>Red de Bibliotecas Públicas del Estado Yaracuy</p>
-            </div>
+            <?php echo membreteReportePdf(); ?>
             <h1>Reporte de cargos</h1>
             <p class="reporte-fecha">Generado el <?php echo $escapar($fechaGeneracion); ?></p>
         </header>

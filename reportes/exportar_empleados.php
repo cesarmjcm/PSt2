@@ -75,21 +75,18 @@ try {
     <head>
         <meta charset="UTF-8">
         <title>Reporte de empleados</title>
-        <style><?php echo $css; ?></style>
+        <style>
+            <?php echo $css; ?>
+            table.membrete-logos { border-collapse: collapse; margin: 0 auto 5px; width: 100%; }
+            .membrete-logos td { border: 0; padding: 0; text-align: center; vertical-align: middle; width: 50%; }
+            .membrete-logos img { display: inline-block; height: 48px; max-width: 100%; }
+            .membrete-instituciones { color: #25346b; font-size: 8px; font-weight: bold; line-height: 1.4; margin-bottom: 8px; text-align: center; text-transform: uppercase; }
+            .membrete-instituciones p { color: #25346b; font-size: 8px; margin: 0; }
+        </style>
     </head>
     <body>
-        <table class="membrete">
-            <tr>
-       
-                <td class="membrete-texto">
-                    <p class="membrete-pais">República Bolivariana de Venezuela</p>
-                    <p class="membrete-inst">Instituto de Cultura del Estado Yaracuy (ICEY)</p>
-                    <p class="membrete-sub">Red de Bibliotecas del Estado Yaracuy</p>
-                </td>
-            </tr>
-        </table>
-
         <header class="reporte-header">
+            <?php echo membreteReportePdf(); ?>
             <h1>Reporte de empleados</h1>
             <p class="reporte-fecha">Generado el <?php echo $escapar($fechaGeneracion); ?></p>
         </header>
