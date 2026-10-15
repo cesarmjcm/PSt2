@@ -10,6 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+require_once __DIR__ . '/../helpers/busqueda.php';
 
 $conex = Conexion::conectar(); 
 
@@ -25,9 +26,13 @@ $filtros = [
     'fecha_desde' => $_GET['fecha_desde'] ?? '',
     'fecha_hasta' => $_GET['fecha_hasta'] ?? '',
 ];
+$busqueda = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
 
 $registros = obtener_bitacora($conex, $filtros);
 $usuarios  = obtener_usuarios_para_filtro($conex);
+if ($busqueda !== '') {
+    $registros = filtrarFilasPorBusqueda($registros, $busqueda);
+}
 $registrosPorPagina = 10;
 $paginaActual = max(1, intval($_GET['page'] ?? 1));
 $totalPaginas = max(1, (int)ceil(count($registros) / $registrosPorPagina));
@@ -87,6 +92,11 @@ $registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, 
             <input type="date" name="fecha_hasta" id="fecha_hasta" value="<?= htmlspecialchars($filtros['fecha_hasta']) ?>">
         </div>
 
+        <div class="campo">
+            <label for="q">Buscar en registros</label>
+            <input type="search" name="q" id="q" value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>" placeholder="Buscar...">
+        </div>
+
         <button type="submit">Filtrar</button>
         <a href="bitacora.php" class="bitacora__limpiar">Limpiar</a>
     </form>
@@ -137,7 +147,7 @@ $registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, 
         <?php if ($totalPaginas > 1): ?>
             <nav class="paginacion" aria-label="Páginas de bitácora">
                 <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
-                    <?php $parametrosPagina = array_merge($filtros, ['page' => $pagina]); ?>
+                    <?php $parametrosPagina = array_merge($filtros, ['q' => $busqueda, 'page' => $pagina]); ?>
                     <a href="?<?php echo htmlspecialchars(http_build_query($parametrosPagina), ENT_QUOTES, 'UTF-8'); ?>"
                        class="paginacion__pagina<?php echo $pagina === $paginaActual ? ' activa' : ''; ?>"
                        <?php echo $pagina === $paginaActual ? 'aria-current="page"' : ''; ?>>

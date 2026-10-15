@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../helpers/busqueda.php';
 
 function responderReportePdf(array $respuesta, $estado = 200)
 {
@@ -21,6 +22,14 @@ function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $col
         ], 405);
     }
 
+    if (isset($_GET['q']) && !is_string($_GET['q'])) {
+        responderReportePdf([
+            'success' => false,
+            'message' => 'El término de búsqueda no es válido.',
+        ], 400);
+    }
+    $busqueda = trim((string) ($_GET['q'] ?? ''));
+
     $idBiblioteca = null;
     if ($filtrarBiblioteca && !esAdministrador()) {
         $idBiblioteca = (int) guardian_idBibliotecaSesion();
@@ -38,6 +47,7 @@ function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $col
         $filas = $filtrarBiblioteca
             ? $modelo->{$metodo}($idBiblioteca)
             : $modelo->{$metodo}();
+        $filas = filtrarFilasReportePdf($filas, $busqueda);
 
         generarReportePdf(
             $titulo,
@@ -53,6 +63,11 @@ function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $col
             'message' => 'Ocurrió un error al generar el reporte PDF.',
         ], 500);
     }
+}
+
+function filtrarFilasReportePdf(array $filas, string $busqueda): array
+{
+    return filtrarFilasPorBusqueda($filas, $busqueda);
 }
 
 function cargarDompdfReporte()

@@ -46,6 +46,13 @@ try {
 
     $idBiblioteca = esAdministrador() ? null : (int) guardian_idBibliotecaSesion();
     $empleados = (new Empleado())->mostrarEmpleados($idBiblioteca);
+    if (isset($_GET['q']) && !is_string($_GET['q'])) {
+        responderReporte([
+            'success' => false,
+            'message' => 'El término de búsqueda no es válido.',
+        ], 400);
+    }
+    $empleados = filtrarFilasReportePdf($empleados, trim((string) ($_GET['q'] ?? '')));
 
     $css = file_get_contents(__DIR__ . '/reportes_empleado.css');
     if ($css === false) {

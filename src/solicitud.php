@@ -543,8 +543,11 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
 
         btnNuevaSolicitud.addEventListener('click', abrirModalNuevo);
         btnExportarSolicitudes.addEventListener('click', () => {
+            const termino = buscarSolicitudes.value.trim();
+            const urlReporte = '../reportes/exportar_solicitudes.php' +
+                (termino ? '?q=' + encodeURIComponent(termino) : '');
             abrirReportePdf(
-                '../reportes/exportar_solicitudes.php',
+                urlReporte,
                 'Reporte de solicitudes',
                 btnExportarSolicitudes,
                 mostrarAlerta

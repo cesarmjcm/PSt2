@@ -17,15 +17,6 @@
     gap: 10px;
 }
 
-.btn-exportar {
-    background-color: #b3261e;
-}
-
-.btn-exportar:hover {
-    box-shadow: 0 12px 24px rgba(179, 38, 30, 0.24);
-}
-
-
 .maestro__alert {
     padding: 14px 18px;
     border-radius: 14px;
@@ -74,23 +65,6 @@
     color: #ffffff;
 
 }
-.btn-primary {
-    background-color: #156939;
-    color: #ffffff;
-    border: none;
-    border-radius: 14px;
-    padding: 12px 22px;
-    font-weight: 700;
-    margin-top: 10px;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(21, 105, 57, 0.24);
-}
-
 .btn-secondary {
     background-color: #f4f6ff;
     color: #25346b;

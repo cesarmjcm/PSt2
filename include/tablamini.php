@@ -1,10 +1,12 @@
 <?php
+require_once __DIR__ . '/../helpers/busqueda.php';
+
 $actividades = [];
 $errorMessage = '';
 $totalActividades = 0;
 $totalParticipantes = 0;
 $municipiosActivos = [];
-$busqueda = trim((string)($_GET['q'] ?? ''));
+$busqueda = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
 
 try {
     require_once __DIR__ . '/../modelos/actividad.php';
@@ -13,10 +15,7 @@ try {
     
     $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
     if ($busqueda !== '') {
-        $actividades = array_values(array_filter($actividades, static function (array $actividad) use ($busqueda): bool {
-            $textoActividad = implode(' ', array_map('strval', $actividad));
-            return stripos($textoActividad, $busqueda) !== false;
-        }));
+        $actividades = filtrarFilasPorBusqueda($actividades, $busqueda);
     }
     $totalActividades = count($actividades);
     $actividadesPorPagina = 10;
@@ -77,6 +76,9 @@ try {
                             </a>
                         <?php endif; ?>
                     </form>
+                    <button type="button" class="btn-primary btn-exportar" id="btnExportarActividades">
+                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    </button>
                 </div>
                 <table class="tabla-planificacion">
                     <thead>

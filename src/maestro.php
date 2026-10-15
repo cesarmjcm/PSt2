@@ -209,8 +209,8 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></title>
-    <link rel="stylesheet" href="./css/main.css">
-    <link rel="stylesheet" href="./css/maestro.css">
+    <link rel="stylesheet" href="./css/main.css?v=3">
+    <link rel="stylesheet" href="./css/maestro.css?v=2">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
@@ -249,6 +249,18 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     </div>
 
                     <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
+
+                    <form class="tabla-buscador" id="buscarMaestroForm" role="search">
+                        <label class="sr-only" for="buscarMaestro">Buscar registro</label>
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input type="search"
+                               id="buscarMaestro"
+                               placeholder="Buscar registro..."
+                               autocomplete="off">
+                        <button type="button" class="tabla-buscador__limpiar" id="limpiarBusquedaMaestro" title="Limpiar búsqueda" aria-label="Limpiar búsqueda" hidden>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
 
                     <table class="tabla-planificacion" id="tablaMaestro">
                         <thead>
@@ -320,6 +332,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         const tablaHead = document.getElementById('tablaHead');
         const tablaBody = document.getElementById('tablaBody');
         const paginacion = document.getElementById('maestroPagination');
+        const buscarMaestroForm = document.getElementById('buscarMaestroForm');
+        const buscarMaestro = document.getElementById('buscarMaestro');
+        const limpiarBusquedaMaestro = document.getElementById('limpiarBusquedaMaestro');
         const alertBox = document.getElementById('alertBox');
 
         const modal = document.getElementById('maestroModal');
@@ -365,6 +380,21 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         function ocultarErrorModal() {
             modalErrorBox.textContent = '';
             modalErrorBox.hidden = true;
+        }
+
+        function normalizarTexto(valor) {
+            return String(valor == null ? '' : valor)
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
+        }
+
+        function filasFiltradas() {
+            const termino = normalizarTexto(buscarMaestro.value.trim());
+            if (!termino) return filasCargadas;
+            return filasCargadas.filter(fila =>
+                normalizarTexto(Object.values(fila).join(' ')).includes(termino)
+            );
         }
 
         function mostrarEstadoCedula(mensaje, tipo) {
@@ -581,7 +611,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             try {
                 filasCargadas = json.data || [];
-                const totalPaginas = Math.max(1, Math.ceil(filasCargadas.length / filasPorPagina));
+                const totalPaginas = Math.max(1, Math.ceil(filasFiltradas().length / filasPorPagina));
                 paginaActual = Math.min(paginaActual, totalPaginas);
                 renderBody();
             } catch (e) {
@@ -591,12 +621,16 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         }
 
         function renderBody() {
-            const totalPaginas = Math.max(1, Math.ceil(filasCargadas.length / filasPorPagina));
+            const resultados = filasFiltradas();
+            const totalPaginas = Math.max(1, Math.ceil(resultados.length / filasPorPagina));
             const inicio = (paginaActual - 1) * filasPorPagina;
-            const filas = filasCargadas.slice(inicio, inicio + filasPorPagina);
+            const filas = resultados.slice(inicio, inicio + filasPorPagina);
             if (!filas.length) {
                 const colspan = camposKeys.filter(k => campos[k].type !== 'password' && !campos[k].soloFiltro).length + 2;
-                tablaBody.innerHTML = '<tr><td colspan="' + colspan + '">No hay registros todavía.</td></tr>';
+                const mensajeVacio = buscarMaestro.value.trim()
+                    ? 'No se encontraron registros para esa búsqueda.'
+                    : 'No hay registros todavía.';
+                tablaBody.innerHTML = '<tr><td colspan="' + colspan + '">' + mensajeVacio + '</td></tr>';
                 renderPaginacion(totalPaginas);
                 return;
             }
@@ -924,6 +958,19 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         });
 
         btnNuevo.addEventListener('click', abrirModalNuevo);
+        buscarMaestroForm.addEventListener('submit', (event) => event.preventDefault());
+        buscarMaestro.addEventListener('input', () => {
+            paginaActual = 1;
+            limpiarBusquedaMaestro.hidden = !buscarMaestro.value.trim();
+            renderBody();
+        });
+        limpiarBusquedaMaestro.addEventListener('click', () => {
+            buscarMaestro.value = '';
+            limpiarBusquedaMaestro.hidden = true;
+            paginaActual = 1;
+            buscarMaestro.focus();
+            renderBody();
+        });
         if (btnExportar) {
             btnExportar.addEventListener('click', () => {
                 let urlReporte;
@@ -943,6 +990,10 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                         tipo_actividad: 'exportar_tipos_actividad.php'
                     };
                     urlReporte = '../reportes/' + reportesMaestros[tablaActual];
+                }
+                const termino = buscarMaestro.value.trim();
+                if (termino) {
+                    urlReporte += (urlReporte.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(termino);
                 }
                 abrirReportePdf(urlReporte, 'Reporte de ' + tablaActual, btnExportar, mostrarAlerta);
             });

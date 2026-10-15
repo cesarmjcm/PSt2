@@ -856,6 +856,31 @@ td.col-acciones {
 	gap: 10px 24px;
 }
 
+.btn-primary {
+	background-color: #156939;
+	color: #ffffff;
+	border: none;
+	border-radius: 14px;
+	padding: 12px 22px;
+	font-weight: 700;
+	margin-top: 10px;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 12px 24px rgba(21, 105, 57, 0.24);
+}
+
+.btn-primary.btn-exportar {
+	background-color: #b3261e;
+}
+
+.btn-primary.btn-exportar:hover {
+	box-shadow: 0 12px 24px rgba(179, 38, 30, 0.24);
+}
+
 .detalle-actividad p {
 	margin: 0;
 	font-size: 0.9rem;
@@ -867,8 +892,6 @@ td.col-acciones {
 	color: #25346b;
 	font-weight: 700;
 }
-
-
 
 
 

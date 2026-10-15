@@ -50,6 +50,13 @@ try {
     require_once __DIR__ . '/../modelos/cargo.php';
 
     $cargos = (new Cargo())->mostrarCargos();
+    if (isset($_GET['q']) && !is_string($_GET['q'])) {
+        responderReporte([
+            'success' => false,
+            'message' => 'El término de búsqueda no es válido.',
+        ], 400);
+    }
+    $cargos = filtrarFilasReportePdf($cargos, trim((string) ($_GET['q'] ?? '')));
     $cssPath = __DIR__ . '/reportes_cargo.css';
     $css = file_get_contents($cssPath);
     if ($css === false) {

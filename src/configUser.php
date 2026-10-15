@@ -3,6 +3,7 @@ include '../include/guardian.php';
 require_once __DIR__ . '/../modelos/usuario.php';
 require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+require_once __DIR__ . '/../helpers/busqueda.php';
 
 $model = new Usuario();
 $empleadoModel = new Empleado();
@@ -151,6 +152,26 @@ try {
     $usuarios = [];
 }
 
+$busquedaUsuarios = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
+$usuariosTabla = $usuarios;
+if ($esAdmin && $busquedaUsuarios !== '') {
+    $usuariosTabla = array_values(array_filter($usuariosTabla, static function (array $usuario) use ($busquedaUsuarios): bool {
+        $valoresVisibles = [
+            $usuario['id'] ?? '',
+            $usuario['nombre'] ?? '',
+            $usuario['telefono'] ?? '',
+            $usuario['id_empleado_nombre'] ?? 'Sin empleado',
+            ($usuario['rol'] ?? 'usuario') === 'administrador' ? 'Administrador' : 'Usuario',
+        ];
+        return coincideTextoBusqueda($valoresVisibles, $busquedaUsuarios);
+    }));
+}
+$usuariosPorPagina = 10;
+$paginaUsuarios = max(1, (int) ($_GET['page'] ?? 1));
+$totalPaginasUsuarios = max(1, (int) ceil(count($usuariosTabla) / $usuariosPorPagina));
+$paginaUsuarios = min($paginaUsuarios, $totalPaginasUsuarios);
+$usuariosTabla = array_slice($usuariosTabla, ($paginaUsuarios - 1) * $usuariosPorPagina, $usuariosPorPagina);
+
 $empleados = [];
 try {
     if ($esAdmin) {
@@ -289,6 +310,11 @@ try {
                             <div class="config-note" style="margin-top:24px;">
                                 <p>Listado de usuarios registrados en la base de datos.</p>
                             </div>
+                            <form class="tabla-buscador" method="get" action="configUser.php" role="search" style="margin-top:16px;">
+                                <label class="sr-only" for="buscarUsuarios">Buscar usuario</label>
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                                <input type="search" name="q" id="buscarUsuarios" value="<?php echo htmlspecialchars($busquedaUsuarios, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Buscar usuario..." autocomplete="off">
+                            </form>
                             <div class="tabla__container tabla-usuarios-wrap" style="margin-top:30px;">
                                 <table class="tabla-planificacion tabla-usuarios">
                                     <thead>
@@ -302,8 +328,8 @@ try {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!empty($usuarios)): ?>
-                                            <?php foreach ($usuarios as $u): ?>
+                                        <?php if (!empty($usuariosTabla)): ?>
+                                            <?php foreach ($usuariosTabla as $u): ?>
                                                 <?php
                                                     $empleadoNombre = trim($u['id_empleado_nombre'] ?? '');
                                                     $empleadoNombre = $empleadoNombre !== '' ? $empleadoNombre : 'Sin empleado';
@@ -333,10 +359,21 @@ try {
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else: ?>
-                                            <tr><td colspan="6">No hay usuarios registrados.</td></tr>
+                                            <tr><td colspan="6"><?php echo $busquedaUsuarios !== '' ? 'No se encontraron usuarios para esa búsqueda.' : 'No hay usuarios registrados.'; ?></td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
+                                <?php if ($totalPaginasUsuarios > 1): ?>
+                                    <nav class="paginacion" aria-label="Páginas de usuarios">
+                                        <?php for ($pagina = 1; $pagina <= $totalPaginasUsuarios; $pagina++): ?>
+                                            <a href="?<?php echo htmlspecialchars(http_build_query(['q' => $busquedaUsuarios, 'page' => $pagina]), ENT_QUOTES, 'UTF-8'); ?>"
+                                               class="paginacion__pagina<?php echo $pagina === $paginaUsuarios ? ' activa' : ''; ?>"
+                                               <?php echo $pagina === $paginaUsuarios ? 'aria-current="page"' : ''; ?>>
+                                                <?php echo $pagina; ?>
+                                            </a>
+                                        <?php endfor; ?>
+                                    </nav>
+                                <?php endif; ?>
                             </div>
                             <?php endif; ?>
                         </div>
