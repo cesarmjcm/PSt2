@@ -307,9 +307,15 @@ try {
                             </form>
 
                             <?php if ($esAdmin): ?>
-                            <div class="config-note" style="margin-top:24px;">
-                                <p>Listado de usuarios registrados en la base de datos.</p>
-                            </div>
+                           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:24px;">
+    <div class="config-note" style="margin:0; flex:1;">
+        <p>Listado de usuarios registrados en la base de datos.</p>
+    </div>
+    <button type="button" class="btn-primary btn-exportar" id="btnExportarUsuarios">
+        <i class="fas fa-file-pdf"></i> Exportar PDF
+    </button>
+</div>
+<div id="alertBox" class="config-note" style="display:none; margin-top:12px;"></div>
                             <form class="tabla-buscador" method="get" action="configUser.php" role="search" style="margin-top:16px;">
                                 <label class="sr-only" for="buscarUsuarios">Buscar usuario</label>
                                 <i class="fas fa-search" aria-hidden="true"></i>
@@ -387,7 +393,9 @@ try {
             </div>
         </div>
     </main>
+<script src="./js/reportes.js"></script>
     <script>
+
         document.addEventListener('DOMContentLoaded', () => {
             const menuButtons = document.querySelectorAll('.config-menu__item[data-tab]');
             const panels = document.querySelectorAll('.config-panel');
@@ -399,14 +407,39 @@ try {
                     panels.forEach(panel => panel.classList.toggle('active', panel.id === target));
                 });
             });
-
+          
             const logoutBtn = document.getElementById('cerrarSesion');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', () => {
                     window.location.href = 'logout.php';
                 });
             }
+                          const btnExportarUsuarios = document.getElementById('btnExportarUsuarios');
+            const alertBox = document.getElementById('alertBox');
+            const buscarUsuarios = document.getElementById('buscarUsuarios');
+            let alertTimeoutId = null;
 
+            function mostrarAlerta(mensaje, tipo) {
+                const color = tipo === 'success' ? '#156939' : '#b3261e';
+                clearTimeout(alertTimeoutId);
+                alertBox.style.borderColor = color;
+                alertBox.style.color = color;
+                alertBox.innerHTML = '';
+                const p = document.createElement('p');
+                p.textContent = mensaje;
+                alertBox.appendChild(p);
+                alertBox.style.display = 'block';
+                alertTimeoutId = setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
+            }
+
+            if (btnExportarUsuarios) {
+                btnExportarUsuarios.addEventListener('click', () => {
+                    const termino = buscarUsuarios ? buscarUsuarios.value.trim() : '';
+                    const urlReporte = '../reportes/exportar_usuarios.php' +
+                        (termino ? '?q=' + encodeURIComponent(termino) : '');
+                    abrirReportePdf(urlReporte, 'Reporte de usuarios', btnExportarUsuarios, mostrarAlerta);
+                });
+            }
             
             const formTitulo = document.getElementById('usuario-form-titulo');
             const usuarioActionInput = document.getElementById('usuario_action');
