@@ -813,13 +813,21 @@ td.col-acciones {
 	cursor: pointer;
 	transition: all 0.2s ease;
 	padding: 0;
+	font: inherit;
 	font-size: 0.95rem;
+	appearance: none;
 }
 
 .btn-icon:hover {
 	background-color: #e7f1ff;
 	border-color: #5792ff;
 	transform: translateY(-1px);
+}
+
+.btn-icon:focus-visible,
+.btn-primary:focus-visible {
+	outline: 3px solid rgba(87, 146, 255, 0.45);
+	outline-offset: 2px;
 }
 
 .btn-ver-mas[aria-expanded="true"] {
@@ -857,6 +865,10 @@ td.col-acciones {
 }
 
 .btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
 	background-color: #156939;
 	color: #ffffff;
 	border: none;
@@ -866,6 +878,9 @@ td.col-acciones {
 	margin-top: 10px;
 	cursor: pointer;
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	font-family: inherit;
+	line-height: 1.2;
+	appearance: none;
 }
 
 .btn-primary:hover {
@@ -892,6 +907,5 @@ td.col-acciones {
 	color: #25346b;
 	font-weight: 700;
 }
-
 
 

@@ -11,7 +11,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitudes de Escuelas</title>
-    <link rel="stylesheet" href="./css/main.css?v=2">
+    <link rel="stylesheet" href="./css/main.css?v=4">
     <link rel="stylesheet" href="./css/maestro.css">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">

@@ -209,7 +209,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></title>
-    <link rel="stylesheet" href="./css/main.css?v=3">
+    <link rel="stylesheet" href="./css/main.css?v=4">
     <link rel="stylesheet" href="./css/maestro.css?v=2">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
