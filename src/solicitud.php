@@ -136,7 +136,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             </form>
         </div>
     </div>
-    <script src="./js/header.js"></script>
+     <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
     <script src="./js/reportes.js"></script>
     <script>
     (function () {

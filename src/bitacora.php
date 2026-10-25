@@ -158,6 +158,6 @@ $registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, 
         <?php endif; ?>
     </div>
 </main>
-<script src="./js/header.js"></script>
+   <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
 </body>
 </html>

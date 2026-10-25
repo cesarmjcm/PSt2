@@ -193,7 +193,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración de usuario</title>
-    <link rel="stylesheet" href="./css/main.css?v=4">
+    <link rel="stylesheet" href="./css/main.css">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="./css/configuracion.css?v=4">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
@@ -393,6 +393,7 @@ try {
             </div>
         </div>
     </main>
+ <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
 <script src="./js/reportes.js"></script>
     <script>
 
