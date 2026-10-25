@@ -2,8 +2,6 @@
 require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../modelos/respaldosbd.php';
 
-guardian_requerirAdmin();
-
 $mensaje = $_SESSION['respaldo_msg'] ?? '';
 unset($_SESSION['respaldo_msg']);
 
@@ -72,8 +70,6 @@ $respaldos = (new RespaldoBD())->listar();
 </div>
 
 </main>
-
-
 
 <script src="./js/header.js"></script>
 </body>

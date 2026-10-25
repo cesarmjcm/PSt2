@@ -3,8 +3,6 @@ require_once __DIR__ . '/../include/guardian.php';      // exige sesión iniciad
 require_once __DIR__ . '/../modelos/respaldosbd.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
 
-guardian_requerirAdmin();                               // solo administrador
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 header('Location: ../src/respaldos.php');
     exit;

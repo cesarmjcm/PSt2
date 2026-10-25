@@ -17,9 +17,9 @@ $esAdmin = isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'administra
         <a href="solicitud.php" class="nav__link<?= $current === 'solicitud.php' ? ' active' : '' ?>">Solicitudes</a>
         <?php if ($esAdmin): ?>
             <a href="bitacora.php" class="nav__link<?= $bitacoraActive ? ' active' : '' ?>">Bitácora</a>
-            <a href="respaldos.php" class="nav__link<?= $current === 'respaldos.php' ? ' active' : '' ?>">Respaldo BD</a>
+          
         <?php endif; ?>
-        
+        <a href="respaldos.php" class="nav__link<?= $current === 'respaldos.php' ? ' active' : '' ?>">Respaldo BD</a>
                 <div class="nav__user">
                     <button id="userMenuButton" class="nav__user-btn" aria-haspopup="true" aria-expanded="false" title="Usuario" type="button">
                         <i class="fas fa-user-circle"></i>
