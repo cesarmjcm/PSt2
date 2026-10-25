@@ -1,0 +1,116 @@
+.container__respaldo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0 40px;
+    margin-top: 40px;
+    box-sizing: border-box;
+}
+
+.respaldo__title {
+    font-size: 1.15rem;
+    margin: 0 0 6px;
+    color: #156939;
+    text-align: center;
+}
+
+.respaldo__subtitle {
+    font-size: 0.95rem;
+    color: #5c6584;
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+/* Mensaje (éxito / error): texto simple como el resto del sistema */
+.respaldo__alerta {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-align: center;
+}
+.respaldo__alerta--ok    { color: #156939; }
+.respaldo__alerta--error { color: #b3261e; }
+
+/* Las dos tarjetas: mismo panel que .tabla__container */
+.respaldo__tarjetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.respaldo__tarjeta {
+    flex: 1 1 320px;
+    background-color: #ffffff;
+    border: 2px solid #99a0be;
+    border-radius: 4px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+    padding: 20px 24px 24px;
+    box-sizing: border-box;
+}
+
+.respaldo__tarjeta h2 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #156939;
+    margin: 0 0 12px;
+}
+
+.respaldo__tarjeta p {
+    font-size: 0.9rem;
+    color: #222222;
+    line-height: 1.4;
+    margin: 0 0 14px;
+}
+
+.respaldo__tarjeta p strong {
+    color: #25346b;
+}
+
+.respaldo__tarjeta form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.respaldo__tarjeta select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #bbc1d6;
+    border-radius:12px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    color: #222222;
+}
+
+/* Botones: igual que .btn-primary y .btn-exportar */
+.respaldo__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 2px;
+    padding: 12px 22px;
+    font-family: inherit;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.respaldo__btn--verde { background-color: #156939; }
+.respaldo__btn--rojo  { background-color: #1e2db3; }
+
+.respaldo__btn--verde:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(21, 105, 57, 0.24);
+}
+.respaldo__btn--rojo:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(30, 45, 179, 0.24);
+}

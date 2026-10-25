@@ -17,6 +17,7 @@ $esAdmin = isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'administra
         <a href="solicitud.php" class="nav__link<?= $current === 'solicitud.php' ? ' active' : '' ?>">Solicitudes</a>
         <?php if ($esAdmin): ?>
             <a href="bitacora.php" class="nav__link<?= $bitacoraActive ? ' active' : '' ?>">Bitácora</a>
+            <a href="respaldos.php" class="nav__link<?= $current === 'respaldos.php' ? ' active' : '' ?>">Respaldo BD</a>
         <?php endif; ?>
         
                 <div class="nav__user">
