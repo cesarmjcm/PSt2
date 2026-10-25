@@ -25,7 +25,7 @@ $esAdmin = isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'administra
                     </button>
                     <div id="userMenu" class="nav__user-menu" hidden>
                         <a href="configUser.php" id="configBtn">Configuración</a>
-                        
+                        <a href="logout.php" id="logoutBtn">Cerrar sesión</a>
                     </div>
                 </div>
             </div>
