@@ -45,7 +45,7 @@ require_once __DIR__ . '/../include/guardian.php';
     </div>
     <script src="./js/utilidades.js"></script>
     <script src="./js/validaciones.js"></script>
-    <script src="./js/header.js"></script>
+    <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
     <script src="./js/index.js"></script>
     <script src="./js/reportes.js"></script>
     <script>

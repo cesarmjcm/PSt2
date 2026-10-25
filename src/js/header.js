@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ev.preventDefault();
             if (userMenu) userMenu.setAttribute('hidden', '');
             if (userMenuButton) userMenuButton.setAttribute('aria-expanded', 'false');
-            window.location.href = 'login.php';
+           window.location.href = 'logout.php';
         });
     }
 

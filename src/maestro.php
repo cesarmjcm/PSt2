@@ -319,7 +319,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     </div>
     <?php endif; ?>
 
-   <script src="./js/header.js"></script>
+    <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
     <script src="./js/reportes.js"></script>
     <?php if ($tablaValida): ?>
     <script>
