@@ -4,7 +4,7 @@ require_once __DIR__ . '/../config/conexion.php';
 class Empleado {
 
     public function mostrarEmpleados(int $idBiblioteca = null) {
-        $sql = "SELECT e.*, e.genero AS genero, e.edad AS edad, e.`anios_de_servicio` AS anios_servicio, c.nombre AS id_cargo_nombre,
+        $sql = "SELECT e.*, e.genero AS genero, e.edad AS edad, IF(e.fecha_inicio_cargo IS NULL, e.`anios_de_servicio`, TIMESTAMPDIFF(YEAR, e.fecha_inicio_cargo, CURDATE())) AS anios_servicio, c.nombre AS id_cargo_nombre,
                        b.nombre AS id_biblioteca_nombre
                 FROM empleado e
                 JOIN cargo c ON e.id_cargo = c.id
