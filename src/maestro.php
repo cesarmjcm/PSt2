@@ -142,7 +142,7 @@ $camposPorMaestro = [
         'telefono' => ['label' => 'Teléfono', 'type' => 'text', 'maxLength' => 11, 'formatoVenezolano' => true],
 
         'genero'   => ['label' => 'Género', 'type' => 'select', 'options' => ['M' => 'Masculino', 'F' => 'Femenino']],
-        'edad'     => ['label' => 'Edad', 'type' => 'number', 'min' => 0],
+        'edad'     => ['label' => 'Edad', 'type' => 'number', 'min' => 17, 'edadMinima' => 17],
         'id_cargo' => [ 'label'       => 'Cargo', 'type'        => 'select','fuente'      => '../controladores/cargo_contr.php','optionValue' => 'id','optionLabel' => 'nombre', ],
         'id_biblioteca' => [
             'label'       => 'Biblioteca donde trabaja',
@@ -151,9 +151,9 @@ $camposPorMaestro = [
             'optionValue' => 'id',
             'optionLabel' => 'nombre',
         ],
-        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0],
-
-        'fecha_inicio_cargo' => ['label' => 'Inicio del cargo', 'type' => 'date'],
+        // La fecha de inicio del cargo hace de fecha de ingreso: de ella se calculan los años de servicio.
+        'fecha_inicio_cargo' => ['label' => 'Fecha de ingreso (inicio del cargo)', 'type' => 'date', 'esFechaIngreso' => true],
+        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0, 'soloLectura' => true, 'calculaDesde' => 'fecha_inicio_cargo'],
         // Sin fecha final = el cargo sigue vigente.
         'fecha_fin_cargo'    => ['label' => 'Fin del cargo', 'type' => 'date', 'opcional' => true, 'noAnteriorA' => 'fecha_inicio_cargo'],
     ],
@@ -322,6 +322,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
     <script src="./js/reportes.js"></script>
     <?php if ($tablaValida): ?>
+    <script src="./js/años_servicio.js?v=<?= filemtime(__DIR__ . '/js/años_servicio.js') ?>"></script>
     <script>
     (function () {
         const tablaActual = <?php echo json_encode($tabla); ?>;
@@ -525,6 +526,20 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             if (campo.formatoVenezolano && !REGEX_TELEFONO_VENEZUELA.test(valor)) {
                 return 'El campo "' + campo.label + '" debe tener el formato venezolano: empieza en 0, solo números, 11 dígitos en total (ej. 04141234567).';
+            }
+
+            if (campo.edadMinima) {
+                if (!/^\d+$/.test(valor)) {
+                    return 'El campo "' + campo.label + '" debe ser un número entero.';
+                }
+                if (Number(valor) < campo.edadMinima) {
+                    return 'El empleado debe tener una edad mínima de ' + campo.edadMinima + ' años.';
+                }
+            }
+
+            if (campo.esFechaIngreso) {
+                const errorFecha = validarFechaIngreso(valor);
+                if (errorFecha) return errorFecha;
             }
 
             if (campo.esRif && !REGEX_RIF.test(valor)) {
@@ -765,7 +780,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                         ? ' pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü \'\\-]+" title="Solo letras y espacios, sin números"'
                         : (campo.soloNumeros ? ' pattern="[0-9]+"' : '');
                     const inputmodeAttr = campo.inputmode ? ' inputmode="' + campo.inputmode + '"' : '';
-                    html += '<input id="campo_' + key + '" name="' + key + '" type="' + campo.type + '" value="' + escapeHtml(valor) + '"' + maxLengthAttr + patternAttr + inputmodeAttr + (esOpcional ? '' : (campo.optionalOnEdit ? '' : ' required')) + ' />';
+                    const soloLecturaAttr = campo.soloLectura ? ' readonly tabindex="-1"' : '';
+                    const maxHoyAttr = campo.esFechaIngreso ? ' max="' + fechaHoyISO() + '"' : '';
+                    html += '<input id="campo_' + key + '" name="' + key + '" type="' + campo.type + '" value="' + escapeHtml(valor) + '"' + maxLengthAttr + patternAttr + inputmodeAttr + soloLecturaAttr + maxHoyAttr + (esOpcional ? '' : (campo.optionalOnEdit ? '' : ' required')) + ' />';
                     if (tablaActual === 'empleado' && key === 'cedula') {
                         html += '<small id="estado_cedula" class="maestro__field-status" aria-live="polite"></small>';
                     }
@@ -806,6 +823,23 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     selectDependiente.innerHTML = html;
                     selectDependiente.disabled = opciones.length === 0;
                 });
+            });
+
+            // Campos calculados (años de servicio a partir de la fecha de ingreso).
+            camposKeys.forEach(key => {
+                const campo = campos[key];
+                if (!campo.calculaDesde) return;
+                const origen = document.getElementById('campo_' + campo.calculaDesde);
+                const destino = document.getElementById('campo_' + key);
+                if (!origen || !destino) return;
+
+                const actualizar = () => {
+                    const anios = calcularAniosServicio(origen.value);
+                    destino.value = anios === null ? '' : anios;
+                };
+                origen.addEventListener('input', actualizar);
+                origen.addEventListener('change', actualizar);
+                actualizar();
             });
 
             if (tablaActual === 'empleado') {
@@ -921,6 +955,16 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 if (campo.noEnviar) continue;
 
                 body.append(key, valor.trim());
+            }
+
+            if (tablaActual === 'empleado') {
+                const edad = Number(document.getElementById('campo_edad').value);
+                const aniosServicio = Number(document.getElementById('campo_anios_servicio').value);
+                if (aniosServicio > edad) {
+                    mostrarErrorModal('Los años de servicio (' + aniosServicio + ') no pueden ser mayores que la edad del empleado (' + edad + ').');
+                    document.getElementById('campo_edad').focus();
+                    return;
+                }
             }
 
             if (tablaActual === 'empleado') {
