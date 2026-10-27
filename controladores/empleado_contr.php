@@ -89,7 +89,7 @@ class EmpleadoController
         ]);
     }
 
-    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = '')
+    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = '')
     {
         if ($nombre === '' || $apellido === '' || $telefono === '' || $cedula === '' || $genero === '') {
             return 'Nombre, apellido, teléfono, cédula y género son obligatorios.';
@@ -112,8 +112,8 @@ class EmpleadoController
         if (!in_array($genero, ['M', 'F'], true)) {
             return 'Debe seleccionar Masculino o Femenino.';
         }
-        if ($edad < 0 || $anios_servicio < 0) {
-            return 'La edad y los años de servicio no pueden ser negativos.';
+        if (!Validador::esEdadMinimaValida($edad, 17)) {
+            return 'El empleado debe tener una edad mínima de 17 años.';
         }
         if ($id_biblioteca <= 0) {
             return 'Debe seleccionar la biblioteca donde trabaja el empleado.';
@@ -126,6 +126,14 @@ class EmpleadoController
         }
         if (!Validador::esFechaValida($fecha_inicio)) {
             return 'La fecha de inicio del cargo no es válida.';
+        }
+        // La fecha de inicio del cargo se usa como fecha de ingreso para calcular los años de servicio.
+        if (!Validador::esFechaIngresoValida($fecha_inicio)) {
+            return 'La fecha de ingreso no puede ser futura ni tener más de 70 años de antigüedad.';
+        }
+        $maxAnios = Validador::aniosServicioMaximos($edad);
+        if (Validador::calcularAniosServicio($fecha_inicio) > $maxAnios) {
+            return 'Con ' . $edad . ' años de edad el empleado puede tener como máximo ' . $maxAnios . ' ' . ($maxAnios === 1 ? 'año' : 'años') . ' de servicio. Revise la edad o la fecha de ingreso.';
         }
         if ($fecha_fin !== '' && !Validador::esFechaValida($fecha_fin)) {
             return 'La fecha final del cargo no es válida.';
@@ -158,18 +166,19 @@ class EmpleadoController
         $cedulaRaw = trim($_POST['cedula'] ?? '');
         $genero = trim($_POST['genero'] ?? '');
         $edad = intval($_POST['edad'] ?? 0);
-        $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
         $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
         $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
         $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
 
-        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $id_biblioteca, $fecha_inicio, $fecha_fin);
         if ($errorValidacion !== null) {
             $this->error($errorValidacion);
             return;
         }
 
         $cedula = (int) $cedulaRaw;
+        // Los años de servicio SIEMPRE se calculan en el servidor (no se confía en el navegador).
+        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio);
 
         if ($this->model->existeCedula($cedula)) {
             $this->error('Ya existe un empleado con esa cédula.');
@@ -213,7 +222,6 @@ class EmpleadoController
         $cedulaRaw = trim($_POST['cedula'] ?? '');
         $genero = trim($_POST['genero'] ?? '');
         $edad = intval($_POST['edad'] ?? 0);
-        $anios_servicio = intval($_POST['anios_servicio'] ?? 0);
         $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
         $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
         $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
@@ -227,13 +235,15 @@ class EmpleadoController
             return;
         }
 
-        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $id_biblioteca, $fecha_inicio, $fecha_fin);
         if ($errorValidacion !== null) {
             $this->error($errorValidacion);
             return;
         }
 
         $cedula = (int) $cedulaRaw;
+        // Los años de servicio SIEMPRE se calculan en el servidor (no se confía en el navegador).
+        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio);
 
         if ($this->model->existeCedula($cedula, $id)) {
             $this->error('Ya existe otro empleado con esa cédula.');
