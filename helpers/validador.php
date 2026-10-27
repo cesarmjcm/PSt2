@@ -171,6 +171,52 @@ class Validador
         return $d !== false && $d->format('Y-m-d') === $valor;
     }
 
+    /**
+     * Edad mínima para ser empleado (17 años por defecto).
+     */
+    public static function esEdadMinimaValida(int $edad, int $minimo = 17): bool
+    {
+        return $edad >= $minimo;
+    }
+
+    /**
+     * Máximo de años de servicio que puede tener un empleado según su edad:
+     * edad - edad mínima para trabajar (17). Con 17 años -> 0, con 18 -> 1, con 30 -> 13...
+     */
+    public static function aniosServicioMaximos(int $edad, int $edadMinima = 17): int
+    {
+        return max(0, $edad - $edadMinima);
+    }
+
+    /**
+     * Fecha de ingreso: formato Y-m-d, fecha real, no futura y no más antigua que $maxAnios años.
+     */
+    public static function esFechaIngresoValida(string $valor, int $maxAnios = 70): bool
+    {
+        if (!self::esFechaValida($valor)) {
+            return false;
+        }
+        $anios = self::calcularAniosServicio($valor);
+        return $anios >= 0 && $anios <= $maxAnios;
+    }
+
+    /**
+     * Años COMPLETOS entre la fecha de ingreso (Y-m-d) y hoy.
+     * Devuelve -1 si la fecha no es válida o es futura. Compatible con PHP 7.
+     */
+    public static function calcularAniosServicio(string $fechaIngreso): int
+    {
+        $ingreso = DateTime::createFromFormat('!Y-m-d', $fechaIngreso);
+        if ($ingreso === false || $ingreso->format('Y-m-d') !== $fechaIngreso) {
+            return -1;
+        }
+        $hoy = new DateTime('today');
+        if ($ingreso > $hoy) {
+            return -1;
+        }
+        return (int) $ingreso->diff($hoy)->y;
+    }
+
     public static function esHoraValida(string $valor): bool
     {
         return (bool) preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $valor);
