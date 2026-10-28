@@ -26,7 +26,7 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-
+g
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_solicitud` int(10) DEFAULT NULL,
