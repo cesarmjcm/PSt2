@@ -46,7 +46,7 @@ $respaldos = (new RespaldoBD())->listar();
 
         <section class="respaldo__tarjeta">
             <h2><i class="fas fa-upload"></i> Importar</h2>
-            <p><strong>Atención:</strong> reemplaza todos los datos actuales. Antes se crea un respaldo de seguridad automático.</p>
+            <p><strong>Atención:</strong> reemplaza todos los datos actuales. Exporte un respaldo de seguridad antes de importar.</p>
             <?php if (!$respaldos): ?>
                 <p>Aún no hay respaldos guardados.</p>
             <?php else: ?>

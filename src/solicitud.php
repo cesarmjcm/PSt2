@@ -53,6 +53,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                         <tr>
                             <th>ID</th>
                             <th>Institución</th>
+                            <th>Nombre de la actividad</th>
                             <th>Fecha</th>
                             <th>Fecha de registro</th>
                             <th>Hora</th>
@@ -153,7 +154,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             rechazada: ['rechazada', 'cancelada'],
             cancelada: ['cancelada'],
         };
-        const columnasTabla = esAdmin ? 11 : 10;
+        const columnasTabla = esAdmin ? 12 : 11;
         const tablaBody = document.getElementById('tablaBody');
         const paginacion = document.getElementById('solicitudPagination');
         const alertBox = document.getElementById('alertBox');
@@ -405,6 +406,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 <tr>
                     <td>${row.id}</td>
                     <td>${escapeHtml(row.institucion)}</td>
+                    <td>${escapeHtml(row.nombre_actividad)}</td>
                     <td>${escapeHtml(row.fecha_solicitud)}</td>
                     <td>${escapeHtml(String(row.fecha_registro || '').replace('T', ' ').slice(0, 16))}</td>
                     <td>${escapeHtml(row.hora_solicitud)}</td>

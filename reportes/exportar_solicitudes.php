@@ -10,6 +10,7 @@ procesarReportePdf(
     [
         ['etiqueta' => 'ID', 'clave' => 'id'],
         ['etiqueta' => 'Institución', 'clave' => 'institucion'],
+        ['etiqueta' => 'Nombre de la actividad', 'clave' => 'nombre_actividad'],
         ['etiqueta' => 'Fecha solicitada', 'clave' => 'fecha_solicitud', 'tipo' => 'fecha'],
         ['etiqueta' => 'Fecha de registro', 'clave' => 'fecha_registro', 'tipo' => 'fecha'],
         ['etiqueta' => 'Hora', 'clave' => 'hora_solicitud'],

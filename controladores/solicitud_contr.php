@@ -219,6 +219,10 @@ class SolicitudController
             $this->error(implode(' ', $errors));
             return;
         }
+        if ($this->model->existeConflictoHorario($data)) {
+            $this->error('Ya existe otra solicitud en esa biblioteca, fecha y hora.');
+            return;
+        }
 
         try {
             $created = $this->model->crearSolicitud(
@@ -291,6 +295,10 @@ class SolicitudController
             $this->error("No se puede cambiar una solicitud de {$estadoActual} a {$data['estado']}.");
             return;
         }
+        if ($this->model->existeConflictoHorario($data, $id)) {
+            $this->error('Ya existe otra solicitud en esa biblioteca, fecha y hora.');
+            return;
+        }
 
         try {
             $updated = $this->model->actualizarSolicitud(
@@ -361,7 +369,8 @@ class SolicitudController
     private function listar()
     {
         $data = $this->model->mostrarSolicitudes(
-            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0)
+            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0),
+            ($_GET['solo_aprobadas'] ?? '') === '1'
         );
         $this->respond(['success' => true, 'data' => $data]);
     }

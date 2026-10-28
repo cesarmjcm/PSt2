@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function cargarSolicitudesDeServidor() {
         try {
-            const response = await fetch('../controladores/solicitud_contr.php?action=listar');
+            const response = await fetch('../controladores/solicitud_contr.php?action=listar&solo_aprobadas=1');
             if (!response.ok) throw new Error('Error cargando solicitudes');
             const data = await response.json();
             if (!data.success) throw new Error(data.message || 'Error cargando solicitudes');
@@ -203,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const planHora = document.getElementById('plan-hora');
         const planParticipantes = document.getElementById('plan-participantes');
         const planBiblioteca = document.getElementById('plan-biblioteca');
+        const selectMunicipio = document.getElementById('planificacion-municipios');
+        const selectParroquia = document.getElementById('plan-parroquia');
         const planResponsable = document.getElementById('plan-responsable');
         const planTelefono = document.getElementById('plan-telefono');
 
@@ -236,6 +238,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        if (selectMunicipio && selectParroquia && solicitud.municipio_id && solicitud.parroquia_id) {
+            selectMunicipio.value = String(solicitud.municipio_id);
+            selectMunicipio.dispatchEvent(new Event('change', { bubbles: true }));
+
+            const opcionParroquia = Array.from(selectParroquia.options)
+                .find(opcion => opcion.dataset.id === String(solicitud.parroquia_id));
+            if (opcionParroquia) {
+                selectParroquia.value = opcionParroquia.value;
+                selectParroquia.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
         if (planResponsable) {
             (function () { var o = planResponsable.querySelector('option[value="__actual__"]'); if (o) o.remove(); })();
             const nombreResponsable = String(solicitud.responsable || '').trim().toLocaleLowerCase();
