@@ -108,6 +108,7 @@ class SolicitudController
             'fecha_solicitud' => trim($_POST['fecha_solicitud'] ?? ''),
             'hora_solicitud' => trim($_POST['hora_solicitud'] ?? ''),
             'lugar' => trim($_POST['lugar'] ?? ''),
+            'nombre_actividad' => trim($_POST['nombre_actividad'] ?? ''),
             'responsable' => trim($_POST['responsable'] ?? ''),
             'participantes' => intval($_POST['participantes'] ?? 0),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
@@ -126,6 +127,7 @@ class SolicitudController
             'fecha_solicitud' => 'La fecha de solicitud',
             'hora_solicitud'  => 'La hora de solicitud',
             'lugar'           => 'El lugar',
+            'nombre_actividad' => 'El nombre de la actividad',
             'responsable'     => 'El responsable',
         ];
         foreach ($camposObligatorios as $campo => $etiqueta) {
@@ -165,6 +167,9 @@ class SolicitudController
         if (!Validador::esTextoValido($data['lugar'], 2, 100)) {
             $errors[] = 'El lugar debe tener entre 2 y 100 caracteres y puede contener letras, números y signos básicos.';
         }
+        if (!Validador::esTextoValido($data['nombre_actividad'], 2, 100)) {
+            $errors[] = 'El nombre de la actividad debe tener entre 2 y 100 caracteres y puede contener letras, números y signos básicos.';
+        }
         if (!Validador::esNombrePropioValido($data['responsable'], 2, 50)) {
             $errors[] = 'El responsable debe tener entre 2 y 50 caracteres y solo puede contener letras, espacios y los signos - \' .';
         }
@@ -182,6 +187,7 @@ class SolicitudController
         
         $camposTexto = [
             'lugar'       => 'lugar',
+            'nombre_actividad' => 'nombre de la actividad',
             'responsable' => 'responsable',
             'descripcion' => 'descripción',
         ];
@@ -224,7 +230,8 @@ class SolicitudController
                 $data['responsable'],        
                 $data['participantes'],
                 $data['descripcion'],
-                $data['estado']
+                $data['estado'],
+                $data['nombre_actividad']
             );
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
@@ -296,7 +303,8 @@ class SolicitudController
                 $data['responsable'],
                 $data['participantes'],
                 $data['descripcion'],
-                $data['estado']
+                $data['estado'],
+                $data['nombre_actividad']
             );
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
