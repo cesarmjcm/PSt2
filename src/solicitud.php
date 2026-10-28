@@ -296,9 +296,12 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
 
         function llenarEmpleados(nombreActual = '') {
             const select = document.getElementById('campo_empleado');
-            select.innerHTML = '<option value="">-- Seleccione --</option>';
+            const idBiblioteca = campoBiblioteca.value;
+            select.innerHTML = '<option value="">' + (idBiblioteca ? '-- Seleccione --' : '-- Seleccione primero la biblioteca --') + '</option>';
             let encontrado = false;
             empleados.forEach(emp => {
+                // Solo empleados de la biblioteca elegida 
+                if (!idBiblioteca || String(emp.id_biblioteca) !== String(idBiblioteca)) return;
                 const nombreCompleto = `${emp.nombre} ${emp.apellido}`.trim();
                 const option = document.createElement('option');
                 option.value = emp.id;
@@ -562,6 +565,9 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 cerrarModal();
             }
         });
+
+        // Al cambiar la biblioteca, se recarga la lista de responsables
+        campoBiblioteca.addEventListener('change', () => llenarEmpleados());
 
         cargarInstituciones();
         cargarBibliotecas();
