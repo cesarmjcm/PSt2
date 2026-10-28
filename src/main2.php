@@ -44,11 +44,11 @@ if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
     <?php include '../include/metrics.php'; ?>
     <?php include '../include/modal.php'; ?>
     <?php include '../include/calendario.php'; ?>
-    <script src="./js/utilidades.js"></script>
-    <script src="./js/validaciones.js"></script>
+    <script src="./js/utilidades.js?v=<?= filemtime(__DIR__ . '/js/utilidades.js') ?>"></script>
+    <script src="./js/validaciones.js?v=<?= filemtime(__DIR__ . '/js/validaciones.js') ?>"></script>
     <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
-    <script src="./js/main2.js"></script>
-    <script src="./js/reportes.js"></script>
-    <script src="./js/script.js"></script>
+    <script src="./js/main2.js?v=<?= filemtime(__DIR__ . '/js/main2.js') ?>"></script>
+    <script src="./js/reportes.js?v=<?= filemtime(__DIR__ . '/js/reportes.js') ?>"></script>
+    <script src="./js/script.js?v=<?= filemtime(__DIR__ . '/js/script.js') ?>"></script>
 </body>
 </html>
