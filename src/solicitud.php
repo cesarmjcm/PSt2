@@ -116,6 +116,10 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     <input type="number" id="campo_participantes" name="participantes" min="0" max="99999" required>
                 </div>
                 <div class="config-field config-field--descripcion">
+                    <label for="campo_nombre_actividad">Nombre de la actividad</label>
+                    <input type="text" id="campo_nombre_actividad" name="nombre_actividad" maxlength="100" required>
+                </div>
+                <div class="config-field config-field--descripcion">
                     <label for="campo_descripcion">Descripción</label>
                     <textarea id="campo_descripcion" name="descripcion" maxlength="250" rows="3"></textarea>
                     <span class="solicitud-form__nota">Importante: La descripción aparece al cargar una solicitud.</span>
@@ -248,6 +252,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             document.getElementById('campo_fecha_solicitud').value = solicitud.fecha_solicitud;
             document.getElementById('campo_hora_solicitud').value = String(solicitud.hora_solicitud || '').slice(0, 5);
             document.getElementById('campo_participantes').value = solicitud.participantes;
+            document.getElementById('campo_nombre_actividad').value = solicitud.nombre_actividad || '';
             document.getElementById('campo_descripcion').value = solicitud.descripcion;
             document.getElementById('campo_estado').value = estadoActual;
             restringirEstados(estadoActual);
@@ -300,7 +305,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             select.innerHTML = '<option value="">' + (idBiblioteca ? '-- Seleccione --' : '-- Seleccione primero la biblioteca --') + '</option>';
             let encontrado = false;
             empleados.forEach(emp => {
-                // Solo empleados de la biblioteca elegida 
+                // Solo empleados de la biblioteca elegida arriba
                 if (!idBiblioteca || String(emp.id_biblioteca) !== String(idBiblioteca)) return;
                 const nombreCompleto = `${emp.nombre} ${emp.apellido}`.trim();
                 const option = document.createElement('option');
@@ -505,6 +510,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 lugar: textoSeleccionado(campoBiblioteca),
                 responsable: textoSeleccionado(campoEmpleado),
                 participantes: document.getElementById('campo_participantes').value,
+                nombre_actividad: document.getElementById('campo_nombre_actividad').value.trim(),
                 descripcion: document.getElementById('campo_descripcion').value.trim(),
                 estado: document.getElementById('campo_estado').value,
             };
@@ -521,6 +527,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             if (!data.hora_solicitud) { mostrarErrorModal('Indique la hora de la solicitud.'); return; }
             if (!data.lugar) { mostrarErrorModal('Seleccione la biblioteca (lugar) de la solicitud.'); return; }
             if (!data.responsable) { mostrarErrorModal('Seleccione el empleado responsable de la solicitud.'); return; }
+            if (!data.nombre_actividad) { mostrarErrorModal('Indique el nombre de la actividad.'); return; }
             if (data.participantes === '') { mostrarErrorModal('Indique la cantidad de participantes.'); return; }
 
             const body = new URLSearchParams();
