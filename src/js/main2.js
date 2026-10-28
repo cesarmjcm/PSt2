@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         solicitudSeleccion.disabled = Boolean(errorCargaSolicitudes) || !solicitudesCache.length;
 
         solicitudesCache.forEach(solicitud => {
-            const nombre = solicitud.descripcion ? solicitud.descripcion : solicitud.lugar;
+            const nombre = solicitud.nombre_actividad || solicitud.descripcion || solicitud.lugar;
             const subtitle = solicitud.responsable ? `${solicitud.responsable} · ${solicitud.fecha_solicitud} ${solicitud.hora_solicitud}` : `${solicitud.fecha_solicitud} ${solicitud.hora_solicitud}`;
             const etiqueta = [nombre, subtitle].filter(Boolean).join(' — ');
             solicitudSeleccion.add(new Option(etiqueta, String(solicitud.id)));
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const planTelefono = document.getElementById('plan-telefono');
 
         if (planTipo) {
-            planTipo.value = solicitud.lugar || solicitud.descripcion || '';
+            planTipo.value = solicitud.nombre_actividad || solicitud.lugar || solicitud.descripcion || '';
             planTipo.dispatchEvent(new Event('input', { bubbles: true }));
         }
         if (planDescripcion) {
