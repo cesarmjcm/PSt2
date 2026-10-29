@@ -151,9 +151,9 @@ $camposPorMaestro = [
             'optionValue' => 'id',
             'optionLabel' => 'nombre',
         ],
-        // La fecha de inicio del cargo hace de fecha de ingreso: de ella se calculan los años de servicio.
+        // Los años de servicio se calculan entre el inicio y el fin, o hasta hoy si el cargo sigue vigente.
         'fecha_inicio_cargo' => ['label' => 'Fecha de ingreso (inicio del cargo)', 'type' => 'date', 'esFechaIngreso' => true],
-        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0, 'soloLectura' => true, 'calculaDesde' => 'fecha_inicio_cargo'],
+        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0, 'soloLectura' => true, 'calculaDesde' => 'fecha_inicio_cargo', 'calculaHasta' => 'fecha_fin_cargo'],
         // Sin fecha final = el cargo sigue vigente.
         'fecha_fin_cargo'    => ['label' => 'Fin del cargo', 'type' => 'date', 'opcional' => true, 'noAnteriorA' => 'fecha_inicio_cargo'],
     ],
@@ -322,7 +322,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
     <script src="./js/reportes.js"></script>
     <?php if ($tablaValida): ?>
-    <script src="./js/años_servicio.js?v=<?= filemtime(__DIR__ . '/js/años_servicio.js') ?>"></script>
+    <script src="./js/anios_servicio.js?v=<?= filemtime(__DIR__ . '/js/anios_servicio.js') ?>"></script>
     <script>
     (function () {
         const tablaActual = <?php echo json_encode($tabla); ?>;
@@ -538,7 +538,8 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             }
 
             if (campo.esFechaIngreso) {
-                const errorFecha = validarFechaIngreso(valor);
+                const campoFin = document.getElementById('campo_fecha_fin_cargo');
+                const errorFecha = validarFechaIngreso(valor, campoFin ? campoFin.value : '');
                 if (errorFecha) return errorFecha;
             }
 
@@ -830,15 +831,22 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 const campo = campos[key];
                 if (!campo.calculaDesde) return;
                 const origen = document.getElementById('campo_' + campo.calculaDesde);
+                const fin = campo.calculaHasta ? document.getElementById('campo_' + campo.calculaHasta) : null;
                 const destino = document.getElementById('campo_' + key);
                 if (!origen || !destino) return;
 
                 const actualizar = () => {
-                    const anios = calcularAniosServicio(origen.value);
+                    const anios = calcularAniosServicio(origen.value, fin ? fin.value : '');
                     destino.value = anios === null ? '' : anios;
                 };
                 origen.addEventListener('input', actualizar);
                 origen.addEventListener('change', actualizar);
+                origen.addEventListener('blur', actualizar);
+                if (fin) {
+                    fin.addEventListener('input', actualizar);
+                    fin.addEventListener('change', actualizar);
+                    fin.addEventListener('blur', actualizar);
+                }
                 actualizar();
             });
 

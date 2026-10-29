@@ -157,9 +157,9 @@ class SolicitudController
             $errors[] = 'Institución inválida: debe ser un identificador numérico positivo.';
         }
         if (!Validador::esFechaValida($data['fecha_solicitud'])) {
-            $errors[] = 'Fecha de solicitud inválida: debe tener el formato AAAA-MM-DD.';
-        } elseif ($data['fecha_solicitud'] < (new DateTimeImmutable('today'))->format('Y-m-d')) {
-            $errors[] = 'La fecha de solicitud no puede ser anterior a la fecha actual.';
+            $errors[] = 'Fecha de actividad inválida: debe tener el formato AAAA-MM-DD.';
+        } elseif ($data['fecha_solicitud'] < (new DateTimeImmutable('today'))->modify('+3 days')->format('Y-m-d')) {
+            $errors[] = 'La fecha de la actividad debe tener al menos 3 días de anticipación.';
         }
         if (!Validador::esHoraValida($data['hora_solicitud'])) {
             $errors[] = 'Hora de solicitud inválida: debe tener el formato HH:MM (24 horas).';

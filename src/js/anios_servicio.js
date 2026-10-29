@@ -26,10 +26,9 @@ function fechaHoyISO() {
     return h.getFullYear() + '-' + mm + '-' + dd;
 }
 
-// Años COMPLETOS de servicio entre la fecha de ingreso y hoy.
-// Devuelve null si la fecha no es válida o es futura.
-// `hoy` es opcional (sirve para probar la función con otra fecha).
-function calcularAniosServicio(fechaIngreso, hoy) {
+// Años COMPLETOS de servicio entre la fecha de ingreso y la fecha final, o hoy si sigue vigente.
+// Devuelve null si alguna fecha no es válida, el inicio es futuro o el final es anterior al inicio.
+function calcularAniosServicio(fechaIngreso, fechaFin, hoy) {
     const ingreso = parsearFechaISO(fechaIngreso);
     if (!ingreso) return null;
 
@@ -37,21 +36,30 @@ function calcularAniosServicio(fechaIngreso, hoy) {
     const hoyLocal = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
     if (ingreso > hoyLocal) return null;
 
-    let anios = hoyLocal.getFullYear() - ingreso.getFullYear();
+    const fin = fechaFin
+        ? parsearFechaISO(fechaFin)
+        : hoyLocal;
+    if (!fin || fin < ingreso) return null;
+
+    let anios = fin.getFullYear() - ingreso.getFullYear();
     // Si todavía no llegó el aniversario este año, falta un año por cumplir.
     const yaCumplioAniversario =
-        hoyLocal.getMonth() > ingreso.getMonth() ||
-        (hoyLocal.getMonth() === ingreso.getMonth() && hoyLocal.getDate() >= ingreso.getDate());
+        fin.getMonth() > ingreso.getMonth() ||
+        (fin.getMonth() === ingreso.getMonth() && fin.getDate() >= ingreso.getDate());
     if (!yaCumplioAniversario) anios--;
 
     return anios;
 }
 
 // Valida la fecha de ingreso. Devuelve un mensaje de error o null si está bien.
-function validarFechaIngreso(fechaIngreso, hoy) {
-    if (!parsearFechaISO(fechaIngreso)) return 'La fecha de ingreso no es válida.';
-    const anios = calcularAniosServicio(fechaIngreso, hoy);
-    if (anios === null) return 'La fecha de ingreso no puede ser una fecha futura.';
+function validarFechaIngreso(fechaIngreso, fechaFin, hoy) {
+    const ingreso = parsearFechaISO(fechaIngreso);
+    if (!ingreso) return 'La fecha de ingreso no es válida.';
+    const fin = fechaFin ? parsearFechaISO(fechaFin) : null;
+    if (fechaFin && !fin) return 'La fecha final del cargo no es válida.';
+    if (fin && fin < ingreso) return 'La fecha final del cargo no puede ser anterior a la fecha de inicio.';
+    const anios = calcularAniosServicio(fechaIngreso, fechaFin, hoy);
+    if (anios === null) return 'La fecha de ingreso no puede ser futura.';
     if (anios > MAX_ANIOS_SERVICIO) return 'La fecha de ingreso es demasiado antigua (más de ' + MAX_ANIOS_SERVICIO + ' años de servicio).';
     return null;
 }

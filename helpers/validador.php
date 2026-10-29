@@ -191,20 +191,20 @@ class Validador
     /**
      * Fecha de ingreso: formato Y-m-d, fecha real, no futura y no más antigua que $maxAnios años.
      */
-    public static function esFechaIngresoValida(string $valor, int $maxAnios = 70): bool
+    public static function esFechaIngresoValida(string $valor, int $maxAnios = 70, ?string $fechaFin = null): bool
     {
         if (!self::esFechaValida($valor)) {
             return false;
         }
-        $anios = self::calcularAniosServicio($valor);
+        $anios = self::calcularAniosServicio($valor, $fechaFin);
         return $anios >= 0 && $anios <= $maxAnios;
     }
 
     /**
-     * Años COMPLETOS entre la fecha de ingreso (Y-m-d) y hoy.
-     * Devuelve -1 si la fecha no es válida o es futura. Compatible con PHP 7.
+     * Años COMPLETOS entre la fecha de ingreso y la fecha final, o hoy si sigue vigente.
+     * Devuelve -1 si alguna fecha no es válida o la fecha de inicio es futura.
      */
-    public static function calcularAniosServicio(string $fechaIngreso): int
+    public static function calcularAniosServicio(string $fechaIngreso, ?string $fechaFin = null): int
     {
         $ingreso = DateTime::createFromFormat('!Y-m-d', $fechaIngreso);
         if ($ingreso === false || $ingreso->format('Y-m-d') !== $fechaIngreso) {
@@ -214,7 +214,13 @@ class Validador
         if ($ingreso > $hoy) {
             return -1;
         }
-        return (int) $ingreso->diff($hoy)->y;
+        $fin = $fechaFin === null || $fechaFin === ''
+            ? $hoy
+            : DateTime::createFromFormat('!Y-m-d', $fechaFin);
+        if ($fin === false || $fin < $ingreso) {
+            return -1;
+        }
+        return (int) $ingreso->diff($fin)->y;
     }
 
     public static function esHoraValida(string $valor): bool

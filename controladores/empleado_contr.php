@@ -127,22 +127,19 @@ class EmpleadoController
         if (!Validador::esFechaValida($fecha_inicio)) {
             return 'La fecha de inicio del cargo no es válida.';
         }
-        // La fecha de inicio del cargo se usa como fecha de ingreso para calcular los años de servicio.
-        if (!Validador::esFechaIngresoValida($fecha_inicio)) {
-            return 'La fecha de ingreso no puede ser futura ni tener más de 70 años de antigüedad.';
-        }
-        $maxAnios = Validador::aniosServicioMaximos($edad);
-        if (Validador::calcularAniosServicio($fecha_inicio) > $maxAnios) {
-            return 'Con ' . $edad . ' años de edad el empleado puede tener como máximo ' . $maxAnios . ' ' . ($maxAnios === 1 ? 'año' : 'años') . ' de servicio. Revise la edad o la fecha de ingreso.';
-        }
         if ($fecha_fin !== '' && !Validador::esFechaValida($fecha_fin)) {
             return 'La fecha final del cargo no es válida.';
         }
-        if ($fecha_fin !== '' && $fecha_inicio === '') {
-            return 'Para indicar la fecha final del cargo debe indicar también la fecha de inicio.';
-        }
         if ($fecha_fin !== '' && $fecha_inicio !== '' && $fecha_fin < $fecha_inicio) {
             return 'La fecha final del cargo no puede ser anterior a la fecha de inicio.';
+        }
+        // La fecha de inicio del cargo se usa como fecha de ingreso para calcular los años de servicio.
+        if (!Validador::esFechaIngresoValida($fecha_inicio, 70, $fecha_fin !== '' ? $fecha_fin : null)) {
+            return 'La fecha de ingreso no puede ser futura ni el período de servicio superar los 70 años.';
+        }
+        $maxAnios = Validador::aniosServicioMaximos($edad);
+        if (Validador::calcularAniosServicio($fecha_inicio, $fecha_fin !== '' ? $fecha_fin : null) > $maxAnios) {
+            return 'Con ' . $edad . ' años de edad el empleado puede tener como máximo ' . $maxAnios . ' ' . ($maxAnios === 1 ? 'año' : 'años') . ' de servicio. Revise la edad o la fecha de ingreso.';
         }
         return null;
     }
@@ -178,7 +175,7 @@ class EmpleadoController
 
         $cedula = (int) $cedulaRaw;
         // Los años de servicio SIEMPRE se calculan en el servidor (no se confía en el navegador).
-        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio);
+        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio, $fecha_fin !== '' ? $fecha_fin : null);
 
         if ($this->model->existeCedula($cedula)) {
             $this->error('Ya existe un empleado con esa cédula.');
@@ -243,7 +240,7 @@ class EmpleadoController
 
         $cedula = (int) $cedulaRaw;
         // Los años de servicio SIEMPRE se calculan en el servidor (no se confía en el navegador).
-        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio);
+        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio, $fecha_fin !== '' ? $fecha_fin : null);
 
         if ($this->model->existeCedula($cedula, $id)) {
             $this->error('Ya existe otro empleado con esa cédula.');

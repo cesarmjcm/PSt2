@@ -54,7 +54,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                             <th>ID</th>
                             <th>Institución</th>
                             <th>Nombre de la actividad</th>
-                            <th>Fecha</th>
+                            <th>Fecha de la actividad</th>
                             <th>Fecha de registro</th>
                             <th>Hora</th>
                             <th>Lugar</th>
@@ -93,7 +93,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     </select>
                 </div>
                 <div class="config-field">
-                    <label for="campo_fecha_solicitud">Fecha de solicitud</label>
+                    <label for="campo_fecha_solicitud">Fecha de la actividad</label>
                     <input type="date" id="campo_fecha_solicitud" name="fecha_solicitud" required>
                 </div>
                 <div class="config-field">
@@ -128,7 +128,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 <div class="config-field">
                     <label for="campo_estado">Estado</label>
                     <select id="campo_estado" name="estado" required>
-                        <option value="pendiente">Pendiente</option>
+                        <option value="pendiente" selected>Pendiente</option>
                         <option value="aprobada">Aprobada</option>
                         <option value="rechazada">Rechazada</option>
                         <option value="cancelada">Cancelada</option>
@@ -221,6 +221,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             formId.value = '';
             modalTitulo.textContent = 'Nueva solicitud';
             solicitudForm.reset();
+            document.getElementById('campo_estado').value = 'pendiente';
             establecerFechaMinimaSolicitud();
             ocultarErrorModal();
             llenarInstituciones();
@@ -232,12 +233,23 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
 
         function establecerFechaMinimaSolicitud() {
             const ahora = new Date();
-            const hoy = [
+            ahora.setDate(ahora.getDate() + 3);
+            const fechaMinima = [
                 ahora.getFullYear(),
                 String(ahora.getMonth() + 1).padStart(2, '0'),
                 String(ahora.getDate()).padStart(2, '0'),
             ].join('-');
-            document.getElementById('campo_fecha_solicitud').min = hoy;
+            document.getElementById('campo_fecha_solicitud').min = fechaMinima;
+        }
+
+        function validarAnticipacionFechaActividad() {
+            const campoFecha = document.getElementById('campo_fecha_solicitud');
+            establecerFechaMinimaSolicitud();
+            if (campoFecha.value && campoFecha.value < campoFecha.min) {
+                mostrarErrorModal('La fecha de la actividad debe tener al menos 3 días de anticipación.');
+                return false;
+            }
+            return true;
         }
 
         function abrirModalEditar(solicitud) {
@@ -258,6 +270,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             document.getElementById('campo_estado').value = estadoActual;
             restringirEstados(estadoActual);
             modal.hidden = false;
+            validarAnticipacionFechaActividad();
         }
 
         function cerrarModal() {
@@ -520,12 +533,8 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             if (!data.id_institucion) { mostrarErrorModal('Seleccione una institución.'); return; }
             if (!data.id_biblioteca) { mostrarErrorModal('Seleccione la biblioteca de la solicitud.'); return; }
             if (!data.id_empleado) { mostrarErrorModal('Seleccione el empleado responsable.'); return; }
-            if (!data.fecha_solicitud) { mostrarErrorModal('Seleccione la fecha de la solicitud.'); return; }
-            establecerFechaMinimaSolicitud();
-            if (data.fecha_solicitud < document.getElementById('campo_fecha_solicitud').min) {
-                mostrarErrorModal('La fecha de solicitud no puede ser anterior a la fecha actual.');
-                return;
-            }
+            if (!data.fecha_solicitud) { mostrarErrorModal('Seleccione la fecha de la actividad.'); return; }
+            if (!validarAnticipacionFechaActividad()) return;
             if (!data.hora_solicitud) { mostrarErrorModal('Indique la hora de la solicitud.'); return; }
             if (!data.lugar) { mostrarErrorModal('Seleccione la biblioteca (lugar) de la solicitud.'); return; }
             if (!data.responsable) { mostrarErrorModal('Seleccione el empleado responsable de la solicitud.'); return; }
@@ -553,6 +562,8 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             }
         });
 
+        document.getElementById('campo_fecha_solicitud').addEventListener('input', validarAnticipacionFechaActividad);
+        document.getElementById('campo_fecha_solicitud').addEventListener('change', validarAnticipacionFechaActividad);
         btnNuevaSolicitud.addEventListener('click', abrirModalNuevo);
         btnExportarSolicitudes.addEventListener('click', () => {
             const termino = buscarSolicitudes.value.trim();
