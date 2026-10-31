@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-10-2026 a las 16:12:49
+-- Tiempo de generación: 31-10-2026 a las 16:35:22
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -26,7 +26,7 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-g
+
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_solicitud` int(10) DEFAULT NULL,
@@ -34,6 +34,7 @@ CREATE TABLE `actividad` (
   `id_espacio_cultural` int(11) DEFAULT NULL,
   `nombre` varchar(30) NOT NULL,
   `id_tipo_actividad` int(10) NOT NULL,
+  `id_nivel_impacto` int(10) DEFAULT NULL,
   `descripcion` text NOT NULL,
   `objetivo` varchar(50) NOT NULL,
   `participantes` int(5) NOT NULL,
@@ -41,73 +42,30 @@ CREATE TABLE `actividad` (
   `hora` time DEFAULT NULL,
   `dia_semana` text NOT NULL,
   `estado` enum('pendiente','confirmada','ejecutada','cancelada') NOT NULL DEFAULT 'pendiente',
-  `responsable` varchar(100) DEFAULT NULL,
-  `telefono_responsable` varchar(20) DEFAULT NULL,
-  `id_asignacion` int(10) DEFAULT NULL
+  `responsable` int(10) DEFAULT NULL,
+  `telefono_responsable` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `actividad`
 --
 
-INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `telefono_responsable`, `id_asignacion`) VALUES
-(23, NULL, 15, 5, 'Biblioteca 1', 4, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 'jesus serrano', '2147483647', NULL),
-(24, NULL, 15, 5, 'zona2', 4, '2', 'carlos', 222, '2026-08-12', NULL, 'Miércoles', 'confirmada', 'jesus serrano', '2147483647', NULL),
-(27, NULL, 15, NULL, 'Arístides Bastidas', 5, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 'jesus soto', '04125240489', NULL),
-(28, NULL, 15, NULL, 'Arístides Bastidas', 5, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 'jesus soto', '2147483647', NULL),
-(29, NULL, NULL, 5, 'hola', 5, 'cosas', 'No definido', 0, '2026-08-19', '13:16:00', 'Miércoles', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(30, NULL, 15, NULL, 'juego de ajedrez', 5, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(31, NULL, 15, NULL, 'Arístides Bastidas', 5, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(33, NULL, 15, NULL, 'Juego de Ajedrez', 5, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(34, NULL, 15, NULL, 'Juego de Ajedrez', 5, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(35, NULL, 15, NULL, 'juego de mesa', 4, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 'jesus soto', '04125240489', NULL),
-(36, NULL, 15, NULL, 'biblioteca', 5, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(37, NULL, 15, NULL, 'juego de mesa', 5, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 'cesar ontreras', '04127168235', NULL),
-(38, NULL, 16, NULL, 'Felix Pifano', 5, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 'cesar ontreras', '04127168235', NULL);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `actividad_comuna`
---
-
-CREATE TABLE `actividad_comuna` (
-  `id` int(10) NOT NULL,
-  `id_comuna` int(10) NOT NULL,
-  `id_actividad` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Volcado de datos para la tabla `actividad_comuna`
---
-
-INSERT INTO `actividad_comuna` (`id`, `id_comuna`, `id_actividad`) VALUES
-(16, 8, 23),
-(17, 8, 24),
-(20, 8, 28),
-(28, 8, 27),
-(29, 8, 29),
-(30, 8, 30),
-(31, 8, 31),
-(33, 8, 32),
-(34, 8, 33),
-(35, 8, 34),
-(43, 8, 36),
-(44, 8, 35),
-(45, 8, 37);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `actividad_espaciocultural`
---
-
-CREATE TABLE `actividad_espaciocultural` (
-  `id` int(10) NOT NULL,
-  `id_actividad` int(10) NOT NULL,
-  `id_biblioteca` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `id_nivel_impacto`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `telefono_responsable`) VALUES
+(23, NULL, 15, 5, 'Biblioteca 1', 4, NULL, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 13, '2147483647'),
+(24, NULL, 15, 5, 'zona2', 4, NULL, '2', 'carlos', 222, '2026-08-12', NULL, 'Miércoles', 'confirmada', 13, '2147483647'),
+(27, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 15, '04125240489'),
+(28, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 15, '2147483647'),
+(29, NULL, NULL, 5, 'hola', 5, NULL, 'cosas', 'No definido', 0, '2026-08-19', '13:16:00', 'Miércoles', 'confirmada', 13, '04125240489'),
+(30, NULL, 15, NULL, 'juego de ajedrez', 5, 3, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 13, '04125240489'),
+(31, NULL, 15, NULL, 'Arístides Bastidas', 5, NULL, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 13, '04125240489'),
+(32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 3, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 13, '04125240489'),
+(33, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 13, '04125240489'),
+(34, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 13, '04125240489'),
+(35, NULL, 15, NULL, 'juego de mesa', 4, 3, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 15, '04125240489'),
+(36, NULL, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, '04125240489'),
+(37, NULL, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, '04127168235'),
+(38, NULL, 16, NULL, 'Felix Pifano', 5, NULL, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 28, '04127168235'),
+(39, NULL, 15, NULL, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, '04125240489');
 
 -- --------------------------------------------------------
 
@@ -117,7 +75,6 @@ CREATE TABLE `actividad_espaciocultural` (
 
 CREATE TABLE `asignacion` (
   `id` int(10) NOT NULL,
-  `id_empleado` int(10) NOT NULL,
   `id_cargo` int(11) NOT NULL,
   `id_biblioteca` int(10) NOT NULL,
   `fecha_desde` date DEFAULT NULL,
@@ -265,7 +222,10 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (93, 'Miercoles', '2026-10-07', '16:25:01', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/solicitud.php'),
 (94, 'Miercoles', '2026-10-07', '16:25:03', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
 (95, 'Miercoles', '2026-10-28', '10:35:57', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
-(96, 'Miercoles', '2026-10-28', '10:36:58', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada');
+(96, 'Miercoles', '2026-10-28', '10:36:58', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
+(97, 'Sabado', '2026-10-31', '11:30:28', 11, 'Crear', 'Solicitud', 'Solicitud registrada para institución #1'),
+(98, 'Sabado', '2026-10-31', '11:31:17', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de metras'),
+(99, 'Sabado', '2026-10-31', '11:34:00', 11, 'Crear', 'Empleado', 'Empleado registrado: maria narvaez');
 
 -- --------------------------------------------------------
 
@@ -334,7 +294,8 @@ INSERT INTO `empleado` (`id`, `nombre`, `apellido`, `cedula`, `telefono`, `gener
 (13, 'jesus', 'serrano', 31982637, '04125240489', 'M', 1, 0, 1, 15, NULL, NULL),
 (15, 'jesus', 'soto', 32435607, '04125240489', '', 0, 0, 1, 15, NULL, NULL),
 (27, 'freddy', 'espinoza', 32626427, '04145058143', 'M', 20, 1, 1, 15, '2026-10-03', '2026-10-03'),
-(28, 'cesar', 'ontreras', 31982333, '04127168235', 'M', 20, 18, 1, 16, '2026-10-04', NULL);
+(28, 'cesar', 'ontreras', 31982333, '04127168235', 'M', 20, 18, 1, 16, '2026-10-04', NULL),
+(29, 'maria', 'narvaez', 15964066, '04261181304', 'M', 30, 7, 1, 16, '2019-02-10', NULL);
 
 -- --------------------------------------------------------
 
@@ -357,30 +318,6 @@ CREATE TABLE `espacio_cultural` (
 INSERT INTO `espacio_cultural` (`id`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`) VALUES
 (4, 'tu casa', 6, 'independencia', ''),
 (5, 'mi casa', 10, 'independencia', 'mi casa');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `impacto_actividad`
---
-
-CREATE TABLE `impacto_actividad` (
-  `id` int(10) NOT NULL,
-  `id_impacto` int(10) NOT NULL,
-  `id_actividad` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Volcado de datos para la tabla `impacto_actividad`
---
-
-INSERT INTO `impacto_actividad` (`id`, `id_impacto`, `id_actividad`) VALUES
-(1, 3, 9),
-(3, 3, 28),
-(11, 3, 27),
-(12, 3, 30),
-(13, 3, 32),
-(21, 3, 35);
 
 -- --------------------------------------------------------
 
@@ -529,7 +466,7 @@ CREATE TABLE `solicitud` (
   `fecha_registro` datetime NOT NULL DEFAULT current_timestamp(),
   `hora_solicitud` time NOT NULL,
   `lugar` varchar(100) NOT NULL,
-  `responsable` varchar(50) NOT NULL,
+  `responsable` int(10) NOT NULL,
   `participantes` int(10) NOT NULL DEFAULT 0,
   `descripcion` varchar(250) NOT NULL,
   `estado` enum('pendiente','aprobada','rechazada','cancelada') NOT NULL DEFAULT 'pendiente'
@@ -540,7 +477,8 @@ CREATE TABLE `solicitud` (
 --
 
 INSERT INTO `solicitud` (`id`, `id_institucion`, `id_biblioteca`, `nombre_actividad`, `fecha_solicitud`, `fecha_registro`, `hora_solicitud`, `lugar`, `responsable`, `participantes`, `descripcion`, `estado`) VALUES
-(2, 1, 16, 'juego de ajedrez', '2026-11-30', '2026-10-02 20:33:41', '14:16:00', 'Felix Pifano', 'cesar ontreras', 100, '1', 'pendiente');
+(2, 1, 16, 'juego de ajedrez', '2026-11-30', '2026-10-02 20:33:41', '14:16:00', 'Felix Pifano', 28, 100, '1', 'pendiente'),
+(7, 1, 15, 'juego de metras', '2026-11-03', '2026-10-31 11:30:28', '10:00:00', 'biblioteca', 13, 15, 'van a jugar metras para entender como era este juego tradicional', 'aprobada');
 
 -- --------------------------------------------------------
 
@@ -562,22 +500,6 @@ INSERT INTO `tipo_actividad` (`id`, `nombre`, `Descripcion`) VALUES
 (4, 'eduativa', '0004'),
 (5, 'educativa', ''),
 (8, 'hola', '');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `ubicacion`
---
-
-CREATE TABLE `ubicacion` (
-  `id` int(10) NOT NULL,
-  `id_comuna` int(10) NOT NULL,
-  `id_parroquia` int(10) NOT NULL,
-  `id_municipio` int(10) NOT NULL,
-  `nombre_comuna` varchar(20) NOT NULL,
-  `nombre_parroquia` varchar(20) NOT NULL,
-  `nombre_municipio` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -616,23 +538,8 @@ ALTER TABLE `actividad`
   ADD KEY `id_biblioteca` (`id_biblioteca`),
   ADD KEY `id_espacio_cultural` (`id_espacio_cultural`),
   ADD KEY `id_tipo_actividad` (`id_tipo_actividad`),
-  ADD KEY `id_asignacion` (`id_asignacion`);
-
---
--- Indices de la tabla `actividad_comuna`
---
-ALTER TABLE `actividad_comuna`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_comuna` (`id_comuna`),
-  ADD KEY `id_actividad` (`id_actividad`);
-
---
--- Indices de la tabla `actividad_espaciocultural`
---
-ALTER TABLE `actividad_espaciocultural`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_actividad` (`id_actividad`,`id_biblioteca`),
-  ADD KEY `actividad_espaciocultural_ibfk_1` (`id_biblioteca`);
+  ADD KEY `actividad_ibfk_nivel` (`id_nivel_impacto`),
+  ADD KEY `actividad_ibfk_responsable` (`responsable`);
 
 --
 -- Indices de la tabla `asignacion`
@@ -640,8 +547,7 @@ ALTER TABLE `actividad_espaciocultural`
 ALTER TABLE `asignacion`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_biblioteca` (`id_biblioteca`),
-  ADD KEY `id_cargo` (`id_cargo`),
-  ADD KEY `id_empleado` (`id_empleado`);
+  ADD KEY `id_cargo` (`id_cargo`);
 
 --
 -- Indices de la tabla `biblioteca`
@@ -692,14 +598,6 @@ ALTER TABLE `espacio_cultural`
   ADD UNIQUE KEY `uq_espacio_cultural_nombre` (`nombre`);
 
 --
--- Indices de la tabla `impacto_actividad`
---
-ALTER TABLE `impacto_actividad`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_impacto` (`id_impacto`),
-  ADD KEY `id_actividad` (`id_actividad`);
-
---
 -- Indices de la tabla `institucion`
 --
 ALTER TABLE `institucion`
@@ -735,22 +633,14 @@ ALTER TABLE `parroquia`
 ALTER TABLE `solicitud`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_institucion` (`id_institucion`),
-  ADD KEY `idx_solicitud_id_biblioteca` (`id_biblioteca`);
+  ADD KEY `idx_solicitud_id_biblioteca` (`id_biblioteca`),
+  ADD KEY `solicitud_ibfk_responsable` (`responsable`);
 
 --
 -- Indices de la tabla `tipo_actividad`
 --
 ALTER TABLE `tipo_actividad`
   ADD PRIMARY KEY (`id`);
-
---
--- Indices de la tabla `ubicacion`
---
-ALTER TABLE `ubicacion`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_comuna` (`id_comuna`),
-  ADD KEY `id_parroquia` (`id_parroquia`),
-  ADD KEY `id_municipio` (`id_municipio`);
 
 --
 -- Indices de la tabla `usuario`
@@ -768,19 +658,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
-
---
--- AUTO_INCREMENT de la tabla `actividad_comuna`
---
-ALTER TABLE `actividad_comuna`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
-
---
--- AUTO_INCREMENT de la tabla `actividad_espaciocultural`
---
-ALTER TABLE `actividad_espaciocultural`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT de la tabla `asignacion`
@@ -798,7 +676,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -816,19 +694,13 @@ ALTER TABLE `comuna`
 -- AUTO_INCREMENT de la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT de la tabla `espacio_cultural`
 --
 ALTER TABLE `espacio_cultural`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT de la tabla `impacto_actividad`
---
-ALTER TABLE `impacto_actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `institucion`
@@ -858,7 +730,7 @@ ALTER TABLE `parroquia`
 -- AUTO_INCREMENT de la tabla `solicitud`
 --
 ALTER TABLE `solicitud`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_actividad`
@@ -883,23 +755,16 @@ ALTER TABLE `actividad`
   ADD CONSTRAINT `actividad_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
   ADD CONSTRAINT `actividad_ibfk_2` FOREIGN KEY (`id_espacio_cultural`) REFERENCES `espacio_cultural` (`id`),
   ADD CONSTRAINT `actividad_ibfk_3` FOREIGN KEY (`id_tipo_actividad`) REFERENCES `tipo_actividad` (`id`),
-  ADD CONSTRAINT `actividad_ibfk_4` FOREIGN KEY (`id_asignacion`) REFERENCES `asignacion` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `actividad_ibfk_nivel` FOREIGN KEY (`id_nivel_impacto`) REFERENCES `nivel_impacto` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `actividad_ibfk_responsable` FOREIGN KEY (`responsable`) REFERENCES `empleado` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_solicitud` FOREIGN KEY (`id_solicitud`) REFERENCES `solicitud` (`id`) ON DELETE SET NULL;
-
---
--- Filtros para la tabla `actividad_comuna`
---
-ALTER TABLE `actividad_comuna`
-  ADD CONSTRAINT `actividad_comuna_ibfk_1` FOREIGN KEY (`id_actividad`) REFERENCES `actividad` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `actividad_comuna_ibfk_2` FOREIGN KEY (`id_comuna`) REFERENCES `comuna` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `asignacion`
 --
 ALTER TABLE `asignacion`
   ADD CONSTRAINT `asignacion_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
-  ADD CONSTRAINT `asignacion_ibfk_2` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`),
-  ADD CONSTRAINT `asignacion_ibfk_3` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id`);
+  ADD CONSTRAINT `asignacion_ibfk_2` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`);
 
 --
 -- Filtros para la tabla `biblioteca`
@@ -938,7 +803,8 @@ ALTER TABLE `institucion`
 --
 ALTER TABLE `solicitud`
   ADD CONSTRAINT `solicitud_ibfk_1` FOREIGN KEY (`id_institucion`) REFERENCES `institucion` (`id`),
-  ADD CONSTRAINT `solicitud_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`);
+  ADD CONSTRAINT `solicitud_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
+  ADD CONSTRAINT `solicitud_ibfk_responsable` FOREIGN KEY (`responsable`) REFERENCES `empleado` (`id`);
 
 --
 -- Filtros para la tabla `usuario`
