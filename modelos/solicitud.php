@@ -28,12 +28,14 @@ class Solicitud
                     s.hora_solicitud,
                     s.lugar,
                     s.nombre_actividad,
-                    s.responsable,
+                    CONCAT(e.nombre, ' ', e.apellido) AS responsable,
+                    s.responsable AS id_empleado,
                     s.participantes,
                     s.descripcion,
                     s.estado
                 FROM solicitud s
                 JOIN institucion i ON i.id = s.id_institucion
+                LEFT JOIN empleado e ON e.id = s.responsable
                 LEFT JOIN biblioteca b ON b.id = s.id_biblioteca
                 LEFT JOIN parroquia p ON p.id = b.id_parroquia
                 LEFT JOIN municipio m ON m.id = p.id_municipio
@@ -70,16 +72,17 @@ class Solicitud
 
     public function obtenerSolicitudPorId(int $id, int $idBiblioteca = null)
     {
-        $sql = "SELECT s.*, i.nombre AS nombre_institucion
+        $sql = "SELECT s.*, CONCAT(e.nombre, ' ', e.apellido) AS responsable, s.responsable AS id_empleado, i.nombre AS nombre_institucion
                 FROM solicitud s
                 JOIN institucion i ON i.id = s.id_institucion
+                LEFT JOIN empleado e ON e.id = s.responsable
                 WHERE s.id = ?" . ($idBiblioteca !== null ? " AND s.id_biblioteca = ?" : "");
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute($idBiblioteca !== null ? [$id, $idBiblioteca] : [$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearSolicitud(int $id_institucion, int $id_biblioteca, string $fecha_solicitud, string $hora_solicitud, string $lugar, string $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente', string $nombre_actividad = '')
+    public function crearSolicitud(int $id_institucion, int $id_biblioteca, string $fecha_solicitud, string $hora_solicitud, string $lugar, int $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente', string $nombre_actividad = '')
     {
         $sql = "INSERT INTO solicitud (id_institucion, id_biblioteca, fecha_solicitud, hora_solicitud, lugar, responsable, participantes, descripcion, estado, nombre_actividad)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -87,7 +90,7 @@ class Solicitud
         return $stmt->execute([$id_institucion, $id_biblioteca, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado, $nombre_actividad]);
     }
 
-    public function actualizarSolicitud(int $id, int $id_institucion, int $id_biblioteca, string $fecha_solicitud, string $hora_solicitud, string $lugar, string $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente', string $nombre_actividad = '')
+    public function actualizarSolicitud(int $id, int $id_institucion, int $id_biblioteca, string $fecha_solicitud, string $hora_solicitud, string $lugar, int $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente', string $nombre_actividad = '')
     {
         $sql = "UPDATE solicitud SET id_institucion = ?, id_biblioteca = ?, fecha_solicitud = ?, hora_solicitud = ?, lugar = ?, responsable = ?, participantes = ?, descripcion = ?, estado = ?, nombre_actividad = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
