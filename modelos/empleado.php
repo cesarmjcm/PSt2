@@ -43,22 +43,121 @@ class Empleado {
      * Una fecha fin vacía significa que el cargo sigue vigente.
      */
     public function crearEmpleado(string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca, string $fecha_inicio_cargo = '', string $fecha_fin_cargo = '') {
+        $conexion = Conexion::conectar();
         $sql = "INSERT INTO empleado (nombre, apellido, telefono, id_cargo, cedula, genero, edad, `anios_de_servicio`, id_biblioteca, fecha_inicio_cargo, fecha_fin_cargo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio_cargo !== '' ? $fecha_inicio_cargo : null, $fecha_fin_cargo !== '' ? $fecha_fin_cargo : null]);
+        $fechaInicio = $fecha_inicio_cargo !== '' ? $fecha_inicio_cargo : null;
+        $fechaFin = $fecha_fin_cargo !== '' ? $fecha_fin_cargo : null;
+
+        try {
+            $conexion->beginTransaction();
+            $stmt = $conexion->prepare($sql);
+            $creado = $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fechaInicio, $fechaFin]);
+            if (!$creado) {
+                $conexion->rollBack();
+                return false;
+            }
+
+            $this->insertarAsignacion($conexion, (int) $conexion->lastInsertId(), $id_cargo, $id_biblioteca, $fechaInicio, $fechaFin);
+            $conexion->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($conexion->inTransaction()) {
+                $conexion->rollBack();
+            }
+            throw $e;
+        }
     }
 
     public function actualizarEmpleado(int $id, string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca, string $fecha_inicio_cargo = '', string $fecha_fin_cargo = '') {
+        $conexion = Conexion::conectar();
         $sql = "UPDATE empleado SET nombre = ?, apellido = ?, telefono = ?, id_cargo = ?, cedula = ?, genero = ?, edad = ?, `anios_de_servicio` = ?, id_biblioteca = ?, fecha_inicio_cargo = ?, fecha_fin_cargo = ? WHERE id = ?";
-        $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio_cargo !== '' ? $fecha_inicio_cargo : null, $fecha_fin_cargo !== '' ? $fecha_fin_cargo : null, $id]);
+        $fechaInicio = $fecha_inicio_cargo !== '' ? $fecha_inicio_cargo : null;
+        $fechaFin = $fecha_fin_cargo !== '' ? $fecha_fin_cargo : null;
+
+        try {
+            $conexion->beginTransaction();
+            $actual = $conexion->prepare('SELECT id_cargo, id_biblioteca, fecha_inicio_cargo, fecha_fin_cargo FROM empleado WHERE id = ? FOR UPDATE');
+            $actual->execute([$id]);
+            $empleadoActual = $actual->fetch(PDO::FETCH_ASSOC);
+            if (!$empleadoActual) {
+                $conexion->rollBack();
+                return false;
+            }
+
+            $stmt = $conexion->prepare($sql);
+            $actualizado = $stmt->execute([$nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fechaInicio, $fechaFin, $id]);
+            if (!$actualizado) {
+                $conexion->rollBack();
+                return false;
+            }
+
+            $asignacionActual = $conexion->prepare(
+                'SELECT id FROM asignacion
+                 WHERE id_empleado = ? AND id_cargo = ? AND id_biblioteca = ?
+                    AND fecha_desde <=> ? AND fecha_hasta <=> ?
+                 ORDER BY id DESC LIMIT 1 FOR UPDATE'
+            );
+            $asignacionActual->execute([
+                $id,
+                (int) $empleadoActual['id_cargo'],
+                (int) $empleadoActual['id_biblioteca'],
+                $empleadoActual['fecha_inicio_cargo'],
+                $empleadoActual['fecha_fin_cargo'],
+            ]);
+            $asignacion = $asignacionActual->fetch(PDO::FETCH_ASSOC);
+
+            if ($asignacion) {
+                $guardarAsignacion = $conexion->prepare(
+                    'UPDATE asignacion
+                     SET id_cargo = ?, id_biblioteca = ?, fecha_desde = ?, fecha_hasta = ?
+                     WHERE id = ?'
+                );
+                $guardarAsignacion->execute([$id_cargo, $id_biblioteca, $fechaInicio, $fechaFin, (int) $asignacion['id']]);
+            } else {
+                $this->insertarAsignacion($conexion, $id, $id_cargo, $id_biblioteca, $fechaInicio, $fechaFin);
+            }
+
+            $conexion->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($conexion->inTransaction()) {
+                $conexion->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    private function insertarAsignacion(PDO $conexion, int $idEmpleado, int $idCargo, int $idBiblioteca, ?string $fechaDesde, ?string $fechaHasta): void
+    {
+        $stmt = $conexion->prepare(
+            'INSERT INTO asignacion (id_empleado, id_cargo, id_biblioteca, fecha_desde, fecha_hasta)
+             VALUES (?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([$idEmpleado, $idCargo, $idBiblioteca, $fechaDesde, $fechaHasta]);
     }
 
     public function eliminarEmpleado(int $id) {
-        
-        
-        $sql = "DELETE FROM empleado WHERE id = ?";
-        $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$id]);
+        $conexion = Conexion::conectar();
+
+        try {
+            $conexion->beginTransaction();
+            $asignaciones = $conexion->prepare('DELETE FROM asignacion WHERE id_empleado = ?');
+            $asignaciones->execute([$id]);
+
+            $stmt = $conexion->prepare('DELETE FROM empleado WHERE id = ?');
+            $eliminado = $stmt->execute([$id]);
+            if (!$eliminado) {
+                $conexion->rollBack();
+                return false;
+            }
+
+            $conexion->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($conexion->inTransaction()) {
+                $conexion->rollBack();
+            }
+            throw $e;
+        }
     }
 }

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-10-2026 a las 16:12:49
+-- Tiempo de generación: 02-11-2026 a las 02:56:41
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -26,7 +26,7 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-g
+
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_solicitud` int(10) DEFAULT NULL,
@@ -64,7 +64,8 @@ INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cult
 (35, NULL, 15, NULL, 'juego de mesa', 4, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 'jesus soto', '04125240489', NULL),
 (36, NULL, 15, NULL, 'biblioteca', 5, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
 (37, NULL, 15, NULL, 'juego de mesa', 5, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 'cesar ontreras', '04127168235', NULL),
-(38, NULL, 16, NULL, 'Felix Pifano', 5, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 'cesar ontreras', '04127168235', NULL);
+(38, NULL, 16, NULL, 'Felix Pifano', 5, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 'cesar ontreras', '04127168235', NULL),
+(39, NULL, 16, NULL, 'juego de ajedrez', 5, '1', 'No definido', 100, '2026-11-30', '14:16:00', 'Lunes', 'pendiente', 'cesar ontreras', '04127168235', NULL);
 
 -- --------------------------------------------------------
 
@@ -123,6 +124,16 @@ CREATE TABLE `asignacion` (
   `fecha_desde` date DEFAULT NULL,
   `fecha_hasta` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `asignacion`
+--
+
+INSERT INTO `asignacion` (`id`, `id_empleado`, `id_cargo`, `id_biblioteca`, `fecha_desde`, `fecha_hasta`) VALUES
+(1, 13, 1, 15, NULL, NULL),
+(2, 15, 1, 15, NULL, NULL),
+(3, 27, 1, 15, '2026-10-03', '2026-10-03'),
+(4, 28, 1, 16, '2026-10-04', NULL);
 
 -- --------------------------------------------------------
 
@@ -265,7 +276,10 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (93, 'Miercoles', '2026-10-07', '16:25:01', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/solicitud.php'),
 (94, 'Miercoles', '2026-10-07', '16:25:03', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
 (95, 'Miercoles', '2026-10-28', '10:35:57', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
-(96, 'Miercoles', '2026-10-28', '10:36:58', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada');
+(96, 'Miercoles', '2026-10-28', '10:36:58', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
+(97, 'Domingo', '2026-11-01', '21:51:56', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
+(98, 'Domingo', '2026-11-01', '21:52:14', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de ajedrez'),
+(99, 'Domingo', '2026-11-01', '21:55:55', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/index.php');
 
 -- --------------------------------------------------------
 
@@ -540,7 +554,7 @@ CREATE TABLE `solicitud` (
 --
 
 INSERT INTO `solicitud` (`id`, `id_institucion`, `id_biblioteca`, `nombre_actividad`, `fecha_solicitud`, `fecha_registro`, `hora_solicitud`, `lugar`, `responsable`, `participantes`, `descripcion`, `estado`) VALUES
-(2, 1, 16, 'juego de ajedrez', '2026-11-30', '2026-10-02 20:33:41', '14:16:00', 'Felix Pifano', 'cesar ontreras', 100, '1', 'pendiente');
+(2, 1, 16, 'juego de ajedrez', '2026-11-30', '2026-10-02 20:33:41', '14:16:00', 'Felix Pifano', 'cesar ontreras', 100, '1', 'aprobada');
 
 -- --------------------------------------------------------
 
@@ -768,7 +782,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT de la tabla `actividad_comuna`
@@ -786,7 +800,7 @@ ALTER TABLE `actividad_espaciocultural`
 -- AUTO_INCREMENT de la tabla `asignacion`
 --
 ALTER TABLE `asignacion`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `biblioteca`
@@ -798,7 +812,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`

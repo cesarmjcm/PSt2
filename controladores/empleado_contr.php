@@ -193,11 +193,12 @@ class EmpleadoController
                 return;
             }
         } catch (Throwable $e) {
-            if ($e->getCode() === '23000') {
+            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ($e->errorInfo[1] ?? 0) === 1062) {
                 $this->error('Ya existe un empleado con esa cédula.');
                 return;
             }
-            $this->error('No se pudo crear el empleado.');
+            error_log('No se pudo crear el empleado y su asignación: ' . $e->getMessage());
+            $this->error('No se pudo crear el empleado y su asignación.');
             return;
         }
 
@@ -258,11 +259,12 @@ class EmpleadoController
                 return;
             }
         } catch (Throwable $e) {
-            if ($e->getCode() === '23000') {
+            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ($e->errorInfo[1] ?? 0) === 1062) {
                 $this->error('Ya existe otro empleado con esa cédula.');
                 return;
             }
-            $this->error('No se pudo actualizar el empleado.');
+            error_log("No se pudo actualizar el empleado #$id y su asignación: " . $e->getMessage());
+            $this->error('No se pudo actualizar el empleado y su asignación.');
             return;
         }
 
