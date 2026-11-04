@@ -195,7 +195,7 @@ try {
     <title>Configuración de usuario</title>
     <link rel="stylesheet" href="./css/main.css">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
-    <link rel="stylesheet" href="./css/configuracion.css?v=4">
+    <link rel="stylesheet" href="./css/configuracion.css?v=5">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
 <body>
@@ -293,11 +293,17 @@ try {
                                     <label for="nueva_clave" id="label-clave">
                                         <?php echo $esAdmin ? 'Clave' : 'Nueva clave (dejar en blanco para no cambiarla)'; ?>
                                     </label>
-                                    <input id="nueva_clave" name="nueva_clave" type="password">
+                                    <div class="campo-clave">
+                                        <input id="nueva_clave" name="nueva_clave" type="password">
+                                        <button type="button" class="btn-ojo" data-target="nueva_clave" aria-label="Mostrar u ocultar clave"><i class="fas fa-eye"></i></button>
+                                    </div>
                                 </div>
                                 <div class="config-field">
                                     <label for="nueva_clave_confirmacion">Confirmar clave</label>
-                                    <input id="nueva_clave_confirmacion" name="nueva_clave_confirmacion" type="password">
+                                    <div class="campo-clave">
+                                        <input id="nueva_clave_confirmacion" name="nueva_clave_confirmacion" type="password">
+                                        <button type="button" class="btn-ojo" data-target="nueva_clave_confirmacion" aria-label="Mostrar u ocultar confirmación de clave"><i class="fas fa-eye"></i></button>
+                                    </div>
                                 </div>
 
                                 <button class="btn-save" type="submit" id="btn-guardar-usuario">
@@ -398,6 +404,17 @@ try {
     <script>
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Ojito para mostrar/ocultar la clave
+            document.querySelectorAll('.btn-ojo').forEach(boton => {
+                boton.addEventListener('click', () => {
+                    const campo = document.getElementById(boton.dataset.target);
+                    const icono = boton.querySelector('i');
+                    const mostrar = campo.type === 'password';
+                    campo.type = mostrar ? 'text' : 'password';
+                    icono.className = mostrar ? 'fas fa-eye-slash' : 'fas fa-eye';
+                });
+            });
+
             const menuButtons = document.querySelectorAll('.config-menu__item[data-tab]');
             const panels = document.querySelectorAll('.config-panel');
 
