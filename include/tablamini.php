@@ -164,7 +164,7 @@ try {
                                                 data-municipio-id="<?php echo htmlspecialchars($actividad['municipio_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-parroquia="<?php echo htmlspecialchars($actividad['parroquia'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-comuna="<?php echo htmlspecialchars($actividad['comuna'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                                                data-espacio="<?php echo htmlspecialchars($actividad['espacio_cultural'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-espacio="<?php echo htmlspecialchars((string)($actividad['id_espacio_cultural'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-id-biblioteca="<?php echo htmlspecialchars($actividad['id_biblioteca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-id-tipo-actividad="<?php echo htmlspecialchars((string)($actividad['id_tipo_actividad'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-responsable="<?php echo htmlspecialchars($actividad['responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
