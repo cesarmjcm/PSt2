@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 31-10-2026 a las 16:35:22
+-- Tiempo de generación: 06-11-2026 a las 22:31:44
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -43,29 +43,31 @@ CREATE TABLE `actividad` (
   `dia_semana` text NOT NULL,
   `estado` enum('pendiente','confirmada','ejecutada','cancelada') NOT NULL DEFAULT 'pendiente',
   `responsable` int(10) DEFAULT NULL,
-  `telefono_responsable` varchar(20) DEFAULT NULL
+  `telefono_responsable` varchar(20) DEFAULT NULL,
+  `id_parroquia` int(10) DEFAULT NULL,
+  `id_comuna` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `actividad`
 --
 
-INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `id_nivel_impacto`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `telefono_responsable`) VALUES
-(23, NULL, 15, 5, 'Biblioteca 1', 4, NULL, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 13, '2147483647'),
-(24, NULL, 15, 5, 'zona2', 4, NULL, '2', 'carlos', 222, '2026-08-12', NULL, 'Miércoles', 'confirmada', 13, '2147483647'),
-(27, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 15, '04125240489'),
-(28, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 15, '2147483647'),
-(29, NULL, NULL, 5, 'hola', 5, NULL, 'cosas', 'No definido', 0, '2026-08-19', '13:16:00', 'Miércoles', 'confirmada', 13, '04125240489'),
-(30, NULL, 15, NULL, 'juego de ajedrez', 5, 3, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 13, '04125240489'),
-(31, NULL, 15, NULL, 'Arístides Bastidas', 5, NULL, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 13, '04125240489'),
-(32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 3, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 13, '04125240489'),
-(33, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 13, '04125240489'),
-(34, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 13, '04125240489'),
-(35, NULL, 15, NULL, 'juego de mesa', 4, 3, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 15, '04125240489'),
-(36, NULL, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, '04125240489'),
-(37, NULL, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, '04127168235'),
-(38, NULL, 16, NULL, 'Felix Pifano', 5, NULL, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 28, '04127168235'),
-(39, NULL, 15, NULL, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, '04125240489');
+INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `id_nivel_impacto`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `telefono_responsable`, `id_parroquia`, `id_comuna`) VALUES
+(23, NULL, 15, 5, 'Biblioteca 1', 4, NULL, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 13, '2147483647', NULL, NULL),
+(24, NULL, 15, 5, 'zona2', 4, NULL, '2', 'carlos', 222, '2026-08-12', NULL, 'Miércoles', 'confirmada', 13, '2147483647', NULL, NULL),
+(27, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 15, '04125240489', NULL, NULL),
+(28, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 15, '2147483647', NULL, NULL),
+(29, NULL, NULL, 5, 'hola', 5, NULL, 'cosas', 'No definido', 0, '2026-08-19', '13:16:00', 'Miércoles', 'confirmada', 13, '04125240489', NULL, NULL),
+(30, NULL, 15, NULL, 'juego de ajedrez', 5, 3, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 13, '04125240489', NULL, NULL),
+(31, NULL, 15, NULL, 'Arístides Bastidas', 5, NULL, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 3, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(33, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(34, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 13, '04125240489', NULL, NULL),
+(35, NULL, 15, NULL, 'juego de mesa', 4, 3, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 15, '04125240489', NULL, NULL),
+(36, NULL, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(37, NULL, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, '04127168235', NULL, NULL),
+(38, NULL, NULL, 4, 'Felix Pifano', 5, 6, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 28, '04127168235', 52, 118),
+(39, NULL, NULL, 4, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, '04125240489', 56, 31);
 
 -- --------------------------------------------------------
 
@@ -225,7 +227,16 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (96, 'Miercoles', '2026-10-28', '10:36:58', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
 (97, 'Sabado', '2026-10-31', '11:30:28', 11, 'Crear', 'Solicitud', 'Solicitud registrada para institución #1'),
 (98, 'Sabado', '2026-10-31', '11:31:17', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de metras'),
-(99, 'Sabado', '2026-10-31', '11:34:00', 11, 'Crear', 'Empleado', 'Empleado registrado: maria narvaez');
+(99, 'Sabado', '2026-10-31', '11:34:00', 11, 'Crear', 'Empleado', 'Empleado registrado: maria narvaez'),
+(100, 'Viernes', '2026-11-06', '15:54:23', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(101, 'Viernes', '2026-11-06', '15:55:51', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(102, 'Viernes', '2026-11-06', '16:01:02', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(103, 'Viernes', '2026-11-06', '16:03:28', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(104, 'Viernes', '2026-11-06', '16:32:50', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(105, 'Viernes', '2026-11-06', '16:33:08', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(106, 'Viernes', '2026-11-06', '16:55:31', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(107, 'Viernes', '2026-11-06', '16:55:45', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(108, 'Viernes', '2026-11-06', '17:07:20', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras');
 
 -- --------------------------------------------------------
 
@@ -263,119 +274,119 @@ CREATE TABLE `comuna` (
 --
 
 INSERT INTO `comuna` (`id`, `nombre`, `id_parroquia`) VALUES
-(8, 'comuna', 54),
-(9, 'SOCIALISTA SIERRA NUBLADA', 55),
-(10, 'SOCIALISTA ARBOL DE LAS TRES R', 55),
-(11, 'SOCIALISTA 12 DE ABRIL', 55),
-(12, 'LA NUEVA UNION DE LAS CUMARAGU', 55),
-(13, 'SOCIALISTA AGROPRODUCTIVA EJE', 55),
-(14, 'SOCIALISTA MELECIO TORRES', 55),
-(15, 'SOCIALISTA ALIANZA CAMPESINA', 55),
-(16, 'PRODUCTIVA SOCIALISTA CHAVEZ P', 55),
-(17, 'COMUNA SOCIALISTA AGROPRODUCTI', 55),
-(18, 'SOCIALISTA AGROPRODUCTIVA RIO', 55),
-(19, 'SOCIALISTA MARIA MIRANDA', 55),
-(20, 'SIERRA AZUL CARABOBO', 55),
-(21, 'COMUNA SOCIALISTA PRODUCTIVA M', 55),
-(22, 'SOCIALISTA ROSA LUXEMBURGO', 49),
-(23, 'SOCIALISTA AGRARIA ENDOGENA EC', 49),
-(24, 'HIJOS DE CHAVEZ', 49),
-(25, 'SOCIALISTA AGROPECUARIA MARIA', 49),
-(26, 'SOCIALISTA AGROTURISTICA INDUS', 49),
-(27, 'SOCIALISTA SOCIOPRODUCTIVA TRO', 49),
-(28, 'SOCIALISTA MAXIMO VIZCAYA', 56),
-(29, 'SOCIALISTA PRODUCTIVA AGROENDO', 56),
-(30, 'SOCIALISTA PRODUCTIVA DOMINGO', 56),
-(31, 'SOCIOPRODUCTIVA NEGRA MATEA', 56),
-(32, 'SOCIALISTA GUERREROS DE LA MON', 62),
-(33, 'SOCIALISTA AGROECOLOGICA TURIS', 62),
-(34, 'NIRGUA PRODUCTIVA', 62),
-(35, 'SOCIALISTA SANTANA OCHOA', 62),
-(36, 'ANGEL RAFAEL GONZALEZ', 62),
-(37, 'SOCIALISTA AGRICOLA LEGUMINOSA', 62),
-(38, 'CERRO AZUL TRONCAL 11', 62),
-(39, 'SOCIALISTA MANUEL CEDEÑO', 62),
-(40, 'SOCIALISTA GUERREROS JIRAHARA', 62),
+(105, 'AGRICOLA VOCES DEL CAMPO', 54),
 (41, 'AGRO ECOLOGICA TURISTICA GENER', 62),
-(42, 'SOCIALISTA NEGRO MIGUEL DE BUR', 62),
-(43, 'AGROTURISTICA EL ESFUERZO Y LA', 62),
 (44, 'AGRO INDUSTRIAL TURISTICA GENE', 61),
-(45, 'SOCIALISTA AMBROCIO PEREIRA', 63),
-(46, 'SOCIALISTA AGROECOLOGICA SIMON', 47),
-(47, 'ECOLOGICA JORGE RODRIGUEZ EJE', 47),
-(48, 'SOCIALISTA MARIA VALENTINA PIN', 47),
-(49, 'SOCIALISTA SIMON TORRES', 47),
-(50, 'SOCIALISTA CIUDADELA COMANDANT', 47),
-(51, 'SOCIALISTA UNIDAD LUCHA BATALL', 47),
-(52, 'EJE GUAYABAL', 47),
-(53, 'SOCIALISTA SAN FELIPE EL FUERT', 47),
-(54, 'SOCIALISTA CULTURAL AGROPRODUC', 3),
-(55, 'SOCIALISTA AGROECOLOGICA YURUB', 3),
-(56, 'SOCIALISTA DR. JUAN JOSE DE MA', 3),
-(57, 'SOCIALISTA AGROPRODUCTIVA AURA', 3),
-(58, 'SOCIALISTA AGROPRODUCTIVA ECOL', 48),
-(59, 'SOCIALISTA AGROPRODUCTIVA CIMA', 48),
-(60, 'SOCIALISTA POPULAR Y CHAVISTA', 48),
-(61, 'SOCIALISTA 12 DE OCTUBRE', 66),
-(62, 'SOCIALISTA AGROTURISTICA Y PRO', 66),
-(63, 'SOCIALISTA EL RENACER DEL TIMO', 66),
+(92, 'AGROPRODUCTIVA CARACARO BICENT', 46),
+(95, 'AGROPRODUCTIVA SEMBRANDO EN RE', 46),
+(91, 'AGROPRODUCTIVA ZONA SUR 5 DE M', 46),
 (64, 'AGROSOCIALISTA BOLIVAR Y CHAVE', 66),
-(65, 'SOCIALISTA PRODUCTORAS Y PRODU', 66),
-(66, 'SOCIALISTA ALI PRIMERA', 67),
-(67, 'SOCIALISTA URACHICHEÑA HUGO RA', 67),
-(68, 'SOCIALISTA CAMUNARE ROJO', 67),
-(69, 'SOCIALISTA ECOLOGICA LINA RON', 64),
-(70, 'SOCIALISTA AGUA LINDA', 64),
-(71, 'SOCIOPRODUCTIVA MUJERES BICENT', 64),
-(72, 'SOCIALISTA URIMIQUIRE', 64),
-(73, 'SOCIALISTA COMANDANTE SUPREMO', 64),
+(43, 'AGROTURISTICA EL ESFUERZO Y LA', 62),
+(36, 'ANGEL RAFAEL GONZALEZ', 62),
+(38, 'CERRO AZUL TRONCAL 11', 62),
+(118, 'CHE GUEVARA LEGENDARIO SOCIALI', 52),
+(8, 'comuna', 54),
+(17, 'COMUNA SOCIALISTA AGROPRODUCTI', 55),
+(21, 'COMUNA SOCIALISTA PRODUCTIVA M', 55),
 (74, 'COMUNA SOCIALISTA PRODUCTIVA N', 64),
-(75, 'SOCIOPRODUCTIVA VALEROSO PEÑA', 64),
-(76, 'SOCIOPRODUCTIVA CHAVEZ VIVE', 64),
-(77, 'SOCIALISTA DIOS ES MI AMIGO', 64),
+(109, 'COMUNA SOCIALISTA PRODUCTIVA S', 60),
+(80, 'COMUNA SOCIALISTA PRODUCTIVA S', 65),
+(112, 'COMUNA SOCIALISTA Y PRODUCTIVA', 60),
+(47, 'ECOLOGICA JORGE RODRIGUEZ EJE', 47),
+(86, 'ECOSOCIALISTA BUENA VISTA', 59),
+(94, 'ECOSOCIALISTA CAMPAÑA ADMIRABL', 46),
+(96, 'ECOSOCIALISTA CORAZON DE MI PA', 46),
+(102, 'EDUCATIVA PRODUCTIVA ECOTURIST', 57),
+(52, 'EJE GUAYABAL', 47),
+(24, 'HIJOS DE CHAVEZ', 49),
+(12, 'LA NUEVA UNION DE LAS CUMARAGU', 55),
+(81, 'LA UNION DE LOS PUEBLOS SOCIAL', 65),
+(34, 'NIRGUA PRODUCTIVA', 62),
 (78, 'PRODUCTIVA FRANCISCO DE MIRAND', 64),
 (79, 'PRODUCTIVA SEGUIREMOS TENIENDO', 64),
-(80, 'COMUNA SOCIALISTA PRODUCTIVA S', 65),
-(81, 'LA UNION DE LOS PUEBLOS SOCIAL', 65),
+(16, 'PRODUCTIVA SOCIALISTA CHAVEZ P', 55),
+(115, 'PUEBLO TIERRA Y HOMBRES LIBRES', 53),
+(119, 'ROBERT SERRA', 52),
+(20, 'SIERRA AZUL CARABOBO', 55),
+(11, 'SOCIALISTA 12 DE ABRIL', 55),
+(61, 'SOCIALISTA 12 DE OCTUBRE', 66),
+(23, 'SOCIALISTA AGRARIA ENDOGENA EC', 49),
+(37, 'SOCIALISTA AGRICOLA LEGUMINOSA', 62),
+(110, 'SOCIALISTA AGRICOLA TURISTICA', 60),
+(46, 'SOCIALISTA AGROECOLOGICA SIMON', 47),
+(33, 'SOCIALISTA AGROECOLOGICA TURIS', 62),
+(55, 'SOCIALISTA AGROECOLOGICA YURUB', 3),
+(25, 'SOCIALISTA AGROPECUARIA MARIA', 49),
+(57, 'SOCIALISTA AGROPRODUCTIVA AURA', 3),
+(59, 'SOCIALISTA AGROPRODUCTIVA CIMA', 48),
+(58, 'SOCIALISTA AGROPRODUCTIVA ECOL', 48),
+(13, 'SOCIALISTA AGROPRODUCTIVA EJE', 55),
+(18, 'SOCIALISTA AGROPRODUCTIVA RIO', 55),
 (82, 'SOCIALISTA AGROTURISTICA ECOLO', 58),
-(83, 'SOCIALISTA PRODUCTIVA TIERRAS', 58),
+(26, 'SOCIALISTA AGROTURISTICA INDUS', 49),
+(117, 'SOCIALISTA AGROTURISTICA RIO T', 52),
+(62, 'SOCIALISTA AGROTURISTICA Y PRO', 66),
+(70, 'SOCIALISTA AGUA LINDA', 64),
+(66, 'SOCIALISTA ALI PRIMERA', 67),
+(15, 'SOCIALISTA ALIANZA CAMPESINA', 55),
+(45, 'SOCIALISTA AMBROCIO PEREIRA', 63),
+(10, 'SOCIALISTA ARBOL DE LAS TRES R', 55),
+(68, 'SOCIALISTA CAMUNARE ROJO', 67),
 (84, 'SOCIALISTA CENTAUROS DE PAEZ', 58),
-(85, 'SOCIALISTA INDEPENDENCIA 18 DE', 59),
-(86, 'ECOSOCIALISTA BUENA VISTA', 59),
-(87, 'SOCIALISTA UN NUEVO RENACER 20', 59),
-(88, 'SOCIALISTA TRINIDAD VICTORIOSO', 59),
-(89, 'SOCIALISTA LA SABANA DE PALITO', 59),
+(50, 'SOCIALISTA CIUDADELA COMANDANT', 47),
+(73, 'SOCIALISTA COMANDANTE SUPREMO', 64),
+(54, 'SOCIALISTA CULTURAL AGROPRODUC', 3),
+(77, 'SOCIALISTA DIOS ES MI AMIGO', 64),
+(56, 'SOCIALISTA DR. JUAN JOSE DE MA', 3),
+(69, 'SOCIALISTA ECOLOGICA LINA RON', 64),
+(120, 'SOCIALISTA EL GUAYABO', 52),
+(63, 'SOCIALISTA EL RENACER DEL TIMO', 66),
+(103, 'SOCIALISTA EMPRENDEDORES DEL G', 57),
+(101, 'SOCIALISTA FERMIN ABDOM RAMIRE', 57),
 (90, 'SOCIALISTA FORJADORES DE LA PA', 59),
-(91, 'AGROPRODUCTIVA ZONA SUR 5 DE M', 46),
-(92, 'AGROPRODUCTIVA CARACARO BICENT', 46),
-(93, 'SOCIOPRODUCTIVA 7 RAICES CECIL', 46),
-(94, 'ECOSOCIALISTA CAMPAÑA ADMIRABL', 46),
-(95, 'AGROPRODUCTIVA SEMBRANDO EN RE', 46),
-(96, 'ECOSOCIALISTA CORAZON DE MI PA', 46),
+(32, 'SOCIALISTA GUERREROS DE LA MON', 62),
+(40, 'SOCIALISTA GUERREROS JIRAHARA', 62),
+(85, 'SOCIALISTA INDEPENDENCIA 18 DE', 59),
+(100, 'SOCIALISTA INDEPENDENCIA Y PAT', 57),
+(116, 'SOCIALISTA JOSE JOAQUIN VEROES', 53),
 (97, 'SOCIALISTA JUAN MILLA', 46),
+(89, 'SOCIALISTA LA SABANA DE PALITO', 59),
+(113, 'SOCIALISTA LOS CAÑIZOS PALO QU', 53),
+(39, 'SOCIALISTA MANUEL CEDEÑO', 62),
+(19, 'SOCIALISTA MARIA MIRANDA', 55),
+(48, 'SOCIALISTA MARIA VALENTINA PIN', 47),
+(28, 'SOCIALISTA MAXIMO VIZCAYA', 56),
+(14, 'SOCIALISTA MELECIO TORRES', 55),
+(42, 'SOCIALISTA NEGRO MIGUEL DE BUR', 62),
+(104, 'SOCIALISTA PETRA BETANCOURT', 54),
+(60, 'SOCIALISTA POPULAR Y CHAVISTA', 48),
+(29, 'SOCIALISTA PRODUCTIVA AGROENDO', 56),
+(30, 'SOCIALISTA PRODUCTIVA DOMINGO', 56),
+(107, 'SOCIALISTA PRODUCTIVA FERROCAR', 60),
+(83, 'SOCIALISTA PRODUCTIVA TIERRAS', 58),
+(65, 'SOCIALISTA PRODUCTORAS Y PRODU', 66),
+(114, 'SOCIALISTA PUEBLOS UNIDOS SIMO', 53),
+(22, 'SOCIALISTA ROSA LUXEMBURGO', 49),
+(53, 'SOCIALISTA SAN FELIPE EL FUERT', 47),
+(35, 'SOCIALISTA SANTANA OCHOA', 62),
+(9, 'SOCIALISTA SIERRA NUBLADA', 55),
+(49, 'SOCIALISTA SIMON TORRES', 47),
+(106, 'SOCIALISTA SOBERANOS DE LA PAT', 54),
+(27, 'SOCIALISTA SOCIOPRODUCTIVA TRO', 49),
+(88, 'SOCIALISTA TRINIDAD VICTORIOSO', 59),
+(87, 'SOCIALISTA UN NUEVO RENACER 20', 59),
+(51, 'SOCIALISTA UNIDAD LUCHA BATALL', 47),
+(67, 'SOCIALISTA URACHICHEÑA HUGO RA', 67),
+(72, 'SOCIALISTA URIMIQUIRE', 64),
 (98, 'SOCIALISTA VENCEDORES Y VENCED', 46),
 (99, 'SOCIALISTA WILLIAM LARA VIVE', 57),
-(100, 'SOCIALISTA INDEPENDENCIA Y PAT', 57),
-(101, 'SOCIALISTA FERMIN ABDOM RAMIRE', 57),
-(102, 'EDUCATIVA PRODUCTIVA ECOTURIST', 57),
-(103, 'SOCIALISTA EMPRENDEDORES DEL G', 57),
-(104, 'SOCIALISTA PETRA BETANCOURT', 54),
-(105, 'AGRICOLA VOCES DEL CAMPO', 54),
-(106, 'SOCIALISTA SOBERANOS DE LA PAT', 54),
-(107, 'SOCIALISTA PRODUCTIVA FERROCAR', 60),
-(108, 'SOCIALISTA Y PRODUCTIVA MANUEL', 60),
-(109, 'COMUNA SOCIALISTA PRODUCTIVA S', 60),
-(110, 'SOCIALISTA AGRICOLA TURISTICA', 60),
 (111, 'SOCIALISTA Y PRODUCTIVA JOSE F', 60),
-(112, 'COMUNA SOCIALISTA Y PRODUCTIVA', 60),
-(113, 'SOCIALISTA LOS CAÑIZOS PALO QU', 53),
-(114, 'SOCIALISTA PUEBLOS UNIDOS SIMO', 53),
-(115, 'PUEBLO TIERRA Y HOMBRES LIBRES', 53),
-(116, 'SOCIALISTA JOSE JOAQUIN VEROES', 53),
-(117, 'SOCIALISTA AGROTURISTICA RIO T', 52),
-(118, 'CHE GUEVARA LEGENDARIO SOCIALI', 52),
-(119, 'ROBERT SERRA', 52),
-(120, 'SOCIALISTA EL GUAYABO', 52);
+(108, 'SOCIALISTA Y PRODUCTIVA MANUEL', 60),
+(93, 'SOCIOPRODUCTIVA 7 RAICES CECIL', 46),
+(76, 'SOCIOPRODUCTIVA CHAVEZ VIVE', 64),
+(71, 'SOCIOPRODUCTIVA MUJERES BICENT', 64),
+(31, 'SOCIOPRODUCTIVA NEGRA MATEA', 56),
+(75, 'SOCIOPRODUCTIVA VALEROSO PEÑA', 64);
 
 -- --------------------------------------------------------
 
@@ -503,7 +514,8 @@ CREATE TABLE `nivel_impacto` (
 INSERT INTO `nivel_impacto` (`id`, `nombre_impacto`) VALUES
 (3, 'Comunal'),
 (4, 'estadal'),
-(5, 'municipal');
+(5, 'municipal'),
+(6, 'nacional');
 
 -- --------------------------------------------------------
 
@@ -651,7 +663,9 @@ ALTER TABLE `actividad`
   ADD KEY `id_espacio_cultural` (`id_espacio_cultural`),
   ADD KEY `id_tipo_actividad` (`id_tipo_actividad`),
   ADD KEY `actividad_ibfk_nivel` (`id_nivel_impacto`),
-  ADD KEY `actividad_ibfk_responsable` (`responsable`);
+  ADD KEY `actividad_ibfk_responsable` (`responsable`),
+  ADD KEY `actividad_ibfk_parroquia` (`id_parroquia`),
+  ADD KEY `actividad_ibfk_comuna` (`id_comuna`);
 
 --
 -- Indices de la tabla `asignacion`
@@ -788,7 +802,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -830,7 +844,7 @@ ALTER TABLE `municipio`
 -- AUTO_INCREMENT de la tabla `nivel_impacto`
 --
 ALTER TABLE `nivel_impacto`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `parroquia`
@@ -867,7 +881,9 @@ ALTER TABLE `actividad`
   ADD CONSTRAINT `actividad_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
   ADD CONSTRAINT `actividad_ibfk_2` FOREIGN KEY (`id_espacio_cultural`) REFERENCES `espacio_cultural` (`id`),
   ADD CONSTRAINT `actividad_ibfk_3` FOREIGN KEY (`id_tipo_actividad`) REFERENCES `tipo_actividad` (`id`),
+  ADD CONSTRAINT `actividad_ibfk_comuna` FOREIGN KEY (`id_comuna`) REFERENCES `comuna` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_nivel` FOREIGN KEY (`id_nivel_impacto`) REFERENCES `nivel_impacto` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `actividad_ibfk_parroquia` FOREIGN KEY (`id_parroquia`) REFERENCES `parroquia` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_responsable` FOREIGN KEY (`responsable`) REFERENCES `empleado` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_solicitud` FOREIGN KEY (`id_solicitud`) REFERENCES `solicitud` (`id`) ON DELETE SET NULL;
 
