@@ -4,6 +4,52 @@ require_once __DIR__ . '/../helpers/validador.php';
 
 class Actividad {
 
+    // Convierte los nombres de parroquia y comuna que llegan del formulario
+    // en los ids que se guardan en actividad (id_parroquia, id_comuna).
+    private function resolverUbicacion(PDO $pdo, array $d): array
+    {
+        $idMunicipio = !empty($d['municipio_id']) ? (int) $d['municipio_id'] : 0;
+        $nombreParroquia = trim((string) ($d['parroquia'] ?? ''));
+        $nombreComuna = trim((string) ($d['comuna'] ?? ''));
+        $idParroquia = null;
+        $idComuna = null;
+
+        if ($nombreParroquia !== '') {
+            $sql = "SELECT id FROM parroquia WHERE nombre = ?";
+            $params = [$nombreParroquia];
+            if ($idMunicipio > 0) {
+                $sql .= " AND id_municipio = ?";
+                $params[] = $idMunicipio;
+            }
+            $stmt = $pdo->prepare($sql . " LIMIT 1");
+            $stmt->execute($params);
+            $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($fila) {
+                $idParroquia = (int) $fila['id'];
+            }
+        }
+
+        if ($nombreComuna !== '') {
+            $sql = "SELECT id, id_parroquia FROM comuna WHERE nombre = ?";
+            $params = [$nombreComuna];
+            if ($idParroquia !== null) {
+                $sql .= " AND id_parroquia = ?";
+                $params[] = $idParroquia;
+            }
+            $stmt = $pdo->prepare($sql . " LIMIT 1");
+            $stmt->execute($params);
+            $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($fila) {
+                $idComuna = (int) $fila['id'];
+                if ($idParroquia === null) {
+                    $idParroquia = (int) $fila['id_parroquia'];
+                }
+            }
+        }
+
+        return [$idParroquia, $idComuna];
+    }
+
     private function condicionBiblioteca($idBiblioteca, string $alias = 'a'): string
     {
         if ($idBiblioteca === null) {
@@ -62,15 +108,18 @@ class Actividad {
                 a.telefono_responsable,
                 ta.nombre AS tipo_actividad,
                 b.nombre AS biblioteca,
+                ec.nombre AS espacio_cultural,
                 m.id AS municipio_id,
                 m.nombre AS municipio,
                 p.nombre AS parroquia,
                 ni.nombre_impacto AS nivel_impacto,
-                NULL AS comuna
+                c.nombre AS comuna
             FROM actividad a
             LEFT JOIN tipo_actividad ta ON ta.id = a.id_tipo_actividad
             LEFT JOIN biblioteca b ON b.id = a.id_biblioteca
-            LEFT JOIN parroquia p ON p.id = b.id_parroquia
+            LEFT JOIN espacio_cultural ec ON ec.id = a.id_espacio_cultural
+            LEFT JOIN comuna c ON c.id = a.id_comuna
+            LEFT JOIN parroquia p ON p.id = COALESCE(a.id_parroquia, c.id_parroquia, b.id_parroquia)
             LEFT JOIN municipio m ON m.id = p.id_municipio
             LEFT JOIN nivel_impacto ni ON ni.id = a.id_nivel_impacto
             LEFT JOIN empleado er ON er.id = a.responsable
@@ -290,14 +339,15 @@ class Actividad {
             $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
             $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
             $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
-            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad, estado, responsable, telefono_responsable, id_nivel_impacto)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            list($idParroquia, $idComuna) = $this->resolverUbicacion($pdo, $d);
+            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad, estado, responsable, telefono_responsable, id_nivel_impacto, id_parroquia, id_comuna)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
                 $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
-                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null, $idNivel
+                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null, $idNivel, $idParroquia, $idComuna
             ]);
             $idActividad = (int)$pdo->lastInsertId();
 
@@ -319,13 +369,14 @@ class Actividad {
             $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
             $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
             $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
-            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=?, estado=?, responsable=?, telefono_responsable=?, id_nivel_impacto=? WHERE id=?";
+            list($idParroquia, $idComuna) = $this->resolverUbicacion($pdo, $d);
+            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=?, estado=?, responsable=?, telefono_responsable=?, id_nivel_impacto=?, id_parroquia=?, id_comuna=? WHERE id=?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
                 $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
-                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null, $idNivel, $id
+                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null, $idNivel, $idParroquia, $idComuna, $id
             ]);
 
             $pdo->commit();
