@@ -13,7 +13,7 @@ procesarReportePdf(
         ['etiqueta' => 'Tipo', 'clave' => 'tipo_actividad'],
         ['etiqueta' => 'Fecha', 'clave' => 'fecha', 'tipo' => 'fecha'],
         ['etiqueta' => 'Hora', 'clave' => 'hora'],
-        ['etiqueta' => 'Ubicación', 'claves' => ['biblioteca', 'municipio', 'parroquia', 'comuna']],
+        ['etiqueta' => 'Ubicación', 'claves' => ['biblioteca', 'espacio_cultural', 'municipio', 'parroquia', 'comuna']],
         ['etiqueta' => 'Descripción', 'claves' => ['descripcion', 'objetivo'], 'separador' => ' | '],
         ['etiqueta' => 'Participantes', 'clave' => 'participantes'],
         ['etiqueta' => 'Responsable', 'claves' => ['responsable', 'telefono_responsable'], 'separador' => ' | '],
