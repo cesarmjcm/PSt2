@@ -12,9 +12,23 @@ procesarReportePdf(
         ['etiqueta' => 'Actividad', 'clave' => 'nombre'],
         ['etiqueta' => 'Tipo', 'clave' => 'tipo_actividad'],
         ['etiqueta' => 'Fecha', 'clave' => 'fecha', 'tipo' => 'fecha'],
-        ['etiqueta' => 'Hora', 'clave' => 'hora'],
-        ['etiqueta' => 'Ubicación', 'claves' => ['biblioteca', 'espacio_cultural', 'municipio', 'parroquia', 'comuna']],
-        ['etiqueta' => 'Descripción', 'claves' => ['descripcion', 'objetivo'], 'separador' => ' | '],
+        ['etiqueta' => 'Hora', 'clave' => 'hora', 'tipo' => 'hora'],
+        [
+            'etiqueta' => 'Ubicación',
+            'partes' => [
+                ['etiqueta' => 'Lugar', 'claves' => ['biblioteca', 'espacio_cultural']],
+                ['etiqueta' => 'Municipio', 'clave' => 'municipio'],
+                ['etiqueta' => 'Parroquia', 'clave' => 'parroquia'],
+                ['etiqueta' => 'Comuna', 'clave' => 'comuna'],
+            ],
+        ],
+        [
+            'etiqueta' => 'Descripción',
+            'partes' => [
+                ['etiqueta' => 'Descripción', 'clave' => 'descripcion'],
+                ['etiqueta' => 'Objetivo', 'clave' => 'objetivo'],
+            ],
+        ],
         ['etiqueta' => 'Participantes', 'clave' => 'participantes'],
         ['etiqueta' => 'Responsable', 'claves' => ['responsable', 'telefono_responsable'], 'separador' => ' | '],
         ['etiqueta' => 'Nivel de impacto', 'clave' => 'nivel_impacto'],
