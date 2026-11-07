@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 06-11-2026 a las 22:31:44
+-- Tiempo de generación: 07-11-2026 a las 01:03:17
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -54,10 +54,8 @@ CREATE TABLE `actividad` (
 
 INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `id_nivel_impacto`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `telefono_responsable`, `id_parroquia`, `id_comuna`) VALUES
 (23, NULL, 15, 5, 'Biblioteca 1', 4, NULL, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 13, '2147483647', NULL, NULL),
-(24, NULL, 15, 5, 'zona2', 4, NULL, '2', 'carlos', 222, '2026-08-12', NULL, 'Miércoles', 'confirmada', 13, '2147483647', NULL, NULL),
 (27, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 15, '04125240489', NULL, NULL),
 (28, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 15, '2147483647', NULL, NULL),
-(29, NULL, NULL, 5, 'hola', 5, NULL, 'cosas', 'No definido', 0, '2026-08-19', '13:16:00', 'Miércoles', 'confirmada', 13, '04125240489', NULL, NULL),
 (30, NULL, 15, NULL, 'juego de ajedrez', 5, 3, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 13, '04125240489', NULL, NULL),
 (31, NULL, 15, NULL, 'Arístides Bastidas', 5, NULL, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
 (32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 3, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
@@ -66,7 +64,7 @@ INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cult
 (35, NULL, 15, NULL, 'juego de mesa', 4, 3, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 15, '04125240489', NULL, NULL),
 (36, NULL, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
 (37, NULL, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, '04127168235', NULL, NULL),
-(38, NULL, NULL, 4, 'Felix Pifano', 5, 6, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 28, '04127168235', 52, 118),
+(38, NULL, 16, NULL, 'Felix Pifano', 5, 6, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 28, '04127168235', 52, 118),
 (39, NULL, NULL, 4, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, '04125240489', 56, 31);
 
 -- --------------------------------------------------------
@@ -105,7 +103,11 @@ CREATE TABLE `biblioteca` (
 
 INSERT INTO `biblioteca` (`id`, `nombre`, `id_parroquia`, `Correo`, `redes_sociales`, `Direccion`, `id_solicitud_actividad`) VALUES
 (15, 'biblioteca', 54, 'cesarmcontre28@gmail.com', 'cesarm2', 'calle 4', NULL),
-(16, 'Felix Pifano', 47, '', '', '', NULL);
+(16, 'Felix Pifano', 47, '', '', '', NULL),
+(17, 'Oswaldo Méndez', 64, '', '', '', NULL),
+(18, 'Rómulo Gallegos', 62, '', '', '', NULL),
+(19, 'Rubén Suárez Moreno', 49, '', '', '', NULL),
+(20, 'Domingo Oviedo Parada', 67, '', '', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -236,7 +238,15 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (105, 'Viernes', '2026-11-06', '16:33:08', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
 (106, 'Viernes', '2026-11-06', '16:55:31', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
 (107, 'Viernes', '2026-11-06', '16:55:45', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
-(108, 'Viernes', '2026-11-06', '17:07:20', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras');
+(108, 'Viernes', '2026-11-06', '17:07:20', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(109, 'Viernes', '2026-11-06', '19:32:09', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(110, 'Viernes', '2026-11-06', '19:42:33', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(111, 'Viernes', '2026-11-06', '19:57:31', 11, 'Eliminar', 'Actividad', 'Actividad #24 eliminada'),
+(112, 'Viernes', '2026-11-06', '19:57:36', 11, 'Eliminar', 'Actividad', 'Actividad #29 eliminada'),
+(113, 'Viernes', '2026-11-06', '19:58:43', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Oswaldo Méndez'),
+(114, 'Viernes', '2026-11-06', '19:59:26', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Rómulo Gallegos'),
+(115, 'Viernes', '2026-11-06', '20:00:29', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Rubén Suárez Moreno'),
+(116, 'Viernes', '2026-11-06', '20:01:35', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Domingo Oviedo Parada');
 
 -- --------------------------------------------------------
 
@@ -796,13 +806,13 @@ ALTER TABLE `asignacion`
 -- AUTO_INCREMENT de la tabla `biblioteca`
 --
 ALTER TABLE `biblioteca`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
