@@ -101,6 +101,11 @@ class ActividadController
             return;
         }
 
+        if ($this->model->existeConflictoResponsableHorario($data)) {
+            $this->error('El responsable ya tiene otra actividad asignada en esa fecha y hora.');
+            return;
+        }
+
         try {
             $id = $this->model->crearActividadCompleta($data);
             if ($id) {
@@ -175,6 +180,11 @@ class ActividadController
             . ' id_biblioteca=' . ($data['id_biblioteca'] ?? '') . ' id_espacio_cultural=' . ($data['id_espacio_cultural'] ?? ''));
         if ($hayConflicto) {
             $this->error('Ya existe otra actividad registrada en ese mismo lugar, fecha y hora.');
+            return;
+        }
+
+        if ($this->model->existeConflictoResponsableHorario($data, $id)) {
+            $this->error('El responsable ya tiene otra actividad asignada en esa fecha y hora.');
             return;
         }
 

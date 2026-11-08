@@ -158,15 +158,21 @@ function abrirModal(actividades, fecha) {
     if (!actividades.length) {
         modalBody.innerHTML = '<p>No hay actividades registradas para este día.</p>';
     } else {
-        const filas = actividades.map((act, index) => `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${act.nombre || ''}</td>
-                <td>${act.descripcion || ''}</td>
-                <td>${act.dia_semana || ''}</td>
-                <td>${formatearFecha(act.fecha)}</td>
-            </tr>
-        `).join('');
+        const filas = actividades.map((act, index) => {
+            const estado = String(act.estado || "pendiente").trim().toLowerCase();
+            const estadoValido = ["pendiente", "confirmada", "ejecutada", "cancelada"].includes(estado)
+                ? estado
+                : "pendiente";
+            return `
+                <tr class="activity-status--${estadoValido}">
+                    <td>${index + 1}</td>
+                    <td>${act.nombre || ''}</td>
+                    <td>${act.descripcion || ''}</td>
+                    <td>${act.dia_semana || ''}</td>
+                    <td>${formatearFecha(act.fecha)}</td>
+                </tr>
+            `;
+        }).join('');
 
         modalBody.innerHTML = `
             <div class="activity-modal-table-wrapper">

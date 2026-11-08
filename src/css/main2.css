@@ -891,6 +891,22 @@ fieldset{
     background: #f7f9ff;
 }
 
+.activity-table tbody tr.activity-status--pendiente td:first-child {
+    border-left: 6px solid #fbbf24;
+}
+
+.activity-table tbody tr.activity-status--confirmada td:first-child {
+    border-left: 6px solid #3b82f6;
+}
+
+.activity-table tbody tr.activity-status--ejecutada td:first-child {
+    border-left: 6px solid #22c55e;
+}
+
+.activity-table tbody tr.activity-status--cancelada td:first-child {
+    border-left: 6px solid #ef4444;
+}
+
 .activity-table tbody tr:hover {
     background: #eef4ff;
 }

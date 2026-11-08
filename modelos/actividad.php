@@ -305,6 +305,30 @@ class Actividad {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function existeConflictoResponsableHorario(array $d, int $idExcluir = null): bool
+    {
+        $fecha = trim($d['fecha'] ?? '');
+        $hora = trim($d['hora'] ?? '');
+        $responsable = trim($d['responsable'] ?? '');
+        $estado = trim($d['estado'] ?? '');
+        if ($fecha === '' || $hora === '' || $responsable === '' || $estado === 'cancelada') {
+            return false;
+        }
+
+        $sql = "SELECT id FROM actividad
+                WHERE fecha = ? AND hora = ? AND responsable = ? AND estado != 'cancelada'";
+        $params = [$fecha, $hora, (int) $responsable];
+        if ($idExcluir !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $idExcluir;
+        }
+        $sql .= " LIMIT 1";
+
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute($params);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     
     
     
