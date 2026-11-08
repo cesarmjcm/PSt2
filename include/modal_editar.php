@@ -18,6 +18,21 @@ $tipoActividadModel = new TipoActividad();
 $municipios = $municipioModel->mostrarMunicipios();
 $comunas = $comunaModel->mostrarComunas();
 $parroquias = $parroquiaModel->mostrarParroquias();
+$parroquiasUnicas = [];
+foreach ($parroquias as $parroquia) {
+    $nombreParroquia = trim((string)($parroquia['nombre'] ?? ''));
+    $idParroquia = (string)($parroquia['id'] ?? '');
+    $municipioParroquia = (string)($parroquia['id_municipio'] ?? '');
+    if ($nombreParroquia !== '') {
+        $claveParroquia = $municipioParroquia . '|' . mb_strtolower($nombreParroquia, 'UTF-8');
+        $parroquiasUnicas[$claveParroquia] = [
+            'id' => $idParroquia,
+            'nombre' => $nombreParroquia,
+            'id_municipio' => $municipioParroquia,
+        ];
+    }
+}
+$parroquias = array_values($parroquiasUnicas);
 $espacios = $espacioModel->mostrarEspacios();
 $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
 $empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
@@ -100,21 +115,20 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                     <div id="editar-municipio-hidden">
                                         <fieldset>
                                             <label for="editar-parroquia">Parroquia</label>
-                                            <input list="editar-parroquias" id="editar-parroquia" name="parroquia" maxlength="30" placeholder="Seleccione una parroquia">
-                                            <datalist id="editar-parroquias">
+                                            <select id="editar-parroquia" name="parroquia" disabled>
                                                 <option value="">Seleccione una parroquia</option>
                                                 <?php foreach ($parroquias as $p): ?>
-                                                    <option value="<?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                    <option value="<?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars($p['id_municipio'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                 <?php endforeach; ?>
-                                            </datalist>
+                                            </select>
                                         </fieldset>
 
                                         <fieldset>
                                             <label for="editar-comuna">Comuna</label>
-                                            <select name="comuna" id="editar-comuna">
+                                            <select name="comuna" id="editar-comuna" disabled>
                                                 <option value="">Seleccione una comuna</option>
                                                 <?php foreach ($comunas as $c): ?>
-                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars((string) $c['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </fieldset>
@@ -137,7 +151,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                                 <select name="id_biblioteca" id="editar-biblioteca">
                                                     <option value="">Seleccione una biblioteca</option>
                                                     <?php foreach ($bibliotecas as $b): ?>
-                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $b['id_municipio'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) $b['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -147,7 +161,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                                 <select name="id_espacio_cultural" id="editar-espacio">
                                                     <option value="">Seleccione un espacio cultural</option>
                                                     <?php foreach ($espacios as $e): ?>
-                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $e['id_municipio'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) $e['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>" data-comuna="<?= htmlspecialchars((string) $e['id_comuna'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -204,6 +218,81 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
         }
 
         radiosUbicacion.forEach(radio => radio.addEventListener('change', actualizarUbicacion));
+
+        const selectMunicipio = document.getElementById('editar-municipio');
+        const selectParroquia = document.getElementById('editar-parroquia');
+        const selectComuna = document.getElementById('editar-comuna');
+        const selectBiblioteca = document.getElementById('editar-biblioteca');
+        const selectEspacio = document.getElementById('editar-espacio');
+
+        if (selectMunicipio && selectParroquia && selectComuna) {
+            const opcionesParroquias = Array.from(selectParroquia.options).slice(1);
+            const opcionesComunas = Array.from(selectComuna.options).slice(1);
+            const opcionesBibliotecas = Array.from(selectBiblioteca.options).slice(1);
+            const opcionesEspacios = Array.from(selectEspacio.options).slice(1);
+
+            const filtrarUbicaciones = () => {
+                const municipioId = selectMunicipio.value;
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
+                const comunaId = (selectComuna.selectedOptions[0] && selectComuna.selectedOptions[0].dataset.id) || '';
+
+                selectBiblioteca.replaceChildren(new Option('Seleccione una biblioteca', ''));
+                opcionesBibliotecas.forEach((opcion) => {
+                    if (opcion.dataset.municipio === municipioId && opcion.dataset.parroquia === parroquiaId) {
+                        selectBiblioteca.appendChild(opcion.cloneNode(true));
+                    }
+                });
+
+                selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
+                opcionesEspacios.forEach((opcion) => {
+                    if (opcion.dataset.municipio === municipioId
+                        && opcion.dataset.parroquia === parroquiaId
+                        && opcion.dataset.comuna === comunaId
+                        && comunaId !== '') {
+                        selectEspacio.appendChild(opcion.cloneNode(true));
+                    }
+                });
+            };
+
+            const filtrarParroquias = () => {
+                const municipioId = selectMunicipio.value;
+                selectParroquia.replaceChildren(new Option('Seleccione una parroquia', ''));
+                opcionesParroquias.forEach((opcion) => {
+                    if (opcion.dataset.municipio === municipioId) {
+                        selectParroquia.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectParroquia.disabled = municipioId === '';
+            };
+
+            const filtrarComunas = () => {
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
+                selectComuna.replaceChildren(new Option('Seleccione una comuna', ''));
+                opcionesComunas.forEach((opcion) => {
+                    if (opcion.dataset.parroquia === parroquiaId) {
+                        selectComuna.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectComuna.disabled = parroquiaId === '';
+            };
+
+            selectMunicipio.addEventListener('change', () => {
+                selectParroquia.value = '';
+                selectComuna.value = '';
+                filtrarParroquias();
+                filtrarComunas();
+                filtrarUbicaciones();
+            });
+            selectParroquia.addEventListener('change', () => {
+                selectComuna.value = '';
+                filtrarComunas();
+                filtrarUbicaciones();
+            });
+            selectComuna.addEventListener('change', filtrarUbicaciones);
+            filtrarParroquias();
+            filtrarComunas();
+            filtrarUbicaciones();
+        }
 
         const selectResponsable = document.getElementById('editar-responsable');
         const inputTelefono = document.getElementById('editar-telefono');
@@ -273,7 +362,9 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             document.getElementById('editar-participantes').value = (actividad.participantes != null ? actividad.participantes : '');
             document.getElementById('editar-nivel-impacto').value = (actividad.nivel_impacto != null ? actividad.nivel_impacto : '');
             document.getElementById('editar-municipio').value = (actividad.municipio_id != null ? actividad.municipio_id : '');
+            document.getElementById('editar-municipio').dispatchEvent(new Event('change'));
             document.getElementById('editar-parroquia').value = (actividad.parroquia != null ? actividad.parroquia : '');
+            document.getElementById('editar-parroquia').dispatchEvent(new Event('change'));
             document.getElementById('editar-comuna').value = (actividad.comuna != null ? actividad.comuna : '');
             document.getElementById('editar-biblioteca').value = (actividad.id_biblioteca != null ? actividad.id_biblioteca : '');
             document.getElementById('editar-espacio').value = (actividad.id_espacio_cultural != null ? actividad.id_espacio_cultural : '');

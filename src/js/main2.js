@@ -144,6 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const solicitudesSelector = document.getElementById('solicitudesSelector');
 
         if (form) form.reset();
+        if (planMunicipio) {
+            planMunicipio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
         (function () { var o = document.querySelector('#plan-responsable option[value="__actual__"]'); if (o) o.remove(); })();
         if (titulo) titulo.textContent = 'Nueva Planificación de Actividad';
         if (planAction) planAction.value = 'crear';
@@ -225,6 +228,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (planParticipantes) {
             planParticipantes.value = solicitud.participantes || '';
         }
+        if (selectMunicipio && selectParroquia && solicitud.municipio_id && solicitud.parroquia_id) {
+            selectMunicipio.value = String(solicitud.municipio_id);
+            selectMunicipio.dispatchEvent(new Event('change', { bubbles: true }));
+
+            const opcionParroquia = Array.from(selectParroquia.options)
+                .find(opcion => opcion.dataset.id === String(solicitud.parroquia_id));
+            if (opcionParroquia) {
+                selectParroquia.value = opcionParroquia.value;
+                selectParroquia.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
         if (planBiblioteca) {
             const bibliotecaNombre = (solicitud.lugar || '').trim();
             const opcionesBiblioteca = Array.from(planBiblioteca.options);
@@ -235,18 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bibliotecaEncontrada) {
                 planBiblioteca.value = bibliotecaEncontrada.value;
                 planBiblioteca.dispatchEvent(new Event('change'));
-            }
-        }
-
-        if (selectMunicipio && selectParroquia && solicitud.municipio_id && solicitud.parroquia_id) {
-            selectMunicipio.value = String(solicitud.municipio_id);
-            selectMunicipio.dispatchEvent(new Event('change', { bubbles: true }));
-
-            const opcionParroquia = Array.from(selectParroquia.options)
-                .find(opcion => opcion.dataset.id === String(solicitud.parroquia_id));
-            if (opcionParroquia) {
-                selectParroquia.value = opcionParroquia.value;
-                selectParroquia.dispatchEvent(new Event('change', { bubbles: true }));
             }
         }
         if (planResponsable) {

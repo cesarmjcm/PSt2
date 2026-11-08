@@ -8,6 +8,7 @@ public function mostrarBibliotecas(int $idBiblioteca = null) {
                 b.id,
                 b.nombre,
                 b.id_parroquia,
+                p.id_municipio,
                 p.nombre AS id_parroquia_nombre,
                 b.Correo AS correo,
                 b.redes_sociales,

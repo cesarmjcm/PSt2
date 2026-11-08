@@ -72,9 +72,17 @@ function cargarActividadesDesdeBD() {
 function renderizarCalendario(mes, anio) {
     const contenedorDias = document.getElementById("days-grid");
     const tituloMesAnio = document.getElementById("month-year-title");
+    const contadorActividades = document.querySelector("#calendar-activity-count .calendar-activity-count__number");
     
     contenedorDias.innerHTML = ""; 
     tituloMesAnio.innerText = `${meses[mes]} ${anio}`;
+    const actividadesDelMes = actividadesDesdeBD.filter(act => {
+        const fecha = String(act.fecha || "").trim().slice(0, 10);
+        return fecha.startsWith(`${anio}-${String(mes + 1).padStart(2, "0")}-`);
+    });
+    if (contadorActividades) {
+        contadorActividades.textContent = actividadesDelMes.length;
+    }
 
     const primerDiaIndex = new Date(anio, mes, 1).getDay();
     const totalDiasMes = new Date(anio, mes + 1, 0).getDate();
@@ -88,15 +96,34 @@ function renderizarCalendario(mes, anio) {
     
     for (let dia = 1; dia <= totalDiasMes; dia++) {
         const celdaDia = document.createElement("div");
-        celdaDia.innerText = dia;
+        const numeroDia = document.createElement("span");
+        numeroDia.className = "calendar-day-number";
+        numeroDia.textContent = dia;
+        celdaDia.appendChild(numeroDia);
 
         const mesFormateado = String(mes + 1).padStart(2, '0');
         const diaFormateado = String(dia).padStart(2, '0');
         const fechaString = `${anio}-${mesFormateado}-${diaFormateado}`;
 
-        const actividadesDelDia = actividadesDesdeBD.filter(act => act.fecha === fechaString);
+        const actividadesDelDia = actividadesDesdeBD.filter(act =>
+            String(act.fecha || "").trim().slice(0, 10) === fechaString
+        );
         if (actividadesDelDia.length > 0) {
             celdaDia.classList.add("has-activity"); 
+            const contadorDia = document.createElement("span");
+            contadorDia.className = "calendar-day-activity-count";
+            contadorDia.textContent = actividadesDelDia.length;
+            contadorDia.setAttribute("aria-label", `${actividadesDelDia.length} actividades`);
+            celdaDia.appendChild(contadorDia);
+
+            const estados = [...new Set(actividadesDelDia.map(act => {
+                const estado = String(act.estado || "pendiente").trim().toLowerCase();
+                return ["pendiente", "confirmada", "ejecutada", "cancelada"].includes(estado) ? estado : "pendiente";
+            }))];
+            const ordenEstados = ["pendiente", "confirmada", "ejecutada", "cancelada"];
+            estados.sort((a, b) => ordenEstados.indexOf(a) - ordenEstados.indexOf(b));
+            celdaDia.title = `Estados de las actividades: ${estados.join(", ")}`;
+            celdaDia.classList.add(`has-activity--${estados[0]}`);
         }
         celdaDia.addEventListener("click", () => {
             abrirModal(actividadesDelDia, fechaString);
@@ -126,7 +153,8 @@ function abrirModal(actividades, fecha) {
     const modalTitle = document.getElementById("activity-modal-title");
     if (!modal || !modalBody || !modalTitle) return;
 
-    modalTitle.innerText = `Actividades del día ${fecha}`;
+    const fechaCompleta = formatearFecha(fecha);
+    modalTitle.innerText = `Actividades del ${fechaCompleta}`;
     if (!actividades.length) {
         modalBody.innerHTML = '<p>No hay actividades registradas para este día.</p>';
     } else {
@@ -136,7 +164,7 @@ function abrirModal(actividades, fecha) {
                 <td>${act.nombre || ''}</td>
                 <td>${act.descripcion || ''}</td>
                 <td>${act.dia_semana || ''}</td>
-                <td>${act.fecha || ''}</td>
+                <td>${formatearFecha(act.fecha)}</td>
             </tr>
         `).join('');
 
@@ -159,6 +187,18 @@ function abrirModal(actividades, fecha) {
     }
 
     modal.style.display = "flex";
+}
+
+function formatearFecha(fecha) {
+    const [anio, mes, dia] = String(fecha || "").trim().slice(0, 10).split("-").map(Number);
+    if (!anio || !mes || !dia) return fecha || "";
+
+    return new Intl.DateTimeFormat("es", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC"
+    }).format(new Date(Date.UTC(anio, mes - 1, dia)));
 }
 
 function cerrarModal() {

@@ -670,6 +670,7 @@ fieldset{
     }
 
     .calendar-container {
+        position: relative;
         display: none;
         width: 100%;
         max-width: 780px;
@@ -682,11 +683,39 @@ fieldset{
         border: 1px solid #d8dee9;
     }
 
+.calendar-activity-count {
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #eef4ff;
+    color: #25346b;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.calendar-activity-count__number {
+    display: inline-flex;
+    min-width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #25346b;
+    color: #ffffff;
+    font-weight: 700;
+}
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    padding-top: 30px;
     margin-bottom: 24px;
 }
 
@@ -733,6 +762,7 @@ fieldset{
 }
 
 .days-grid div {
+    position: relative;
     min-height: 82px;
     display: flex;
     justify-content: flex-start;
@@ -748,6 +778,25 @@ fieldset{
     transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
+.calendar-day-activity-count {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    display: inline-flex;
+    min-width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #25346b;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(37, 52, 107, 0.2);
+}
+
 .days-grid div:hover {
     background: #eef4ff;
     transform: translateY(-1px);
@@ -755,16 +804,52 @@ fieldset{
 
 
 .days-grid div.has-activity {
-    background-color:#0000FF ;
-    color: white;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
     transition: transform 0.15s ease, background-color 0.2s ease;
 }
 
+.days-grid div.has-activity--pendiente {
+    background-color: #fbbf24;
+    color: #422006;
+    box-shadow: 0 2px 6px rgba(146, 64, 14, 0.3);
+}
+
+.days-grid div.has-activity--confirmada {
+    background-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+}
+
+.days-grid div.has-activity--ejecutada {
+    background-color: #22c55e;
+    color: #052e16;
+    box-shadow: 0 2px 6px rgba(21, 128, 61, 0.3);
+}
+
+.days-grid div.has-activity--cancelada {
+    background-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(185, 28, 28, 0.3);
+}
+
+.days-grid div.has-activity--pendiente:hover {
+    background-color: #f59e0b;
+}
+
+.days-grid div.has-activity--confirmada:hover {
+    background-color: #2563eb;
+}
+
+.days-grid div.has-activity--ejecutada:hover {
+    background-color: #16a34a;
+}
+
+.days-grid div.has-activity--cancelada:hover {
+    background-color: #dc2626;
+}
+
 .days-grid div.has-activity:hover {
-    background-color:#0f4bcc;
     transform: translateY(-1px);
 }
 

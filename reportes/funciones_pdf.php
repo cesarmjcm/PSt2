@@ -150,7 +150,39 @@ function valorReportePdf(array $fila, array $columna)
         }
     }
 
+    if (isset($columna['tipo']) && $columna['tipo'] === 'hora') {
+        foreach (['!H:i:s', '!H:i'] as $formato) {
+            $hora = DateTimeImmutable::createFromFormat($formato, $valor);
+            if ($hora !== false) {
+                return $hora->format('h:i A');
+            }
+        }
+    }
+
     return $valor;
+}
+
+function celdaReportePdf(array $fila, array $columna)
+{
+    if (!isset($columna['partes'])) {
+        return escaparReportePdf(valorReportePdf($fila, $columna));
+    }
+
+    $lineas = [];
+    foreach ($columna['partes'] as $parte) {
+        $valor = valorReportePdf($fila, $parte);
+        if ($valor === '—') {
+            continue;
+        }
+        $lineas[] = '<span class="etiqueta-ubicacion">' . escaparReportePdf($parte['etiqueta']) . ':</span> '
+            . escaparReportePdf($valor);
+    }
+
+    if ($lineas === []) {
+        return '—';
+    }
+
+    return implode('<br>', $lineas);
 }
 
 function generarReportePdf($titulo, array $columnas, array $filas, $nombreArchivo, $orientacion = 'landscape')
@@ -184,6 +216,7 @@ function generarReportePdf($titulo, array $columnas, array $filas, $nombreArchiv
             th { background: #25346b; color: #fff; font-weight: bold; text-align: left; }
             th, td { border: 1px solid #d8e1f3; font-size: 8px; padding: 5px; word-wrap: break-word; }
             tr:nth-child(even) td { background: #f7f8fc; }
+            .etiqueta-ubicacion { color: #62708f; }
             .sin-registros { color: #62708f; padding: 16px; text-align: center; }
             footer { border-top: 1px solid #d8e1f3; color: #62708f; font-size: 7px; margin-top: 18px; padding-top: 6px; text-align: center; }
         </style>
@@ -216,7 +249,7 @@ function generarReportePdf($titulo, array $columnas, array $filas, $nombreArchiv
                     <?php foreach ($filas as $fila): ?>
                         <tr>
                             <?php foreach ($columnas as $columna): ?>
-                                <td><?php echo escaparReportePdf(valorReportePdf($fila, $columna)); ?></td>
+                                <td><?php echo celdaReportePdf($fila, $columna); ?></td>
                             <?php endforeach; ?>
                         </tr>
                     <?php endforeach; ?>

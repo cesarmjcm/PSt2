@@ -26,7 +26,8 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-
+create database red_bibliotecas;
+use red_bibliotecas;
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_solicitud` int(10) DEFAULT NULL,
@@ -34,6 +35,7 @@ CREATE TABLE `actividad` (
   `id_espacio_cultural` int(11) DEFAULT NULL,
   `nombre` varchar(30) NOT NULL,
   `id_tipo_actividad` int(10) NOT NULL,
+  `id_nivel_impacto` int(10) DEFAULT NULL,
   `descripcion` text NOT NULL,
   `objetivo` varchar(50) NOT NULL,
   `participantes` int(5) NOT NULL,
@@ -41,9 +43,10 @@ CREATE TABLE `actividad` (
   `hora` time DEFAULT NULL,
   `dia_semana` text NOT NULL,
   `estado` enum('pendiente','confirmada','ejecutada','cancelada') NOT NULL DEFAULT 'pendiente',
-  `responsable` varchar(100) DEFAULT NULL,
+  `responsable` int(10) DEFAULT NULL,
   `telefono_responsable` varchar(20) DEFAULT NULL,
-  `id_asignacion` int(10) DEFAULT NULL
+  `id_parroquia` int(10) DEFAULT NULL,
+  `id_comuna` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -118,7 +121,6 @@ CREATE TABLE `actividad_espaciocultural` (
 
 CREATE TABLE `asignacion` (
   `id` int(10) NOT NULL,
-  `id_empleado` int(10) NOT NULL,
   `id_cargo` int(11) NOT NULL,
   `id_biblioteca` int(10) NOT NULL,
   `fecha_desde` date DEFAULT NULL,
@@ -157,7 +159,11 @@ CREATE TABLE `biblioteca` (
 
 INSERT INTO `biblioteca` (`id`, `nombre`, `id_parroquia`, `Correo`, `redes_sociales`, `Direccion`, `id_solicitud_actividad`) VALUES
 (15, 'biblioteca', 54, 'cesarmcontre28@gmail.com', 'cesarm2', 'calle 4', NULL),
-(16, 'Felix Pifano', 47, '', '', '', NULL);
+(16, 'Felix Pifano', 47, '', '', '', NULL),
+(17, 'Oswaldo Méndez', 64, '', '', '', NULL),
+(18, 'Rómulo Gallegos', 62, '', '', '', NULL),
+(19, 'Rubén Suárez Moreno', 49, '', '', '', NULL),
+(20, 'Domingo Oviedo Parada', 67, '', '', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -317,7 +323,119 @@ CREATE TABLE `comuna` (
 --
 
 INSERT INTO `comuna` (`id`, `nombre`, `id_parroquia`) VALUES
-(8, 'comuna', 54);
+(105, 'AGRICOLA VOCES DEL CAMPO', 54),
+(41, 'AGRO ECOLOGICA TURISTICA GENER', 62),
+(44, 'AGRO INDUSTRIAL TURISTICA GENE', 61),
+(92, 'AGROPRODUCTIVA CARACARO BICENT', 46),
+(95, 'AGROPRODUCTIVA SEMBRANDO EN RE', 46),
+(91, 'AGROPRODUCTIVA ZONA SUR 5 DE M', 46),
+(64, 'AGROSOCIALISTA BOLIVAR Y CHAVE', 66),
+(43, 'AGROTURISTICA EL ESFUERZO Y LA', 62),
+(36, 'ANGEL RAFAEL GONZALEZ', 62),
+(38, 'CERRO AZUL TRONCAL 11', 62),
+(118, 'CHE GUEVARA LEGENDARIO SOCIALI', 52),
+(8, 'comuna', 54),
+(17, 'COMUNA SOCIALISTA AGROPRODUCTI', 55),
+(21, 'COMUNA SOCIALISTA PRODUCTIVA M', 55),
+(74, 'COMUNA SOCIALISTA PRODUCTIVA N', 64),
+(109, 'COMUNA SOCIALISTA PRODUCTIVA S', 60),
+(80, 'COMUNA SOCIALISTA PRODUCTIVA S', 65),
+(112, 'COMUNA SOCIALISTA Y PRODUCTIVA', 60),
+(47, 'ECOLOGICA JORGE RODRIGUEZ EJE', 47),
+(86, 'ECOSOCIALISTA BUENA VISTA', 59),
+(94, 'ECOSOCIALISTA CAMPAÑA ADMIRABL', 46),
+(96, 'ECOSOCIALISTA CORAZON DE MI PA', 46),
+(102, 'EDUCATIVA PRODUCTIVA ECOTURIST', 57),
+(52, 'EJE GUAYABAL', 47),
+(24, 'HIJOS DE CHAVEZ', 49),
+(12, 'LA NUEVA UNION DE LAS CUMARAGU', 55),
+(81, 'LA UNION DE LOS PUEBLOS SOCIAL', 65),
+(34, 'NIRGUA PRODUCTIVA', 62),
+(78, 'PRODUCTIVA FRANCISCO DE MIRAND', 64),
+(79, 'PRODUCTIVA SEGUIREMOS TENIENDO', 64),
+(16, 'PRODUCTIVA SOCIALISTA CHAVEZ P', 55),
+(115, 'PUEBLO TIERRA Y HOMBRES LIBRES', 53),
+(119, 'ROBERT SERRA', 52),
+(20, 'SIERRA AZUL CARABOBO', 55),
+(11, 'SOCIALISTA 12 DE ABRIL', 55),
+(61, 'SOCIALISTA 12 DE OCTUBRE', 66),
+(23, 'SOCIALISTA AGRARIA ENDOGENA EC', 49),
+(37, 'SOCIALISTA AGRICOLA LEGUMINOSA', 62),
+(110, 'SOCIALISTA AGRICOLA TURISTICA', 60),
+(46, 'SOCIALISTA AGROECOLOGICA SIMON', 47),
+(33, 'SOCIALISTA AGROECOLOGICA TURIS', 62),
+(55, 'SOCIALISTA AGROECOLOGICA YURUB', 3),
+(25, 'SOCIALISTA AGROPECUARIA MARIA', 49),
+(57, 'SOCIALISTA AGROPRODUCTIVA AURA', 3),
+(59, 'SOCIALISTA AGROPRODUCTIVA CIMA', 48),
+(58, 'SOCIALISTA AGROPRODUCTIVA ECOL', 48),
+(13, 'SOCIALISTA AGROPRODUCTIVA EJE', 55),
+(18, 'SOCIALISTA AGROPRODUCTIVA RIO', 55),
+(82, 'SOCIALISTA AGROTURISTICA ECOLO', 58),
+(26, 'SOCIALISTA AGROTURISTICA INDUS', 49),
+(117, 'SOCIALISTA AGROTURISTICA RIO T', 52),
+(62, 'SOCIALISTA AGROTURISTICA Y PRO', 66),
+(70, 'SOCIALISTA AGUA LINDA', 64),
+(66, 'SOCIALISTA ALI PRIMERA', 67),
+(15, 'SOCIALISTA ALIANZA CAMPESINA', 55),
+(45, 'SOCIALISTA AMBROCIO PEREIRA', 63),
+(10, 'SOCIALISTA ARBOL DE LAS TRES R', 55),
+(68, 'SOCIALISTA CAMUNARE ROJO', 67),
+(84, 'SOCIALISTA CENTAUROS DE PAEZ', 58),
+(50, 'SOCIALISTA CIUDADELA COMANDANT', 47),
+(73, 'SOCIALISTA COMANDANTE SUPREMO', 64),
+(54, 'SOCIALISTA CULTURAL AGROPRODUC', 3),
+(77, 'SOCIALISTA DIOS ES MI AMIGO', 64),
+(56, 'SOCIALISTA DR. JUAN JOSE DE MA', 3),
+(69, 'SOCIALISTA ECOLOGICA LINA RON', 64),
+(120, 'SOCIALISTA EL GUAYABO', 52),
+(63, 'SOCIALISTA EL RENACER DEL TIMO', 66),
+(103, 'SOCIALISTA EMPRENDEDORES DEL G', 57),
+(101, 'SOCIALISTA FERMIN ABDOM RAMIRE', 57),
+(90, 'SOCIALISTA FORJADORES DE LA PA', 59),
+(32, 'SOCIALISTA GUERREROS DE LA MON', 62),
+(40, 'SOCIALISTA GUERREROS JIRAHARA', 62),
+(85, 'SOCIALISTA INDEPENDENCIA 18 DE', 59),
+(100, 'SOCIALISTA INDEPENDENCIA Y PAT', 57),
+(116, 'SOCIALISTA JOSE JOAQUIN VEROES', 53),
+(97, 'SOCIALISTA JUAN MILLA', 46),
+(89, 'SOCIALISTA LA SABANA DE PALITO', 59),
+(113, 'SOCIALISTA LOS CAÑIZOS PALO QU', 53),
+(39, 'SOCIALISTA MANUEL CEDEÑO', 62),
+(19, 'SOCIALISTA MARIA MIRANDA', 55),
+(48, 'SOCIALISTA MARIA VALENTINA PIN', 47),
+(28, 'SOCIALISTA MAXIMO VIZCAYA', 56),
+(14, 'SOCIALISTA MELECIO TORRES', 55),
+(42, 'SOCIALISTA NEGRO MIGUEL DE BUR', 62),
+(104, 'SOCIALISTA PETRA BETANCOURT', 54),
+(60, 'SOCIALISTA POPULAR Y CHAVISTA', 48),
+(29, 'SOCIALISTA PRODUCTIVA AGROENDO', 56),
+(30, 'SOCIALISTA PRODUCTIVA DOMINGO', 56),
+(107, 'SOCIALISTA PRODUCTIVA FERROCAR', 60),
+(83, 'SOCIALISTA PRODUCTIVA TIERRAS', 58),
+(65, 'SOCIALISTA PRODUCTORAS Y PRODU', 66),
+(114, 'SOCIALISTA PUEBLOS UNIDOS SIMO', 53),
+(22, 'SOCIALISTA ROSA LUXEMBURGO', 49),
+(53, 'SOCIALISTA SAN FELIPE EL FUERT', 47),
+(35, 'SOCIALISTA SANTANA OCHOA', 62),
+(9, 'SOCIALISTA SIERRA NUBLADA', 55),
+(49, 'SOCIALISTA SIMON TORRES', 47),
+(106, 'SOCIALISTA SOBERANOS DE LA PAT', 54),
+(27, 'SOCIALISTA SOCIOPRODUCTIVA TRO', 49),
+(88, 'SOCIALISTA TRINIDAD VICTORIOSO', 59),
+(87, 'SOCIALISTA UN NUEVO RENACER 20', 59),
+(51, 'SOCIALISTA UNIDAD LUCHA BATALL', 47),
+(67, 'SOCIALISTA URACHICHEÑA HUGO RA', 67),
+(72, 'SOCIALISTA URIMIQUIRE', 64),
+(98, 'SOCIALISTA VENCEDORES Y VENCED', 46),
+(99, 'SOCIALISTA WILLIAM LARA VIVE', 57),
+(111, 'SOCIALISTA Y PRODUCTIVA JOSE F', 60),
+(108, 'SOCIALISTA Y PRODUCTIVA MANUEL', 60),
+(93, 'SOCIOPRODUCTIVA 7 RAICES CECIL', 46),
+(76, 'SOCIOPRODUCTIVA CHAVEZ VIVE', 64),
+(71, 'SOCIOPRODUCTIVA MUJERES BICENT', 64),
+(31, 'SOCIOPRODUCTIVA NEGRA MATEA', 56),
+(75, 'SOCIOPRODUCTIVA VALEROSO PEÑA', 64);
 
 -- --------------------------------------------------------
 
@@ -348,7 +466,8 @@ INSERT INTO `empleado` (`id`, `nombre`, `apellido`, `cedula`, `telefono`, `gener
 (13, 'jesus', 'serrano', 31982637, '04125240489', 'M', 1, 0, 1, 15, NULL, NULL),
 (15, 'jesus', 'soto', 32435607, '04125240489', '', 0, 0, 1, 15, NULL, NULL),
 (27, 'freddy', 'espinoza', 32626427, '04145058143', 'M', 20, 1, 1, 15, '2026-10-03', '2026-10-03'),
-(28, 'cesar', 'ontreras', 31982333, '04127168235', 'M', 20, 18, 1, 16, '2026-10-04', NULL);
+(28, 'cesar', 'ontreras', 31982333, '04127168235', 'M', 20, 18, 1, 16, '2026-10-04', NULL),
+(29, 'maria', 'narvaez', 15964066, '04261181304', 'M', 30, 7, 1, 16, '2019-02-10', NULL);
 
 -- --------------------------------------------------------
 
@@ -371,30 +490,6 @@ CREATE TABLE `espacio_cultural` (
 INSERT INTO `espacio_cultural` (`id`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`) VALUES
 (4, 'tu casa', 6, 'independencia', ''),
 (5, 'mi casa', 10, 'independencia', 'mi casa');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `impacto_actividad`
---
-
-CREATE TABLE `impacto_actividad` (
-  `id` int(10) NOT NULL,
-  `id_impacto` int(10) NOT NULL,
-  `id_actividad` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Volcado de datos para la tabla `impacto_actividad`
---
-
-INSERT INTO `impacto_actividad` (`id`, `id_impacto`, `id_actividad`) VALUES
-(1, 3, 9),
-(3, 3, 28),
-(11, 3, 27),
-(12, 3, 30),
-(13, 3, 32),
-(21, 3, 35);
 
 -- --------------------------------------------------------
 
@@ -468,7 +563,8 @@ CREATE TABLE `nivel_impacto` (
 INSERT INTO `nivel_impacto` (`id`, `nombre_impacto`) VALUES
 (3, 'Comunal'),
 (4, 'estadal'),
-(5, 'municipal');
+(5, 'municipal'),
+(6, 'nacional');
 
 -- --------------------------------------------------------
 
@@ -543,7 +639,7 @@ CREATE TABLE `solicitud` (
   `fecha_registro` datetime NOT NULL DEFAULT current_timestamp(),
   `hora_solicitud` time NOT NULL,
   `lugar` varchar(100) NOT NULL,
-  `responsable` varchar(50) NOT NULL,
+  `responsable` int(10) NOT NULL,
   `participantes` int(10) NOT NULL DEFAULT 0,
   `descripcion` varchar(250) NOT NULL,
   `estado` enum('pendiente','aprobada','rechazada','cancelada') NOT NULL DEFAULT 'pendiente'
@@ -576,22 +672,6 @@ INSERT INTO `tipo_actividad` (`id`, `nombre`, `Descripcion`) VALUES
 (4, 'eduativa', '0004'),
 (5, 'educativa', ''),
 (8, 'hola', '');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `ubicacion`
---
-
-CREATE TABLE `ubicacion` (
-  `id` int(10) NOT NULL,
-  `id_comuna` int(10) NOT NULL,
-  `id_parroquia` int(10) NOT NULL,
-  `id_municipio` int(10) NOT NULL,
-  `nombre_comuna` varchar(20) NOT NULL,
-  `nombre_parroquia` varchar(20) NOT NULL,
-  `nombre_municipio` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -630,23 +710,10 @@ ALTER TABLE `actividad`
   ADD KEY `id_biblioteca` (`id_biblioteca`),
   ADD KEY `id_espacio_cultural` (`id_espacio_cultural`),
   ADD KEY `id_tipo_actividad` (`id_tipo_actividad`),
-  ADD KEY `id_asignacion` (`id_asignacion`);
-
---
--- Indices de la tabla `actividad_comuna`
---
-ALTER TABLE `actividad_comuna`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_comuna` (`id_comuna`),
-  ADD KEY `id_actividad` (`id_actividad`);
-
---
--- Indices de la tabla `actividad_espaciocultural`
---
-ALTER TABLE `actividad_espaciocultural`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_actividad` (`id_actividad`,`id_biblioteca`),
-  ADD KEY `actividad_espaciocultural_ibfk_1` (`id_biblioteca`);
+  ADD KEY `actividad_ibfk_nivel` (`id_nivel_impacto`),
+  ADD KEY `actividad_ibfk_responsable` (`responsable`),
+  ADD KEY `actividad_ibfk_parroquia` (`id_parroquia`),
+  ADD KEY `actividad_ibfk_comuna` (`id_comuna`);
 
 --
 -- Indices de la tabla `asignacion`
@@ -654,8 +721,7 @@ ALTER TABLE `actividad_espaciocultural`
 ALTER TABLE `asignacion`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_biblioteca` (`id_biblioteca`),
-  ADD KEY `id_cargo` (`id_cargo`),
-  ADD KEY `id_empleado` (`id_empleado`);
+  ADD KEY `id_cargo` (`id_cargo`);
 
 --
 -- Indices de la tabla `biblioteca`
@@ -706,14 +772,6 @@ ALTER TABLE `espacio_cultural`
   ADD UNIQUE KEY `uq_espacio_cultural_nombre` (`nombre`);
 
 --
--- Indices de la tabla `impacto_actividad`
---
-ALTER TABLE `impacto_actividad`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_impacto` (`id_impacto`),
-  ADD KEY `id_actividad` (`id_actividad`);
-
---
 -- Indices de la tabla `institucion`
 --
 ALTER TABLE `institucion`
@@ -749,22 +807,14 @@ ALTER TABLE `parroquia`
 ALTER TABLE `solicitud`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_institucion` (`id_institucion`),
-  ADD KEY `idx_solicitud_id_biblioteca` (`id_biblioteca`);
+  ADD KEY `idx_solicitud_id_biblioteca` (`id_biblioteca`),
+  ADD KEY `solicitud_ibfk_responsable` (`responsable`);
 
 --
 -- Indices de la tabla `tipo_actividad`
 --
 ALTER TABLE `tipo_actividad`
   ADD PRIMARY KEY (`id`);
-
---
--- Indices de la tabla `ubicacion`
---
-ALTER TABLE `ubicacion`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_comuna` (`id_comuna`),
-  ADD KEY `id_parroquia` (`id_parroquia`),
-  ADD KEY `id_municipio` (`id_municipio`);
 
 --
 -- Indices de la tabla `usuario`
@@ -806,7 +856,7 @@ ALTER TABLE `asignacion`
 -- AUTO_INCREMENT de la tabla `biblioteca`
 --
 ALTER TABLE `biblioteca`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `bitacora`
@@ -824,25 +874,19 @@ ALTER TABLE `cargo`
 -- AUTO_INCREMENT de la tabla `comuna`
 --
 ALTER TABLE `comuna`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- AUTO_INCREMENT de la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT de la tabla `espacio_cultural`
 --
 ALTER TABLE `espacio_cultural`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT de la tabla `impacto_actividad`
---
-ALTER TABLE `impacto_actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `institucion`
@@ -860,7 +904,7 @@ ALTER TABLE `municipio`
 -- AUTO_INCREMENT de la tabla `nivel_impacto`
 --
 ALTER TABLE `nivel_impacto`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `parroquia`
@@ -872,7 +916,7 @@ ALTER TABLE `parroquia`
 -- AUTO_INCREMENT de la tabla `solicitud`
 --
 ALTER TABLE `solicitud`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_actividad`
@@ -897,23 +941,18 @@ ALTER TABLE `actividad`
   ADD CONSTRAINT `actividad_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
   ADD CONSTRAINT `actividad_ibfk_2` FOREIGN KEY (`id_espacio_cultural`) REFERENCES `espacio_cultural` (`id`),
   ADD CONSTRAINT `actividad_ibfk_3` FOREIGN KEY (`id_tipo_actividad`) REFERENCES `tipo_actividad` (`id`),
-  ADD CONSTRAINT `actividad_ibfk_4` FOREIGN KEY (`id_asignacion`) REFERENCES `asignacion` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `actividad_ibfk_comuna` FOREIGN KEY (`id_comuna`) REFERENCES `comuna` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `actividad_ibfk_nivel` FOREIGN KEY (`id_nivel_impacto`) REFERENCES `nivel_impacto` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `actividad_ibfk_parroquia` FOREIGN KEY (`id_parroquia`) REFERENCES `parroquia` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `actividad_ibfk_responsable` FOREIGN KEY (`responsable`) REFERENCES `empleado` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_solicitud` FOREIGN KEY (`id_solicitud`) REFERENCES `solicitud` (`id`) ON DELETE SET NULL;
-
---
--- Filtros para la tabla `actividad_comuna`
---
-ALTER TABLE `actividad_comuna`
-  ADD CONSTRAINT `actividad_comuna_ibfk_1` FOREIGN KEY (`id_actividad`) REFERENCES `actividad` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `actividad_comuna_ibfk_2` FOREIGN KEY (`id_comuna`) REFERENCES `comuna` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `asignacion`
 --
 ALTER TABLE `asignacion`
   ADD CONSTRAINT `asignacion_ibfk_1` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
-  ADD CONSTRAINT `asignacion_ibfk_2` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`),
-  ADD CONSTRAINT `asignacion_ibfk_3` FOREIGN KEY (`id_empleado`) REFERENCES `empleado` (`id`);
+  ADD CONSTRAINT `asignacion_ibfk_2` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`);
 
 --
 -- Filtros para la tabla `biblioteca`
@@ -952,7 +991,8 @@ ALTER TABLE `institucion`
 --
 ALTER TABLE `solicitud`
   ADD CONSTRAINT `solicitud_ibfk_1` FOREIGN KEY (`id_institucion`) REFERENCES `institucion` (`id`),
-  ADD CONSTRAINT `solicitud_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`);
+  ADD CONSTRAINT `solicitud_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`),
+  ADD CONSTRAINT `solicitud_ibfk_responsable` FOREIGN KEY (`responsable`) REFERENCES `empleado` (`id`);
 
 --
 -- Filtros para la tabla `usuario`

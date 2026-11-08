@@ -35,7 +35,7 @@ if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - Red de Bibliotecas</title>
-    <link rel="stylesheet" href="./css/main2.css?v=4">
+    <link rel="stylesheet" href="./css/main2.css?v=10">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>

@@ -5,13 +5,20 @@ class Espacio {
 
     public function mostrarEspacios() {
         $sql = "SELECT
-        id,
-        nombre,
-        capacidad,
-        direccion,
-        Metodo_contactar AS metodo_contactar
-    FROM espacio_cultural
-    ORDER BY nombre";
+        ec.id,
+        ec.nombre,
+        ec.capacidad,
+        ec.direccion,
+        ec.Metodo_contactar AS metodo_contactar,
+        ec.id_parroquia,
+        p.id_municipio,
+        p.nombre AS id_parroquia_nombre,
+        ec.id_comuna,
+        c.nombre AS id_comuna_nombre
+    FROM espacio_cultural ec
+    LEFT JOIN parroquia p ON p.id = ec.id_parroquia
+    LEFT JOIN comuna c ON c.id = ec.id_comuna
+    ORDER BY ec.nombre";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -37,16 +44,23 @@ class Espacio {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearEspacio(string $nombre, int $capacidad, string $direccion, string $metodo_contactar = '') {
-        $sql = "INSERT INTO espacio_cultural (nombre, capacidad, direccion, Metodo_contactar) VALUES (?, ?, ?, ?)";
+    public function ubicacionValida(int $idParroquia, int $idComuna): bool {
+        $sql = "SELECT id FROM comuna WHERE id = ? AND id_parroquia = ? LIMIT 1";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $capacidad, $direccion, $metodo_contactar]);
+        $stmt->execute([$idComuna, $idParroquia]);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function actualizarEspacio(int $id, string $nombre, int $capacidad, string $direccion, string $metodo_contactar = '') {
-        $sql = "UPDATE espacio_cultural SET nombre = ?, capacidad = ?, direccion = ?, Metodo_contactar = ? WHERE id = ?";
+    public function crearEspacio(string $nombre, int $capacidad, string $direccion, string $metodo_contactar, int $idParroquia, int $idComuna) {
+        $sql = "INSERT INTO espacio_cultural (nombre, capacidad, direccion, Metodo_contactar, id_parroquia, id_comuna) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
-        return $stmt->execute([$nombre, $capacidad, $direccion, $metodo_contactar, $id]);
+        return $stmt->execute([$nombre, $capacidad, $direccion, $metodo_contactar, $idParroquia, $idComuna]);
+    }
+
+    public function actualizarEspacio(int $id, string $nombre, int $capacidad, string $direccion, string $metodo_contactar, int $idParroquia, int $idComuna) {
+        $sql = "UPDATE espacio_cultural SET nombre = ?, capacidad = ?, direccion = ?, Metodo_contactar = ?, id_parroquia = ?, id_comuna = ? WHERE id = ?";
+        $stmt = Conexion::conectar()->prepare($sql);
+        return $stmt->execute([$nombre, $capacidad, $direccion, $metodo_contactar, $idParroquia, $idComuna, $id]);
     }
 
     public function eliminarEspacio(int $id) {

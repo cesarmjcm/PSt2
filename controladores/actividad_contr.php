@@ -335,7 +335,7 @@ class ActividadController
             return 'El empleado responsable seleccionado ya no existe.';
         }
 
-        $data['responsable'] = trim((string)($empleado['nombre'] ?? '') . ' ' . (string)($empleado['apellido'] ?? ''));
+        $data['responsable'] = (string)(int)$idEmpleado; // ahora se guarda el id del empleado
         $data['telefono_responsable'] = trim((string)($empleado['telefono'] ?? ''));
         return null;
     }

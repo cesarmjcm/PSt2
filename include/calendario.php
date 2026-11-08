@@ -5,6 +5,10 @@
 
 
     <div class="calendar-container">
+        <div id="calendar-activity-count" class="calendar-activity-count" aria-live="polite">
+            <span class="calendar-activity-count__number">0</span>
+            <span>actividades</span>
+        </div>
         <div class="calendar-header">
             <button id="prev-month" class="nav-btn">&#10094;</button>
             <h2 id="month-year-title">Cargando mes...</h2>
