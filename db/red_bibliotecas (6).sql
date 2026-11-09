@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-11-2026 a las 02:56:41
+-- Tiempo de generación: 09-11-2026 a las 15:59:36
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -26,8 +26,7 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-create database red_bibliotecas;
-use red_bibliotecas;
+
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_solicitud` int(10) DEFAULT NULL,
@@ -53,65 +52,21 @@ CREATE TABLE `actividad` (
 -- Volcado de datos para la tabla `actividad`
 --
 
-INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `telefono_responsable`, `id_asignacion`) VALUES
-(23, NULL, 15, 5, 'Biblioteca 1', 4, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 'jesus serrano', '2147483647', NULL),
-(24, NULL, 15, 5, 'zona2', 4, '2', 'carlos', 222, '2026-08-12', NULL, 'Miércoles', 'confirmada', 'jesus serrano', '2147483647', NULL),
-(27, NULL, 15, NULL, 'Arístides Bastidas', 5, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 'jesus soto', '04125240489', NULL),
-(28, NULL, 15, NULL, 'Arístides Bastidas', 5, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 'jesus soto', '2147483647', NULL),
-(29, NULL, NULL, 5, 'hola', 5, 'cosas', 'No definido', 0, '2026-08-19', '13:16:00', 'Miércoles', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(30, NULL, 15, NULL, 'juego de ajedrez', 5, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(31, NULL, 15, NULL, 'Arístides Bastidas', 5, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(33, NULL, 15, NULL, 'Juego de Ajedrez', 5, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(34, NULL, 15, NULL, 'Juego de Ajedrez', 5, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(35, NULL, 15, NULL, 'juego de mesa', 4, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 'jesus soto', '04125240489', NULL),
-(36, NULL, 15, NULL, 'biblioteca', 5, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 'jesus serrano', '04125240489', NULL),
-(37, NULL, 15, NULL, 'juego de mesa', 5, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 'cesar ontreras', '04127168235', NULL),
-(38, NULL, 16, NULL, 'Felix Pifano', 5, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 'cesar ontreras', '04127168235', NULL),
-(39, NULL, 16, NULL, 'juego de ajedrez', 5, '1', 'No definido', 100, '2026-11-30', '14:16:00', 'Lunes', 'pendiente', 'cesar ontreras', '04127168235', NULL);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `actividad_comuna`
---
-
-CREATE TABLE `actividad_comuna` (
-  `id` int(10) NOT NULL,
-  `id_comuna` int(10) NOT NULL,
-  `id_actividad` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Volcado de datos para la tabla `actividad_comuna`
---
-
-INSERT INTO `actividad_comuna` (`id`, `id_comuna`, `id_actividad`) VALUES
-(16, 8, 23),
-(17, 8, 24),
-(20, 8, 28),
-(28, 8, 27),
-(29, 8, 29),
-(30, 8, 30),
-(31, 8, 31),
-(33, 8, 32),
-(34, 8, 33),
-(35, 8, 34),
-(43, 8, 36),
-(44, 8, 35),
-(45, 8, 37);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `actividad_espaciocultural`
---
-
-CREATE TABLE `actividad_espaciocultural` (
-  `id` int(10) NOT NULL,
-  `id_actividad` int(10) NOT NULL,
-  `id_biblioteca` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `id_nivel_impacto`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `telefono_responsable`, `id_parroquia`, `id_comuna`) VALUES
+(23, NULL, 15, 5, 'Biblioteca 1', 4, NULL, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 13, '2147483647', NULL, NULL),
+(27, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 15, '04125240489', NULL, NULL),
+(28, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 15, '2147483647', NULL, NULL),
+(30, NULL, 15, NULL, 'juego de ajedrez', 5, 3, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 13, '04125240489', NULL, NULL),
+(31, NULL, 15, NULL, 'Arístides Bastidas', 5, NULL, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 3, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(33, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(34, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 13, '04125240489', NULL, NULL),
+(35, NULL, 15, NULL, 'juego de mesa', 4, 3, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 15, '04125240489', NULL, NULL),
+(36, NULL, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
+(37, NULL, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, '04127168235', NULL, NULL),
+(38, NULL, 16, NULL, 'Felix Pifano', 5, 6, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 28, '04127168235', 52, 118),
+(39, NULL, NULL, 5, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, '04125240489', 54, 105),
+(40, NULL, 15, NULL, 'juego de metras', 5, NULL, 'cosas', 'No definido', 0, '2026-11-03', '10:00:00', 'Martes', 'confirmada', 28, '04127168235', 54, 8);
 
 -- --------------------------------------------------------
 
@@ -126,16 +81,6 @@ CREATE TABLE `asignacion` (
   `fecha_desde` date DEFAULT NULL,
   `fecha_hasta` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `asignacion`
---
-
-INSERT INTO `asignacion` (`id`, `id_empleado`, `id_cargo`, `id_biblioteca`, `fecha_desde`, `fecha_hasta`) VALUES
-(1, 13, 1, 15, NULL, NULL),
-(2, 15, 1, 15, NULL, NULL),
-(3, 27, 1, 15, '2026-10-03', '2026-10-03'),
-(4, 28, 1, 16, '2026-10-04', NULL);
 
 -- --------------------------------------------------------
 
@@ -283,9 +228,41 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (94, 'Miercoles', '2026-10-07', '16:25:03', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
 (95, 'Miercoles', '2026-10-28', '10:35:57', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
 (96, 'Miercoles', '2026-10-28', '10:36:58', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
-(97, 'Domingo', '2026-11-01', '21:51:56', 11, 'Editar', 'Solicitud', 'Solicitud #2 actualizada'),
-(98, 'Domingo', '2026-11-01', '21:52:14', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de ajedrez'),
-(99, 'Domingo', '2026-11-01', '21:55:55', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/index.php');
+(97, 'Sabado', '2026-10-31', '11:30:28', 11, 'Crear', 'Solicitud', 'Solicitud registrada para institución #1'),
+(98, 'Sabado', '2026-10-31', '11:31:17', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de metras'),
+(99, 'Sabado', '2026-10-31', '11:34:00', 11, 'Crear', 'Empleado', 'Empleado registrado: maria narvaez'),
+(100, 'Viernes', '2026-11-06', '15:54:23', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(101, 'Viernes', '2026-11-06', '15:55:51', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(102, 'Viernes', '2026-11-06', '16:01:02', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(103, 'Viernes', '2026-11-06', '16:03:28', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(104, 'Viernes', '2026-11-06', '16:32:50', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(105, 'Viernes', '2026-11-06', '16:33:08', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(106, 'Viernes', '2026-11-06', '16:55:31', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(107, 'Viernes', '2026-11-06', '16:55:45', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(108, 'Viernes', '2026-11-06', '17:07:20', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(109, 'Viernes', '2026-11-06', '19:32:09', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(110, 'Viernes', '2026-11-06', '19:42:33', 11, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(111, 'Viernes', '2026-11-06', '19:57:31', 11, 'Eliminar', 'Actividad', 'Actividad #24 eliminada'),
+(112, 'Viernes', '2026-11-06', '19:57:36', 11, 'Eliminar', 'Actividad', 'Actividad #29 eliminada'),
+(113, 'Viernes', '2026-11-06', '19:58:43', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Oswaldo Méndez'),
+(114, 'Viernes', '2026-11-06', '19:59:26', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Rómulo Gallegos'),
+(115, 'Viernes', '2026-11-06', '20:00:29', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Rubén Suárez Moreno'),
+(116, 'Viernes', '2026-11-06', '20:01:35', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Domingo Oviedo Parada'),
+(117, 'Sabado', '2026-11-07', '23:37:04', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/index.php'),
+(118, 'Sabado', '2026-11-07', '23:41:25', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(119, 'Sabado', '2026-11-07', '23:46:05', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/index.php'),
+(120, 'Sabado', '2026-11-07', '23:46:50', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(121, 'Sabado', '2026-11-07', '23:47:32', 11, 'Editar', 'Espacio cultural', 'Espacio cultural #5 actualizado: mi casa'),
+(122, 'Sabado', '2026-11-07', '23:47:50', 11, 'Editar', 'Actividad', 'Actividad #39 actualizada: juego de metras'),
+(123, 'Domingo', '2026-11-08', '00:01:31', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php'),
+(124, 'Domingo', '2026-11-08', '00:02:20', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php?accion=obtener_actividades'),
+(125, 'Domingo', '2026-11-08', '00:07:41', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php'),
+(126, 'Domingo', '2026-11-08', '13:25:59', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/index.php'),
+(127, 'Domingo', '2026-11-08', '13:26:00', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(128, 'Domingo', '2026-11-08', '13:27:40', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de metras'),
+(129, 'Domingo', '2026-11-08', '13:38:56', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php'),
+(130, 'Lunes', '2026-11-09', '10:58:50', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php'),
+(131, 'Lunes', '2026-11-09', '10:58:52', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar');
 
 -- --------------------------------------------------------
 
@@ -480,16 +457,18 @@ CREATE TABLE `espacio_cultural` (
   `nombre` varchar(30) NOT NULL,
   `capacidad` int(10) NOT NULL,
   `direccion` varchar(30) NOT NULL,
-  `Metodo_contactar` varchar(40) NOT NULL DEFAULT ''
+  `Metodo_contactar` varchar(40) NOT NULL DEFAULT '',
+  `id_parroquia` int(10) DEFAULT NULL,
+  `id_comuna` int(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Volcado de datos para la tabla `espacio_cultural`
 --
 
-INSERT INTO `espacio_cultural` (`id`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`) VALUES
-(4, 'tu casa', 6, 'independencia', ''),
-(5, 'mi casa', 10, 'independencia', 'mi casa');
+INSERT INTO `espacio_cultural` (`id`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`, `id_parroquia`, `id_comuna`) VALUES
+(4, 'tu casa', 6, 'independencia', '', NULL, NULL),
+(5, 'mi casa', 10, 'independencia', '', 54, 105);
 
 -- --------------------------------------------------------
 
@@ -650,7 +629,8 @@ CREATE TABLE `solicitud` (
 --
 
 INSERT INTO `solicitud` (`id`, `id_institucion`, `id_biblioteca`, `nombre_actividad`, `fecha_solicitud`, `fecha_registro`, `hora_solicitud`, `lugar`, `responsable`, `participantes`, `descripcion`, `estado`) VALUES
-(2, 1, 16, 'juego de ajedrez', '2026-11-30', '2026-10-02 20:33:41', '14:16:00', 'Felix Pifano', 'cesar ontreras', 100, '1', 'aprobada');
+(2, 1, 16, 'juego de ajedrez', '2026-11-30', '2026-10-02 20:33:41', '14:16:00', 'Felix Pifano', 28, 100, '1', 'pendiente'),
+(7, 1, 15, 'juego de metras', '2026-11-03', '2026-10-31 11:30:28', '10:00:00', 'biblioteca', 13, 15, 'van a jugar metras para entender como era este juego tradicional', 'aprobada');
 
 -- --------------------------------------------------------
 
@@ -769,7 +749,9 @@ ALTER TABLE `empleado`
 --
 ALTER TABLE `espacio_cultural`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_espacio_cultural_nombre` (`nombre`);
+  ADD UNIQUE KEY `uq_espacio_cultural_nombre` (`nombre`),
+  ADD KEY `idx_espacio_cultural_parroquia` (`id_parroquia`),
+  ADD KEY `idx_espacio_cultural_comuna` (`id_comuna`);
 
 --
 -- Indices de la tabla `institucion`
@@ -832,25 +814,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
-
---
--- AUTO_INCREMENT de la tabla `actividad_comuna`
---
-ALTER TABLE `actividad_comuna`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
-
---
--- AUTO_INCREMENT de la tabla `actividad_espaciocultural`
---
-ALTER TABLE `actividad_espaciocultural`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT de la tabla `asignacion`
 --
 ALTER TABLE `asignacion`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `biblioteca`
@@ -862,7 +832,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -979,6 +949,13 @@ ALTER TABLE `comuna`
 ALTER TABLE `empleado`
   ADD CONSTRAINT `empleado_ibfk_1` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`),
   ADD CONSTRAINT `empleado_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`);
+
+--
+-- Filtros para la tabla `espacio_cultural`
+--
+ALTER TABLE `espacio_cultural`
+  ADD CONSTRAINT `espacio_cultural_ibfk_comuna` FOREIGN KEY (`id_comuna`) REFERENCES `comuna` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `espacio_cultural_ibfk_parroquia` FOREIGN KEY (`id_parroquia`) REFERENCES `parroquia` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `institucion`

@@ -45,17 +45,21 @@ try {
         text-transform: capitalize;
         white-space: nowrap;
     }
+    .badge-estado--pendiente {
+        background: #fde68a;
+        color: #78350f;
+    }
     .badge-estado--confirmada {
-        background: #e0edff;
-        color: #1d4ed8;
+        background: #bfdbfe;
+        color: #1e40af;
     }
     .badge-estado--ejecutada {
-        background: #dcfce7;
-        color: #15803d;
+        background: #bbf7d0;
+        color: #166534;
     }
     .badge-estado--cancelada {
-        background: #fee2e2;
-        color: #b91c1c;
+        background: #fecaca;
+        color: #991b1b;
     }
 </style>
 <div class="tabla__container">
@@ -111,6 +115,7 @@ try {
                                         <?php
                                             $estadoActividad = strtolower(trim((string)($actividad['estado'] ?? 'confirmada')));
                                             $estadoLabels = [
+                                                'pendiente'  => 'Pendiente',
                                                 'confirmada' => 'Confirmada',
                                                 'ejecutada'  => 'Ejecutada',
                                                 'cancelada'  => 'Cancelada',
