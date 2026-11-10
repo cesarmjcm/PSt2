@@ -296,6 +296,11 @@ function validacionesformulario(form) {
         mostrarAvisoFormulario('La comuna seleccionada no tiene un formato válido.', planComunas, avisoId);
         return false;
     }
+    // El espacio cultural queda asociado a una parroquia a través de la comuna de la actividad.
+    if (tipoUbicacion === 'espacio' && comuna === '') {
+        mostrarAvisoFormulario('Selecciona la comuna para asociar el espacio cultural a una parroquia.', planComunas, avisoId);
+        return false;
+    }
 
     // Al seleccionar un empleado se guarda su identificador en la actividad.
     const planResponsable = document.getElementById(ids.responsable);
