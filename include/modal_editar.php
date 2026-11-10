@@ -6,6 +6,7 @@ require_once __DIR__ . '/../modelos/espacio.php';
 require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../modelos/biblioteca.php';
 require_once __DIR__ . '/../modelos/tipo_actividad.php';
+require_once __DIR__ . '/../modelos/nv_act.php';
 
 $municipioModel = new Municipio();
 $comunaModel = new Comuna();
@@ -14,6 +15,7 @@ $espacioModel = new Espacio();
 $empleadoModel = new Empleado();
 $bibliotecaModel = new Biblioteca();
 $tipoActividadModel = new TipoActividad();
+$nivelImpactoModel = new NivelImpacto();
 
 $municipios = $municipioModel->mostrarMunicipios();
 $comunas = $comunaModel->mostrarComunas();
@@ -38,6 +40,7 @@ $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSe
 $empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
 $bibliotecas = $bibliotecaModel->mostrarBibliotecas($idBibliotecaUsuario);
 $tiposActividad = $tipoActividadModel->mostrarTipos();
+$nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
 ?>
 
 <section>
@@ -98,7 +101,12 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                                     <input type="number" id="editar-participantes" name="participantes" min="0" max="99999" placeholder="Ej. 25">
 
                                     <label for="editar-nivel-impacto">Nivel de impacto</label>
-                                    <input type="text" id="editar-nivel-impacto" maxlength="20" name="nivel_impacto" placeholder="Ej. Comunal, Regional, Nacional">
+                                    <select id="editar-nivel-impacto" name="nivel_impacto">
+                                        <option value="">Seleccione un nivel de impacto</option>
+                                        <?php foreach ($nivelesImpacto as $nivel): ?>
+                                            <option value="<?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </fieldset>
                             </fieldset>
 
@@ -210,11 +218,14 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
         const radiosUbicacion = document.querySelectorAll('#form-editar-actividad input[name="tipo_ubicacion"]');
         const ubicacionBiblioteca = document.getElementById('editar-ubicacion-biblioteca');
         const ubicacionEspacio = document.getElementById('editar-ubicacion-espacio');
+        let filtrarUbicaciones = () => {};
 
         function actualizarUbicacion() {
-            const esEspacio = document.getElementById('editar-tipo-ubicacion-espacio').checked;
+            const radioEspacio = document.getElementById('editar-tipo-ubicacion-espacio');
+            const esEspacio = radioEspacio !== null && radioEspacio.checked;
             ubicacionBiblioteca.classList.toggle('hidden', esEspacio);
             ubicacionEspacio.classList.toggle('hidden', !esEspacio);
+            filtrarUbicaciones();
         }
 
         radiosUbicacion.forEach(radio => radio.addEventListener('change', actualizarUbicacion));
@@ -224,17 +235,34 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
         const selectComuna = document.getElementById('editar-comuna');
         const selectBiblioteca = document.getElementById('editar-biblioteca');
         const selectEspacio = document.getElementById('editar-espacio');
+        let seleccionarEspacioGuardado = id => {
+            selectEspacio.value = String(id || '');
+        };
 
         if (selectMunicipio && selectParroquia && selectComuna) {
             const opcionesParroquias = Array.from(selectParroquia.options).slice(1);
             const opcionesComunas = Array.from(selectComuna.options).slice(1);
             const opcionesBibliotecas = Array.from(selectBiblioteca.options).slice(1);
             const opcionesEspacios = Array.from(selectEspacio.options).slice(1);
+            seleccionarEspacioGuardado = id => {
+                const idEspacio = String(id || '');
+                const opcion = opcionesEspacios.find(item => item.value === idEspacio);
+                if (!opcion) {
+                    selectEspacio.value = '';
+                    return;
+                }
+                if (!Array.from(selectEspacio.options).some(item => item.value === idEspacio)) {
+                    selectEspacio.add(opcion.cloneNode(true));
+                }
+                selectEspacio.value = idEspacio;
+            };
 
-            const filtrarUbicaciones = () => {
+            filtrarUbicaciones = () => {
                 const municipioId = selectMunicipio.value;
                 const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
                 const comunaId = (selectComuna.selectedOptions[0] && selectComuna.selectedOptions[0].dataset.id) || '';
+                const bibliotecaSeleccionada = selectBiblioteca.value;
+                const espacioSeleccionado = selectEspacio.value;
 
                 selectBiblioteca.replaceChildren(new Option('Seleccione una biblioteca', ''));
                 opcionesBibliotecas.forEach((opcion) => {
@@ -242,6 +270,9 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                         selectBiblioteca.appendChild(opcion.cloneNode(true));
                     }
                 });
+                if (Array.from(selectBiblioteca.options).some(opcion => opcion.value === bibliotecaSeleccionada)) {
+                    selectBiblioteca.value = bibliotecaSeleccionada;
+                }
 
                 selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
                 opcionesEspacios.forEach((opcion) => {
@@ -252,6 +283,9 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
                         selectEspacio.appendChild(opcion.cloneNode(true));
                     }
                 });
+                if (Array.from(selectEspacio.options).some(opcion => opcion.value === espacioSeleccionado)) {
+                    selectEspacio.value = espacioSeleccionado;
+                }
             };
 
             const filtrarParroquias = () => {
@@ -347,6 +381,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
         
         
         window.actualizarUbicacionEditar = actualizarUbicacion;
+        window.seleccionarEspacioGuardadoEditar = seleccionarEspacioGuardado;
 
         
         window.precargarFormularioEditar = function (actividad) {
@@ -366,8 +401,7 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             document.getElementById('editar-parroquia').value = (actividad.parroquia != null ? actividad.parroquia : '');
             document.getElementById('editar-parroquia').dispatchEvent(new Event('change'));
             document.getElementById('editar-comuna').value = (actividad.comuna != null ? actividad.comuna : '');
-            document.getElementById('editar-biblioteca').value = (actividad.id_biblioteca != null ? actividad.id_biblioteca : '');
-            document.getElementById('editar-espacio').value = (actividad.id_espacio_cultural != null ? actividad.id_espacio_cultural : '');
+            document.getElementById('editar-comuna').dispatchEvent(new Event('change'));
             document.getElementById('editar-tipo-actividad').value = (actividad.id_tipo_actividad != null ? actividad.id_tipo_actividad : '');
             window.seleccionarResponsableActividad(actividad.responsable, actividad.telefono_responsable);
 
@@ -375,6 +409,8 @@ $tiposActividad = $tipoActividadModel->mostrarTipos();
             document.getElementById('editar-tipo-ubicacion-' + (esEspacio ? 'espacio' : 'biblioteca')).checked = true;
 
             actualizarUbicacion();
+            document.getElementById('editar-biblioteca').value = (actividad.id_biblioteca != null ? actividad.id_biblioteca : '');
+            seleccionarEspacioGuardado(actividad.id_espacio_cultural);
         };
 
         

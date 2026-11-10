@@ -48,6 +48,10 @@ class CargoController
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede gestionar cargos.');
+            return;
+        }
 
         $nombre = trim($_POST['nombre'] ?? '');
         $descripcion = trim($_POST['descripcion'] ?? '');
@@ -102,6 +106,10 @@ class CargoController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede gestionar cargos.');
             return;
         }
 
@@ -159,6 +167,10 @@ class CargoController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede gestionar cargos.');
             return;
         }
 

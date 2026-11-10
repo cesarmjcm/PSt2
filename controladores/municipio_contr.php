@@ -48,6 +48,10 @@ class MunicipioController
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede registrar municipios.');
+            return;
+        }
 
         $nombre = trim($_POST['nombre'] ?? '');
         if ($nombre === '') {
@@ -133,6 +137,10 @@ class MunicipioController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede eliminar municipios.');
             return;
         }
 

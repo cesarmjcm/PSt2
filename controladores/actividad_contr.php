@@ -73,11 +73,15 @@ class ActividadController
                 $this->error('El usuario no tiene una biblioteca asociada.');
                 return;
             }
-            $data['id_biblioteca'] = $idBibliotecaUsuario;
+            $data['id_biblioteca'] = $data['tipo_ubicacion'] === 'biblioteca' ? $idBibliotecaUsuario : 0;
         }
         $errorResponsable = $this->completarDatosResponsable($data);
         if ($errorResponsable !== null) {
             $this->error($errorResponsable);
+            return;
+        }
+        if (!esAdministrador() && $data['tipo_ubicacion'] === 'espacio' && $data['responsable'] === '') {
+            $this->error('Seleccione un responsable de su biblioteca para una actividad en un espacio cultural.');
             return;
         }
         $errors = $this->model->validarActividad($data);
@@ -137,7 +141,7 @@ class ActividadController
         }
    
     
-        if (($_SESSION['user_rol'] ?? '') !== 'administrador') {
+        if (!esAdministrador() && !esCoordinador()) {
             $this->error('No tienes permisos para editar actividades.');
             return;
         }
@@ -147,16 +151,24 @@ class ActividadController
             return;
         }
 
-        $actual = $this->model->obtenerActividadPorId($id);
+        $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $actual = $this->model->obtenerActividadPorId($id, $idBibliotecaUsuario);
         if (!$actual) {
-            $this->error('La actividad no existe.');
+            $this->error('La actividad no existe o no pertenece a tu biblioteca.');
             return;
         }
 
         $data = $this->collectInput();
+        if (esCoordinador()) {
+            $data['id_biblioteca'] = $data['tipo_ubicacion'] === 'biblioteca' ? $idBibliotecaUsuario : 0;
+        }
         $errorResponsable = $this->completarDatosResponsable($data, $actual);
         if ($errorResponsable !== null) {
             $this->error($errorResponsable);
+            return;
+        }
+        if (esCoordinador() && $data['tipo_ubicacion'] === 'espacio' && $data['responsable'] === '') {
+            $this->error('Seleccione un responsable de su biblioteca para una actividad en un espacio cultural.');
             return;
         }
         $estadoActual = strtolower(Validador::normalizarTexto($actual['estado'] ?? 'pendiente'));

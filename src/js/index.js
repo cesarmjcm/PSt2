@@ -71,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setValue('editar-parroquia', btn.dataset.parroquia);
         if (selParroquia) selParroquia.dispatchEvent(new Event('change'));
         setValue('editar-comuna', btn.dataset.comuna);
-        setValue('editar-espacio', btn.dataset.espacio);
-        setValue('editar-biblioteca', btn.dataset.idBiblioteca);
+        const selComuna = document.getElementById('editar-comuna');
+        if (selComuna) selComuna.dispatchEvent(new Event('change'));
         setValue('editar-estado', btn.dataset.estado);
         if (typeof window.restringirEstadoActividad === 'function') {
             window.restringirEstadoActividad(btn.dataset.estado);
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         
         
-        const tieneEspacio = !!btn.dataset.espacio && btn.dataset.espacio !== '0' && !btn.dataset.idBiblioteca;
+        const tieneEspacio = !!btn.dataset.espacio && btn.dataset.espacio !== '0';
         const radioBiblioteca = document.getElementById('editar-tipo-ubicacion-biblioteca');
         const radioEspacio = document.getElementById('editar-tipo-ubicacion-espacio');
         if (tieneEspacio && radioEspacio) {
@@ -100,6 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.actualizarUbicacionEditar === 'function') {
             window.actualizarUbicacionEditar();
         }
+        if (typeof window.seleccionarEspacioGuardadoEditar === 'function') {
+            window.seleccionarEspacioGuardadoEditar(btn.dataset.espacio);
+        } else {
+            setValue('editar-espacio', btn.dataset.espacio);
+        }
+        setValue('editar-biblioteca', btn.dataset.idBiblioteca);
 
         openModalEditar();
     }

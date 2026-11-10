@@ -4,7 +4,7 @@ require_once __DIR__ . '/../helpers/validador.php';
 
 class Usuario {
 
-public function mostrarUsuarios() {
+public function mostrarUsuarios(int $idBiblioteca = null) {
 
     $sql = "SELECT
     u.id,
@@ -12,13 +12,19 @@ public function mostrarUsuarios() {
     u.telefono,
     u.id_empleado,
     u.rol,
-    CONCAT(e.nombre, ' ', e.apellido) AS id_empleado_nombre
+    CONCAT(e.nombre, ' ', e.apellido) AS id_empleado_nombre,
+    e.id_biblioteca
 FROM usuario u
 LEFT JOIN empleado e ON e.id = u.id_empleado
+";
+    if ($idBiblioteca !== null) {
+        $sql .= "WHERE e.id_biblioteca = ? ";
+    }
+    $sql .= "
 ORDER BY u.nombre";
 
     $stmt = Conexion::conectar()->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($idBiblioteca !== null ? [$idBiblioteca] : []);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -51,7 +57,7 @@ ORDER BY u.nombre";
 
         if (array_key_exists('rol', $data)) {
             $rol = $data['rol'];
-            if (!in_array($rol, ['administrador', 'usuario'], true)) {
+            if (!in_array($rol, ['administrador', 'coordinador', 'usuario'], true)) {
                 $errors[] = 'Rol inválido.';
             }
         }
@@ -61,6 +67,20 @@ ORDER BY u.nombre";
 
     public function obtenerUsuarioPorId(int $id) {
         $sql = "SELECT id, nombre, telefono, id_empleado, rol FROM usuario WHERE id = ?";
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerPerfilUsuario(int $id) {
+        $sql = "SELECT
+                    u.id AS user_id,
+                    TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, ''))) AS empleado,
+                    b.nombre AS biblioteca
+                FROM usuario u
+                LEFT JOIN empleado e ON e.id = u.id_empleado
+                LEFT JOIN biblioteca b ON b.id = e.id_biblioteca
+                WHERE u.id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -77,7 +97,9 @@ ORDER BY u.nombre";
 
         if ($user) {
             $rol = trim(strtolower($user['rol'] ?? 'usuario'));
-            $user['rol'] = $rol === 'administrador' ? 'administrador' : 'usuario';
+            $user['rol'] = in_array($rol, ['administrador', 'coordinador', 'usuario'], true)
+                ? $rol
+                : 'usuario';
         }
 
         return $user;

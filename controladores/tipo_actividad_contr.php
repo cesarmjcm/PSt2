@@ -50,6 +50,10 @@ class TipoActividadController
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede registrar tipos de actividad.');
+            return;
+        }
 
         $nombre = trim($_POST['nombre'] ?? '');
         $descripcion = trim($_POST['descripcion'] ?? '');
@@ -161,6 +165,10 @@ class TipoActividadController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede eliminar tipos de actividad.');
             return;
         }
 

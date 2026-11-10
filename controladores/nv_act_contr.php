@@ -48,6 +48,10 @@ class NvActController
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede registrar niveles de impacto.');
+            return;
+        }
 
         $nombre = trim($_POST['nombre_impacto'] ?? '');
         if ($nombre === '') {
@@ -133,6 +137,10 @@ class NvActController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede eliminar niveles de impacto.');
             return;
         }
 

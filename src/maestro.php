@@ -216,6 +216,17 @@ $titulo = $maestros[$tabla] ?? 'Maestro no encontrado';
 $tablaValida = !empty($tabla) && isset($maestros[$tabla]);
 
 $esAdmin = esAdministrador();
+$esCoordinador = esCoordinador();
+$soloEdicion = !$esAdmin && in_array($tabla, [
+    'biblioteca',
+    'municipio',
+    'parroquia',
+    'nv_act',
+    'tipo_actividad',
+    'empleado',
+    'cargo',
+], true) && !($esCoordinador && $tabla === 'empleado');
+$mostrarNuevo = !$soloEdicion && !($esCoordinador && $tabla === 'biblioteca');
 
 
 
@@ -266,9 +277,11 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                             <button type="button" class="btn-primary btn-exportar" id="btnExportar">
                                 <i class="fas fa-file-pdf"></i> Exportar PDF
                             </button>
-                            <button type="button" class="btn-primary" id="btnNuevo">
-                                <i class="fas fa-plus"></i> Nuevo
-                            </button>
+                            <?php if ($mostrarNuevo): ?>
+                                <button type="button" class="btn-primary" id="btnNuevo">
+                                    <i class="fas fa-plus"></i> Nuevo
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -350,6 +363,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <script>
     (function () {
         const tablaActual = <?php echo json_encode($tabla); ?>;
+        const soloEdicion = <?php echo json_encode($soloEdicion); ?>;
         const endpoint = <?php echo json_encode($controladorPorMaestro[$tabla]); ?>;
         const campos = <?php echo json_encode($camposPorMaestro[$tabla], JSON_UNESCAPED_UNICODE); ?>;
         const camposKeys = Object.keys(campos);
@@ -696,7 +710,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 });
                 html += '<td class="col-acciones">';
                 html += '<button type="button" class="btn-icon btn-edit" data-id="' + fila.id + '" title="Editar"><i class="fas fa-pen"></i></button>';
-                html += '<button type="button" class="btn-icon btn-delete" data-id="' + fila.id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
+                if (!soloEdicion) {
+                    html += '<button type="button" class="btn-icon btn-delete" data-id="' + fila.id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
+                }
                 html += '</td>';
                 html += '</tr>';
             });
@@ -1033,7 +1049,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             }
         });
 
-        btnNuevo.addEventListener('click', abrirModalNuevo);
+        if (btnNuevo) {
+            btnNuevo.addEventListener('click', abrirModalNuevo);
+        }
         buscarMaestroForm.addEventListener('submit', (event) => event.preventDefault());
         buscarMaestro.addEventListener('input', () => {
             paginaActual = 1;

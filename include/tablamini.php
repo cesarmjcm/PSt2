@@ -152,7 +152,7 @@ try {
                                                     data-target="detalle-actividad-<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 <i class="fas fa-chevron-down"></i>
                                             </button>
-                                            <?php if (($_SESSION['user_rol'] ?? '') === 'administrador'): ?>
+                                            <?php if (esAdministrador() || esCoordinador()): ?>
                                         <button type="button"
                                                 class="btn-icon btn-edit-actividad"
                                                 title="Editar"

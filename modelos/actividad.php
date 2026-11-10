@@ -56,7 +56,10 @@ class Actividad {
             return '';
         }
 
-        return "{$alias}.id_biblioteca = ?";
+        return "({$alias}.id_biblioteca = ? OR ({$alias}.id_biblioteca IS NULL AND EXISTS (
+            SELECT 1 FROM empleado e
+            WHERE e.id = {$alias}.responsable AND e.id_biblioteca = ?
+        )))";
     }
 
     public function mostrarActividades(int $idBiblioteca = null) {
@@ -64,7 +67,7 @@ class Actividad {
             ($idBiblioteca !== null ? " WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") .
             " ORDER BY a.fecha DESC";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca] : []);
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
@@ -128,7 +131,7 @@ class Actividad {
             ORDER BY a.fecha DESC
         ";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca] : []);
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
@@ -252,7 +255,7 @@ class Actividad {
         $sql = "SELECT a.* FROM actividad a WHERE a.id = ?" .
             ($idBiblioteca !== null ? " AND " . $this->condicionBiblioteca($idBiblioteca) : "");
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute($idBiblioteca !== null ? [$id, $idBiblioteca] : [$id]);
+        $stmt->execute($idBiblioteca !== null ? [$id, $idBiblioteca, $idBiblioteca] : [$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -360,8 +363,12 @@ class Actividad {
             
             
             
-            $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
-            $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
+            $idBiblioteca = ($d['tipo_ubicacion'] ?? '') === 'biblioteca' && !empty($d['id_biblioteca'])
+                ? (int)$d['id_biblioteca']
+                : null;
+            $idEspacioCultural = ($d['tipo_ubicacion'] ?? '') === 'espacio' && !empty($d['id_espacio_cultural'])
+                ? (int)$d['id_espacio_cultural']
+                : null;
             $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
             list($idParroquia, $idComuna) = $this->resolverUbicacion($pdo, $d);
             $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad, estado, responsable, telefono_responsable, id_nivel_impacto, id_parroquia, id_comuna)
@@ -390,8 +397,12 @@ class Actividad {
         try {
             
             
-            $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
-            $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
+            $idBiblioteca = ($d['tipo_ubicacion'] ?? '') === 'biblioteca' && !empty($d['id_biblioteca'])
+                ? (int)$d['id_biblioteca']
+                : null;
+            $idEspacioCultural = ($d['tipo_ubicacion'] ?? '') === 'espacio' && !empty($d['id_espacio_cultural'])
+                ? (int)$d['id_espacio_cultural']
+                : null;
             $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
             list($idParroquia, $idComuna) = $this->resolverUbicacion($pdo, $d);
             $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=?, estado=?, responsable=?, telefono_responsable=?, id_nivel_impacto=?, id_parroquia=?, id_comuna=? WHERE id=?";

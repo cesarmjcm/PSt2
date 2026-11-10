@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 09-11-2026 a las 15:59:36
+-- Tiempo de generación: 10-11-2026 a las 18:21:27
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -64,9 +64,10 @@ INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cult
 (35, NULL, 15, NULL, 'juego de mesa', 4, 3, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 15, '04125240489', NULL, NULL),
 (36, NULL, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, '04125240489', NULL, NULL),
 (37, NULL, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, '04127168235', NULL, NULL),
-(38, NULL, 16, NULL, 'Felix Pifano', 5, 6, 'felix', 'No definido', 0, '2026-10-04', '18:12:00', 'Domingo', 'pendiente', 28, '04127168235', 52, 118),
+(38, NULL, NULL, 6, 'Felix Pifano', 5, 3, 'felix', 'No definido', 2, '2026-10-04', '18:12:00', 'Domingo', 'confirmada', 28, '04127168235', 47, 53),
 (39, NULL, NULL, 5, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, '04125240489', 54, 105),
-(40, NULL, 15, NULL, 'juego de metras', 5, NULL, 'cosas', 'No definido', 0, '2026-11-03', '10:00:00', 'Martes', 'confirmada', 28, '04127168235', 54, 8);
+(40, NULL, 15, NULL, 'juego de metras', 5, NULL, 'cosas', 'No definido', 0, '2026-11-03', '10:00:00', 'Martes', 'confirmada', 28, '04127168235', 54, 8),
+(41, NULL, NULL, 6, 'juego', 5, 3, 'cosas', 'No definido', 0, '2026-11-18', '16:12:00', 'Miércoles', 'pendiente', 29, '04261181304', 47, 53);
 
 -- --------------------------------------------------------
 
@@ -215,9 +216,6 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (81, 'Sabado', '2026-10-03', '18:08:15', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Felix Pifano'),
 (82, 'Sabado', '2026-10-03', '18:08:40', 11, 'Editar', 'Empleado', 'Empleado #28 actualizado: cesar ontreras'),
 (83, 'Sabado', '2026-10-03', '18:09:10', 11, 'Crear', 'Usuario', 'Usuario registrado: cesar'),
-(84, 'Sabado', '2026-10-03', '18:09:21', 13, 'Login', 'Usuario', 'Inicio de sesión: cesar'),
-(85, 'Sabado', '2026-10-03', '18:10:02', 13, 'Crear', 'Actividad', 'Actividad registrada: Felix Pifano'),
-(86, 'Lunes', '2026-10-05', '16:02:31', 13, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/solicitud.php'),
 (87, 'Lunes', '2026-10-05', '16:02:33', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
 (88, 'Miercoles', '2026-10-07', '14:59:39', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/solicitud.php'),
 (89, 'Miercoles', '2026-10-07', '14:59:43', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
@@ -262,7 +260,32 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (128, 'Domingo', '2026-11-08', '13:27:40', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de metras'),
 (129, 'Domingo', '2026-11-08', '13:38:56', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php'),
 (130, 'Lunes', '2026-11-09', '10:58:50', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php'),
-(131, 'Lunes', '2026-11-09', '10:58:52', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar');
+(131, 'Lunes', '2026-11-09', '10:58:52', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(132, 'Martes', '2026-11-10', '12:38:19', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/main2.php'),
+(133, 'Martes', '2026-11-10', '12:38:21', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(134, 'Martes', '2026-11-10', '12:50:59', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/configUser.php'),
+(135, 'Martes', '2026-11-10', '12:51:22', 11, 'Crear', 'Usuario', 'Usuario registrado: coord'),
+(136, 'Martes', '2026-11-10', '12:51:30', 14, 'Login', 'Usuario', 'Inicio de sesión: coord'),
+(137, 'Martes', '2026-11-10', '12:52:14', 14, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(138, 'Martes', '2026-11-10', '12:52:19', 14, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(139, 'Martes', '2026-11-10', '12:52:26', 14, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(140, 'Martes', '2026-11-10', '12:52:32', 14, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(141, 'Martes', '2026-11-10', '12:54:31', 14, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(142, 'Martes', '2026-11-10', '13:02:05', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/configUser.php'),
+(143, 'Martes', '2026-11-10', '13:02:59', 14, 'Eliminar', 'Usuario', 'Usuario #13 eliminado'),
+(144, 'Martes', '2026-11-10', '13:03:14', 14, 'Crear', 'Usuario', 'Usuario registrado: cesar'),
+(145, 'Martes', '2026-11-10', '13:10:06', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/index.php'),
+(146, 'Martes', '2026-11-10', '13:10:45', 14, 'Crear', 'Espacio cultural', 'Espacio cultural registrado: juego de metras'),
+(147, 'Martes', '2026-11-10', '13:10:56', 14, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(148, 'Martes', '2026-11-10', '13:12:55', 14, 'Crear', 'Actividad', 'Actividad registrada: juego'),
+(149, 'Martes', '2026-11-10', '13:14:13', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
+(150, 'Martes', '2026-11-10', '13:17:31', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main2/src/index.php'),
+(151, 'Martes', '2026-11-10', '13:17:40', 14, 'Editar', 'Actividad', 'Actividad #38 actualizada: Felix Pifano'),
+(152, 'Martes', '2026-11-10', '13:18:01', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
+(153, 'Martes', '2026-11-10', '13:19:20', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
+(154, 'Martes', '2026-11-10', '13:19:27', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
+(155, 'Martes', '2026-11-10', '13:20:29', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
+(156, 'Martes', '2026-11-10', '13:20:55', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego');
 
 -- --------------------------------------------------------
 
@@ -468,7 +491,8 @@ CREATE TABLE `espacio_cultural` (
 
 INSERT INTO `espacio_cultural` (`id`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`, `id_parroquia`, `id_comuna`) VALUES
 (4, 'tu casa', 6, 'independencia', '', NULL, NULL),
-(5, 'mi casa', 10, 'independencia', '', 54, 105);
+(5, 'mi casa', 10, 'independencia', '', 54, 105),
+(6, 'juego de metras', 100, 'calle 4', '', 47, 53);
 
 -- --------------------------------------------------------
 
@@ -665,7 +689,7 @@ CREATE TABLE `usuario` (
   `clave` varchar(255) NOT NULL,
   `telefono` varchar(15) DEFAULT NULL,
   `id_empleado` int(11) DEFAULT NULL,
-  `rol` enum('administrador','usuario') NOT NULL DEFAULT 'usuario'
+  `rol` enum('administrador','coordinador','usuario') NOT NULL DEFAULT 'usuario'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -675,7 +699,8 @@ CREATE TABLE `usuario` (
 INSERT INTO `usuario` (`id`, `nombre`, `clave`, `telefono`, `id_empleado`, `rol`) VALUES
 (11, 'cheddar', '$2y$10$gDEMnG9XXqwiKvUQNP95BOzYUQ/KcRkmZcCqfzHi.WvkowTeqRjwq', '04125240489', 15, 'administrador'),
 (12, 'jesus', '$2y$10$A/oi0oFJTyOERvUGmZTbReSn6CeDT.kUzbpwx5TkBRRShSp14658a', '04125240489', 13, 'usuario'),
-(13, 'cesar', '$2y$10$xzjKL4an985Ht74uyBixF.ECl..GSE.47mJhP3vdR7zG8T/AS4pDS', '04127168235', 28, 'usuario');
+(14, 'coord', '$2y$10$LAxF.VhNlb1CndPOQo.L0un5WUiloc5MBYeQXd0e/oVQQcJiUNlrG', '04261181304', 29, 'coordinador'),
+(15, 'cesar', '$2y$10$bPRPSAtGXGSk404EfnbmmeNUk0HhRYEWAmV4EjyNvps62HReC3zme', '04127168235', 28, 'usuario');
 
 --
 -- Índices para tablas volcadas
@@ -814,7 +839,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT de la tabla `asignacion`
@@ -832,7 +857,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -856,7 +881,7 @@ ALTER TABLE `empleado`
 -- AUTO_INCREMENT de la tabla `espacio_cultural`
 --
 ALTER TABLE `espacio_cultural`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `institucion`
@@ -898,7 +923,7 @@ ALTER TABLE `tipo_actividad`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Restricciones para tablas volcadas

@@ -91,6 +91,12 @@ function esAdministrador(): bool
     return $rol === 'administrador';
 }
 
+function esCoordinador(): bool
+{
+    $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
+    return $rol === 'coordinador';
+}
+
 function guardian_idBibliotecaSesion(): ?int
 {
     if (esAdministrador()) {

@@ -200,6 +200,9 @@ $direccion = trim($_POST['direccion'] ?? '');
                     $conex = Conexion::conectar();
                     registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Biblioteca', "Biblioteca #$id actualizada: " . $nombre);
                 }
+                if ($id === (int) (guardian_idBibliotecaSesion() ?? 0)) {
+                    unset($_SESSION['user_profile']);
+                }
                 $this->success('Biblioteca actualizada correctamente.');
                 return;
             }
@@ -233,11 +236,6 @@ $direccion = trim($_POST['direccion'] ?? '');
             $this->error('ID inválido.');
             return;
         }
-        if (!esAdministrador() && $id !== (int) (guardian_idBibliotecaSesion() ?? 0)) {
-            $this->error('No tienes permisos para eliminar bibliotecas de otra unidad.');
-            return;
-        }
-
         try {
             $deleted = $this->model->eliminarBiblioteca($id);
             if ($deleted) {
@@ -249,7 +247,7 @@ $direccion = trim($_POST['direccion'] ?? '');
                 return;
             }
         } catch (Exception $e) {
-            $this->error('No se pudo eliminar: esta biblioteca tiene actividades asociadas.');
+            $this->error('No se pudo eliminar: la biblioteca tiene empleados, usuarios, actividades u otros registros asociados.');
             return;
         }
 

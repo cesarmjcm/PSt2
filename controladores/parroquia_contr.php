@@ -48,6 +48,10 @@ class ParroquiaController
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede registrar parroquias.');
+            return;
+        }
 
         $nombre = trim($_POST['nombre'] ?? '');
         $id_municipio = intval($_POST['id_municipio'] ?? 0);
@@ -139,6 +143,10 @@ class ParroquiaController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede eliminar parroquias.');
             return;
         }
 

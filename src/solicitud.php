@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
+$puedeEditarSolicitudes = $esAdmin || esCoordinador();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -48,7 +49,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     </button>
                 </form>
 
-                <table class="tabla-planificacion solicitudes-tabla<?= $esAdmin ? ' solicitudes-tabla--admin' : '' ?>" id="tablaSolicitudes">
+                <table class="tabla-planificacion solicitudes-tabla<?= $puedeEditarSolicitudes ? ' solicitudes-tabla--admin' : '' ?>" id="tablaSolicitudes">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -62,7 +63,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                             <th>Participantes</th>
                             <th>Descripción</th>
                             <th>Estado</th>
-                            <?php if ($esAdmin): ?><th class="col-acciones">Acciones</th><?php endif; ?>
+                            <?php if ($puedeEditarSolicitudes): ?><th class="col-acciones">Acciones</th><?php endif; ?>
                         </tr>
                     </thead>
                     <tbody id="tablaBody">
@@ -147,6 +148,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
     (function () {
         const endpoint = '../controladores/solicitud_contr.php';
         const esAdmin = <?= json_encode($esAdmin) ?>;
+        const puedeEditarSolicitudes = <?= json_encode($puedeEditarSolicitudes) ?>;
         // Debe coincidir con TRANSICIONES_ESTADO de solicitud_contr.php (el servidor es quien manda).
         const TRANSICIONES_ESTADO = {
             pendiente: ['pendiente', 'aprobada', 'rechazada', 'cancelada'],
@@ -154,7 +156,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             rechazada: ['rechazada', 'cancelada'],
             cancelada: ['cancelada'],
         };
-        const columnasTabla = esAdmin ? 12 : 11;
+        const columnasTabla = puedeEditarSolicitudes ? 12 : 11;
         const tablaBody = document.getElementById('tablaBody');
         const paginacion = document.getElementById('solicitudPagination');
         const alertBox = document.getElementById('alertBox');
@@ -428,9 +430,9 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     <td>${escapeHtml(row.participantes)}</td>
                     <td>${escapeHtml(row.descripcion)}</td>
                     <td>${escapeHtml(formatearEstado(row.estado))}</td>
-                    ${esAdmin ? `<td class="col-acciones">
+                    ${puedeEditarSolicitudes ? `<td class="col-acciones">
                         <button type="button" class="btn-icon btn-edit" data-id="${row.id}"><i class="fas fa-pen"></i></button>
-                        <button type="button" class="btn-icon btn-delete" data-id="${row.id}"><i class="fas fa-trash"></i></button>
+                        ${esAdmin ? `<button type="button" class="btn-icon btn-delete" data-id="${row.id}"><i class="fas fa-trash"></i></button>` : ''}
                     </td>` : ''}
                 </tr>
             `).join('');

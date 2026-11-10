@@ -58,6 +58,11 @@ class SolicitudController
         return ($_SESSION['user_rol'] ?? '') === 'administrador';
     }
 
+    private function puedeEditar(): bool
+    {
+        return $this->esAdmin() || esCoordinador();
+    }
+
     private function obtenerSolicitud(int $id)
     {
         return $this->model->obtenerSolicitudPorId(
@@ -260,7 +265,7 @@ class SolicitudController
             return;
         }
 
-        if (!$this->esAdmin()) {
+        if (!$this->puedeEditar()) {
             $this->error('No tiene permisos para editar solicitudes.');
             return;
         }

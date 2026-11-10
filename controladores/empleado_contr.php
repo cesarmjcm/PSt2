@@ -52,7 +52,6 @@ class EmpleadoController
             $this->error('Método no permitido.');
             return;
         }
-
         $cedulaRaw = trim($_POST['cedula'] ?? '');
         if (!Validador::esCedulaValida($cedulaRaw)) {
             $this->error('La cédula debe contener solo números y tener entre 6 y 8 dígitos.');
@@ -155,6 +154,10 @@ class EmpleadoController
             $this->error('Método no permitido.');
             return;
         }
+        if (!esAdministrador() && !esCoordinador()) {
+            $this->error('No tienes permisos para gestionar empleados.');
+            return;
+        }
 
         $nombre = trim($_POST['nombre'] ?? '');
         $apellido = trim($_POST['apellido'] ?? '');
@@ -211,7 +214,6 @@ class EmpleadoController
             $this->error('Método no permitido.');
             return;
         }
-
         $id = intval($_POST['id'] ?? 0);
         $nombre = trim($_POST['nombre'] ?? '');
         $apellido = trim($_POST['apellido'] ?? '');
@@ -255,6 +257,9 @@ class EmpleadoController
                     $conex = Conexion::conectar();
                     registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Empleado', "Empleado #$id actualizado: " . $nombre . ' ' . $apellido);
                 }
+                if ($id === (int) ($_SESSION['id_empleado'] ?? 0)) {
+                    unset($_SESSION['user_profile']);
+                }
                 $this->success('Empleado actualizado correctamente.');
                 return;
             }
@@ -275,6 +280,10 @@ class EmpleadoController
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador() && !esCoordinador()) {
+            $this->error('No tienes permisos para gestionar empleados.');
             return;
         }
 

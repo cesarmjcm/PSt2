@@ -92,12 +92,33 @@ nav {
     color: #25346b;
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    min-width: 160px;
+    min-width: 240px;
     overflow: hidden;
     border: 1px solid #e6e9f2;
     z-index: 1500;
     display: flex;
     flex-direction: column;
+}
+.nav__user-info {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e6e9f2;
+    overflow-wrap: anywhere;
+}
+.nav__user-name {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+.nav__user-info p {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+}
+.nav__user-info p span {
+    display: block;
+    color: #68718a;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 .nav__user-menu a {
     padding: 10px 14px;
