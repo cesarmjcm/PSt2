@@ -53,14 +53,8 @@ class EspacioController
         $capacidadRaw = $_POST['capacidad'] ?? 0;
         $direccion = trim($_POST['direccion'] ?? '');
         $metodo_contactar = trim($_POST['metodo_contactar'] ?? '');
-        $idParroquia = filter_var($_POST['id_parroquia'] ?? null, FILTER_VALIDATE_INT);
-        $idComuna = filter_var($_POST['id_comuna'] ?? null, FILTER_VALIDATE_INT);
         if ($nombre === '') {
             $this->error('Nombre es obligatorio.');
-            return;
-        }
-        if (!$idParroquia || !$idComuna || !$this->model->ubicacionValida($idParroquia, $idComuna)) {
-            $this->error('Debe seleccionar una comuna perteneciente a la parroquia indicada.');
             return;
         }
         if (!Validador::esTextoValido($nombre, 2, 30)) {
@@ -85,7 +79,7 @@ class EspacioController
         }
 
         try {
-            $created = $this->model->crearEspacio($nombre, intval($capacidadRaw), $direccion, $metodo_contactar, $idParroquia, $idComuna);
+            $created = $this->model->crearEspacio($nombre, intval($capacidadRaw), $direccion, $metodo_contactar);
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
@@ -118,14 +112,8 @@ class EspacioController
         $capacidadRaw = $_POST['capacidad'] ?? 0;
         $direccion = trim($_POST['direccion'] ?? '');
         $metodo_contactar = trim($_POST['metodo_contactar'] ?? '');
-        $idParroquia = filter_var($_POST['id_parroquia'] ?? null, FILTER_VALIDATE_INT);
-        $idComuna = filter_var($_POST['id_comuna'] ?? null, FILTER_VALIDATE_INT);
         if ($id <= 0 || $nombre === '') {
             $this->error('ID y nombre son obligatorios.');
-            return;
-        }
-        if (!$idParroquia || !$idComuna || !$this->model->ubicacionValida($idParroquia, $idComuna)) {
-            $this->error('Debe seleccionar una comuna perteneciente a la parroquia indicada.');
             return;
         }
         if (!Validador::esTextoValido($nombre, 2, 30)) {
@@ -150,7 +138,7 @@ class EspacioController
         }
 
         try {
-            $updated = $this->model->actualizarEspacio($id, $nombre, intval($capacidadRaw), $direccion, $metodo_contactar, $idParroquia, $idComuna);
+            $updated = $this->model->actualizarEspacio($id, $nombre, intval($capacidadRaw), $direccion, $metodo_contactar);
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
