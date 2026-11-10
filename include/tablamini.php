@@ -210,8 +210,12 @@ try {
                                             <p><strong>Municipio:</strong> <?php echo htmlspecialchars($actividad['municipio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Parroquia:</strong> <?php echo htmlspecialchars($actividad['parroquia'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Comuna:</strong> <?php echo htmlspecialchars($actividad['comuna'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-                                            <p><strong>Espacio cultural:</strong> <?php echo htmlspecialchars($actividad['espacio_cultural'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-                                            <p><strong>Biblioteca:</strong> <?php echo htmlspecialchars($actividad['biblioteca'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <?php if (trim((string)($actividad['espacio_cultural'] ?? '')) !== ''): ?>
+                                            <p><strong>Espacio cultural:</strong> <?php echo htmlspecialchars($actividad['espacio_cultural'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <?php endif; ?>
+                                            <?php if (trim((string)($actividad['biblioteca'] ?? '')) !== ''): ?>
+                                            <p><strong>Biblioteca:</strong> <?php echo htmlspecialchars($actividad['biblioteca'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <?php endif; ?>
                                             <p><strong>Responsable:</strong> <?php echo htmlspecialchars($actividad['responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Teléfono responsable:</strong> <?php echo htmlspecialchars($actividad['telefono_responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                         </div>
