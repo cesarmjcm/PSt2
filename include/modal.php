@@ -18,7 +18,8 @@ $tipoActividadModel = new TipoActividad();
 $nivelImpactoModel = new NivelImpacto();
 
 $municipios = $municipioModel->mostrarMunicipios();
-$comunas = $comunaModel->mostrarComunas();
+// Comunas con su parroquia y municipio (JOIN comuna -> parroquia -> municipio).
+$comunas = $comunaModel->mostrarComunasConUbicacion();
 $parroquias = $parroquiaModel->mostrarParroquias();
 $parroquiasUnicas = [];
 foreach ($parroquias as $parroquia) {
@@ -158,7 +159,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                             <select name="comuna" id="planificacion-comunas" disabled>
                                                 <option value="">Seleccione una comuna</option>
                                                 <?php foreach ($comunas as $c): ?>
-                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars((string) $c['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars((string) $c['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $c['id_municipio'], ENT_QUOTES, 'UTF-8') ?>">
                                                         <?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -193,7 +194,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                                 <select name="id_espacio_cultural" id="plan-espacio">
                                                     <option value="">Seleccione un espacio cultural</option>
                                                     <?php foreach ($espacios as $e): ?>
-                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $e['id_municipio'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) $e['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>" data-comuna="<?= htmlspecialchars((string) $e['id_comuna'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -261,7 +262,6 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
             const filtrarUbicaciones = () => {
                 const municipioId = selectMunicipio.value;
                 const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
-                const comunaId = (selectComuna.selectedOptions[0] && selectComuna.selectedOptions[0].dataset.id) || '';
                 const bibliotecaSeleccionada = selectBiblioteca.value || bibliotecaSeleccionadaInicial;
 
                 selectBiblioteca.replaceChildren(new Option('Seleccione una biblioteca', ''));
@@ -277,15 +277,15 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                     selectBiblioteca.value = bibliotecaSeleccionada;
                 }
 
+                // El espacio cultural no tiene parroquia propia: se asocia a la parroquia/comuna
+                // elegidas arriba al guardar la actividad (actividad -> comuna -> parroquia).
+                // Por eso se listan todos los espacios.
+                const espacioSeleccionado = selectEspacio.value;
                 selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
-                opcionesEspacios.forEach((opcion) => {
-                    if (opcion.dataset.municipio === municipioId
-                        && opcion.dataset.parroquia === parroquiaId
-                        && opcion.dataset.comuna === comunaId
-                        && comunaId !== '') {
-                        selectEspacio.appendChild(opcion.cloneNode(true));
-                    }
-                });
+                opcionesEspacios.forEach((opcion) => selectEspacio.appendChild(opcion.cloneNode(true)));
+                if (espacioSeleccionado !== '') {
+                    selectEspacio.value = espacioSeleccionado;
+                }
             };
 
             const filtrarParroquias = () => {
