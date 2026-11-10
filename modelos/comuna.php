@@ -13,6 +13,26 @@ class Comuna {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Comunas con su parroquia y su municipio. La comuna no guarda el municipio:
+     * se llega a él usando a la parroquia como "puente" (comuna -> parroquia -> municipio).
+     */
+    public function mostrarComunasConUbicacion() {
+        $sql = "SELECT c.id,
+                       c.nombre,
+                       c.id_parroquia,
+                       pa.nombre AS id_parroquia_nombre,
+                       pa.id_municipio,
+                       m.nombre AS id_municipio_nombre
+                FROM comuna c
+                JOIN parroquia pa ON pa.id = c.id_parroquia
+                JOIN municipio m ON m.id = pa.id_municipio
+                ORDER BY c.nombre";
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function obtenerComunaPorId(int $id) {
         $sql = "SELECT * FROM comuna WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
