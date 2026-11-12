@@ -15,5 +15,7 @@ procesarReportePdf(
         ['etiqueta' => 'Correo', 'clave' => 'correo'],
         ['etiqueta' => 'Dirección', 'clave' => 'direccion'],
     ],
-    'reporte_instituciones'
+    'reporte_instituciones',
+    'landscape',
+    true
 );

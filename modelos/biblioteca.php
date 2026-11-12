@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Biblioteca {
 
-public function mostrarBibliotecas(int $idBiblioteca = null) {
+public function mostrarBibliotecas(?int $idBiblioteca = null) {
     $sql = "SELECT
                 b.id,
                 b.nombre,

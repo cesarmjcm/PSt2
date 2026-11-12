@@ -126,12 +126,28 @@ class Actividad {
         )))";
     }
 
+    private function condicionVisibilidad(int $idBiblioteca, string $alias = 'a', string $municipioAlias = 'p'): string
+    {
+        return "({$municipioAlias}.id_municipio = (
+            SELECT p_usuario.id_municipio
+            FROM biblioteca b_usuario
+            JOIN parroquia p_usuario ON p_usuario.id = b_usuario.id_parroquia
+            WHERE b_usuario.id = ?
+        ) OR " . $this->condicionBiblioteca($idBiblioteca, $alias) . ")";
+    }
+
     public function mostrarActividades(int $idBiblioteca = null) {
-        $sql = "SELECT a.* FROM actividad a" .
-            ($idBiblioteca !== null ? " WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") .
+        $sql = "SELECT a.* FROM actividad a
+            LEFT JOIN comuna c ON c.id = a.id_comuna
+            LEFT JOIN biblioteca b ON b.id = COALESCE(
+                a.id_biblioteca,
+                (SELECT e.id_biblioteca FROM empleado e WHERE e.id = a.responsable)
+            )
+            LEFT JOIN parroquia p ON p.id = COALESCE(c.id_parroquia, b.id_parroquia)" .
+            ($idBiblioteca !== null ? " WHERE " . $this->condicionVisibilidad($idBiblioteca) : "") .
             " ORDER BY a.fecha DESC";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
@@ -173,6 +189,7 @@ class Actividad {
                 CONCAT(er.nombre, ' ', er.apellido) AS responsable,
                 a.responsable AS id_empleado,
                 er.telefono AS telefono_responsable,
+                er.id_biblioteca AS id_biblioteca_responsable,
                 ta.nombre AS tipo_actividad,
                 b.nombre AS biblioteca,
                 ec.nombre AS espacio_cultural,
@@ -184,7 +201,10 @@ class Actividad {
                 c.nombre AS comuna
             FROM actividad a
             LEFT JOIN tipo_actividad ta ON ta.id = a.id_tipo_actividad
-            LEFT JOIN biblioteca b ON b.id = a.id_biblioteca
+            LEFT JOIN biblioteca b ON b.id = COALESCE(
+                a.id_biblioteca,
+                (SELECT e.id_biblioteca FROM empleado e WHERE e.id = a.responsable)
+            )
             LEFT JOIN espacio_cultural ec ON ec.id = a.id_espacio_cultural
             LEFT JOIN comuna c ON c.id = a.id_comuna
             -- La parroquia sale de la comuna de la actividad (comuna -> parroquia); si no tiene comuna, de la biblioteca.
@@ -192,12 +212,12 @@ class Actividad {
             LEFT JOIN municipio m ON m.id = p.id_municipio
             LEFT JOIN nivel_impacto ni ON ni.id = a.id_nivel_impacto
             LEFT JOIN empleado er ON er.id = a.responsable
-            " . ($idBiblioteca !== null ? "WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") . "
+            " . ($idBiblioteca !== null ? "WHERE " . $this->condicionVisibilidad($idBiblioteca) : "") . "
             GROUP BY a.id
             ORDER BY a.fecha DESC
         ";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }

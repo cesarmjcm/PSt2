@@ -39,7 +39,7 @@ $parroquias = array_values($parroquiasUnicas);
 $espacios = $espacioModel->mostrarEspacios();
 $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
 $empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
-$bibliotecas = $bibliotecaModel->mostrarBibliotecas($idBibliotecaUsuario);
+$bibliotecas = $bibliotecaModel->mostrarBibliotecas();
 $tiposActividad = $tipoActividadModel->mostrarTipos();
 $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
 ?>

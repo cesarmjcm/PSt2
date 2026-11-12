@@ -224,7 +224,8 @@ class InstitucionController
 
     private function listar()
     {
-        $data = $this->model->mostrarInstituciones();
+        $idBiblioteca = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $data = $this->model->mostrarInstituciones($idBiblioteca);
         $this->respond(['success' => true, 'data' => $data]);
     }
 

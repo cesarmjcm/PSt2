@@ -256,7 +256,7 @@ $direccion = trim($_POST['direccion'] ?? '');
 
     private function listar()
     {
-        $data = $this->model->mostrarBibliotecas(esAdministrador() ? null : guardian_idBibliotecaSesion());
+        $data = $this->model->mostrarBibliotecas();
         $this->respond(['success' => true, 'data' => $data]);
     }
 

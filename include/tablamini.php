@@ -106,6 +106,17 @@ try {
                             </tr>
                         <?php else: ?>
                             <?php foreach ($actividades as $index => $actividad): ?>
+                                <?php
+                                    $idBibliotecaSesion = (int) (guardian_idBibliotecaSesion() ?? 0);
+                                    $puedeEditarActividad = esAdministrador()
+                                        || (esCoordinador() && (
+                                            (int) ($actividad['id_biblioteca'] ?? 0) === $idBibliotecaSesion
+                                            || (
+                                                empty($actividad['id_biblioteca'])
+                                                && (int) ($actividad['id_biblioteca_responsable'] ?? 0) === $idBibliotecaSesion
+                                            )
+                                        ));
+                                ?>
                                 <tr>
                                     <td><?php echo $index + 1; ?></td>
 
@@ -152,7 +163,7 @@ try {
                                                     data-target="detalle-actividad-<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 <i class="fas fa-chevron-down"></i>
                                             </button>
-                                            <?php if (esAdministrador() || esCoordinador()): ?>
+                                            <?php if ($puedeEditarActividad): ?>
                                         <button type="button"
                                                 class="btn-icon btn-edit-actividad"
                                                 title="Editar"

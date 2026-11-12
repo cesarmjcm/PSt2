@@ -339,6 +339,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <script>
     (function () {
         const tablaActual = <?php echo json_encode($tabla); ?>;
+        const puedeEditarRegistro = tablaActual !== 'empleado' || <?php echo json_encode($esAdmin || $esCoordinador); ?>;
         const soloEdicion = <?php echo json_encode($soloEdicion); ?>;
         const endpoint = <?php echo json_encode($controladorPorMaestro[$tabla]); ?>;
         const campos = <?php echo json_encode($camposPorMaestro[$tabla], JSON_UNESCAPED_UNICODE); ?>;
@@ -496,7 +497,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         }
 
         
-        const CAMPOS_SIN_CHEQUEO_REPETICION = ['telefono', 'capacidad', 'rif'];
+        const CAMPOS_SIN_CHEQUEO_REPETICION = ['telefono', 'capacidad', 'rif', 'cedula'];
 
        
         const REGEX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü '\-]+$/u;
@@ -685,7 +686,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     }
                 });
                 html += '<td class="col-acciones">';
-                html += '<button type="button" class="btn-icon btn-edit" data-id="' + fila.id + '" title="Editar"><i class="fas fa-pen"></i></button>';
+                if (puedeEditarRegistro) {
+                    html += '<button type="button" class="btn-icon btn-edit" data-id="' + fila.id + '" title="Editar"><i class="fas fa-pen"></i></button>';
+                }
                 if (!soloEdicion) {
                     html += '<button type="button" class="btn-icon btn-delete" data-id="' + fila.id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
                 }
