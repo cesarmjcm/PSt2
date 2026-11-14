@@ -18,7 +18,7 @@ class BibliotecaController
         $this->model = new Biblioteca();
     }
 
-    public function dispatch(): void
+    public function dispatch()
     {
         $action = $_REQUEST['action'] ?? '';
 
@@ -41,7 +41,7 @@ class BibliotecaController
         }
     }
 
-    private function crear(): void
+    private function crear()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -132,7 +132,7 @@ class BibliotecaController
         $this->error('No se pudo crear la biblioteca.');
     }
 
-    private function actualizar(): void
+    private function actualizar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -200,6 +200,9 @@ $direccion = trim($_POST['direccion'] ?? '');
                     $conex = Conexion::conectar();
                     registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Biblioteca', "Biblioteca #$id actualizada: " . $nombre);
                 }
+                if ($id === (int) (guardian_idBibliotecaSesion() ?? 0)) {
+                    unset($_SESSION['user_profile']);
+                }
                 $this->success('Biblioteca actualizada correctamente.');
                 return;
             }
@@ -217,7 +220,7 @@ $direccion = trim($_POST['direccion'] ?? '');
         $this->error('No se pudo actualizar la biblioteca.');
     }
 
-    private function eliminar(): void
+    private function eliminar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -233,11 +236,6 @@ $direccion = trim($_POST['direccion'] ?? '');
             $this->error('ID inválido.');
             return;
         }
-        if (!esAdministrador() && $id !== (int) (guardian_idBibliotecaSesion() ?? 0)) {
-            $this->error('No tienes permisos para eliminar bibliotecas de otra unidad.');
-            return;
-        }
-
         try {
             $deleted = $this->model->eliminarBiblioteca($id);
             if ($deleted) {
@@ -249,30 +247,30 @@ $direccion = trim($_POST['direccion'] ?? '');
                 return;
             }
         } catch (Exception $e) {
-            $this->error('No se pudo eliminar: esta biblioteca tiene actividades asociadas.');
+            $this->error('No se pudo eliminar: la biblioteca tiene empleados, usuarios, actividades u otros registros asociados.');
             return;
         }
 
         $this->error('No se pudo eliminar la biblioteca.');
     }
 
-    private function listar(): void
+    private function listar()
     {
-        $data = $this->model->mostrarBibliotecas(esAdministrador() ? null : guardian_idBibliotecaSesion());
+        $data = $this->model->mostrarBibliotecas();
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = []): void
+    private function success(string $message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message): void
+    private function error(string $message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }
 
-    private function respond(array $payload): void
+    private function respond(array $payload)
     {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);

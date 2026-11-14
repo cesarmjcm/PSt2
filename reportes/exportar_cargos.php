@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../include/guardian.php';
+require_once __DIR__ . '/funciones_pdf.php';
 guardian_requerirAdmin('json');
 
 header('Content-Type: application/json; charset=utf-8');
@@ -9,7 +10,7 @@ header('Pragma: no-cache');
 function responderReporte(array $respuesta, int $estado = 200): void
 {
     http_response_code($estado);
-    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -49,6 +50,13 @@ try {
     require_once __DIR__ . '/../modelos/cargo.php';
 
     $cargos = (new Cargo())->mostrarCargos();
+    if (isset($_GET['q']) && !is_string($_GET['q'])) {
+        responderReporte([
+            'success' => false,
+            'message' => 'El término de búsqueda no es válido.',
+        ], 400);
+    }
+    $cargos = filtrarFilasReportePdf($cargos, trim((string) ($_GET['q'] ?? '')));
     $cssPath = __DIR__ . '/reportes_cargo.css';
     $css = file_get_contents($cssPath);
     if ($css === false) {
@@ -72,7 +80,7 @@ try {
     </head>
     <body>
         <header class="reporte-header">
-            <p class="reporte-etiqueta">Sistema de gestión</p>
+            <?php echo membreteReportePdf(); ?>
             <h1>Reporte de cargos</h1>
             <p class="reporte-fecha">Generado el <?php echo $escapar($fechaGeneracion); ?></p>
         </header>
@@ -120,11 +128,7 @@ try {
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
 
-    responderReporte([
-        'success' => true,
-        'filename' => 'reporte_cargos_' . $fechaActual->format('Ymd_His') . '.pdf',
-        'pdf' => base64_encode($dompdf->output()),
-    ]);
+    enviarReportePdf($dompdf, 'reporte_cargos_' . $fechaActual->format('Ymd_His') . '.pdf');
 } catch (Throwable $error) {
     error_log('Error al generar el reporte PDF de cargos: ' . $error->getMessage());
     responderReporte([

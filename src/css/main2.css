@@ -92,12 +92,33 @@ nav {
     color: #25346b;
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    min-width: 160px;
+    min-width: 240px;
     overflow: hidden;
     border: 1px solid #e6e9f2;
     z-index: 1500;
     display: flex;
     flex-direction: column;
+}
+.nav__user-info {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e6e9f2;
+    overflow-wrap: anywhere;
+}
+.nav__user-name {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+.nav__user-info p {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+}
+.nav__user-info p span {
+    display: block;
+    color: #68718a;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 .nav__user-menu a {
     padding: 10px 14px;
@@ -670,6 +691,7 @@ fieldset{
     }
 
     .calendar-container {
+        position: relative;
         display: none;
         width: 100%;
         max-width: 780px;
@@ -682,11 +704,39 @@ fieldset{
         border: 1px solid #d8dee9;
     }
 
+.calendar-activity-count {
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #eef4ff;
+    color: #25346b;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.calendar-activity-count__number {
+    display: inline-flex;
+    min-width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #25346b;
+    color: #ffffff;
+    font-weight: 700;
+}
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    padding-top: 30px;
     margin-bottom: 24px;
 }
 
@@ -733,6 +783,7 @@ fieldset{
 }
 
 .days-grid div {
+    position: relative;
     min-height: 82px;
     display: flex;
     justify-content: flex-start;
@@ -748,6 +799,25 @@ fieldset{
     transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
+.calendar-day-activity-count {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    display: inline-flex;
+    min-width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #25346b;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(37, 52, 107, 0.2);
+}
+
 .days-grid div:hover {
     background: #eef4ff;
     transform: translateY(-1px);
@@ -755,16 +825,52 @@ fieldset{
 
 
 .days-grid div.has-activity {
-    background-color:#0000FF ;
-    color: white;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
     transition: transform 0.15s ease, background-color 0.2s ease;
 }
 
+.days-grid div.has-activity--pendiente {
+    background-color: #fde68a;
+    color: #78350f;
+    box-shadow: 0 2px 6px rgba(120, 53, 15, 0.22);
+}
+
+.days-grid div.has-activity--confirmada {
+    background-color: #bfdbfe;
+    color: #1e40af;
+    box-shadow: 0 2px 6px rgba(30, 64, 175, 0.22);
+}
+
+.days-grid div.has-activity--ejecutada {
+    background-color: #bbf7d0;
+    color: #166534;
+    box-shadow: 0 2px 6px rgba(22, 101, 52, 0.22);
+}
+
+.days-grid div.has-activity--cancelada {
+    background-color: #fecaca;
+    color: #991b1b;
+    box-shadow: 0 2px 6px rgba(153, 27, 27, 0.22);
+}
+
+.days-grid div.has-activity--pendiente:hover {
+    background-color: #fde68a;
+}
+
+.days-grid div.has-activity--confirmada:hover {
+    background-color: #bfdbfe;
+}
+
+.days-grid div.has-activity--ejecutada:hover {
+    background-color: #bbf7d0;
+}
+
+.days-grid div.has-activity--cancelada:hover {
+    background-color: #fecaca;
+}
+
 .days-grid div.has-activity:hover {
-    background-color:#0f4bcc;
     transform: translateY(-1px);
 }
 
@@ -804,6 +910,22 @@ fieldset{
 
 .activity-table tbody tr:nth-child(even) {
     background: #f7f9ff;
+}
+
+.activity-table tbody tr.activity-status--pendiente td:first-child {
+    border-left: 6px solid #fbbf24;
+}
+
+.activity-table tbody tr.activity-status--confirmada td:first-child {
+    border-left: 6px solid #3b82f6;
+}
+
+.activity-table tbody tr.activity-status--ejecutada td:first-child {
+    border-left: 6px solid #22c55e;
+}
+
+.activity-table tbody tr.activity-status--cancelada td:first-child {
+    border-left: 6px solid #ef4444;
 }
 
 .activity-table tbody tr:hover {

@@ -54,21 +54,12 @@ $camposPorMaestro = [
         'nombre'       => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30, 'noNumeros' => true],
     ],
     'biblioteca' => [
-        'id_municipio' => [
-            'label'       => 'Municipio',
-            'type'        => 'select',
-            'fuente'      => '../controladores/municipio_contr.php',
-            'optionValue' => 'id',
-            'optionLabel' => 'nombre',
-            'soloFiltro'  => true,
-        ],
         'id_parroquia' => [
             'label'       => 'Parroquia',
             'type'        => 'select',
             'fuente'      => '../controladores/parroquia_contr.php',
             'optionValue' => 'id',
             'optionLabel' => 'nombre',
-            'filtradoPor' => 'id_municipio',
         ],
         'nombre' => [
             'label' => 'Nombre',
@@ -142,7 +133,7 @@ $camposPorMaestro = [
         'telefono' => ['label' => 'Teléfono', 'type' => 'text', 'maxLength' => 11, 'formatoVenezolano' => true],
 
         'genero'   => ['label' => 'Género', 'type' => 'select', 'options' => ['M' => 'Masculino', 'F' => 'Femenino']],
-        'edad'     => ['label' => 'Edad', 'type' => 'number', 'min' => 0],
+        'edad'     => ['label' => 'Edad', 'type' => 'number', 'min' => 17, 'edadMinima' => 17],
         'id_cargo' => [ 'label'       => 'Cargo', 'type'        => 'select','fuente'      => '../controladores/cargo_contr.php','optionValue' => 'id','optionLabel' => 'nombre', ],
         'id_biblioteca' => [
             'label'       => 'Biblioteca donde trabaja',
@@ -151,9 +142,9 @@ $camposPorMaestro = [
             'optionValue' => 'id',
             'optionLabel' => 'nombre',
         ],
-        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0],
-
-        'fecha_inicio_cargo' => ['label' => 'Inicio del cargo', 'type' => 'date'],
+        // Los años de servicio se calculan entre el inicio y el fin, o hasta hoy si el cargo sigue vigente.
+        'fecha_inicio_cargo' => ['label' => 'Fecha de ingreso (inicio del cargo)', 'type' => 'date', 'esFechaIngreso' => true],
+        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0, 'soloLectura' => true, 'calculaDesde' => 'fecha_inicio_cargo', 'calculaHasta' => 'fecha_fin_cargo'],
         // Sin fecha final = el cargo sigue vigente.
         'fecha_fin_cargo'    => ['label' => 'Fin del cargo', 'type' => 'date', 'opcional' => true, 'noAnteriorA' => 'fecha_inicio_cargo'],
     ],
@@ -192,6 +183,17 @@ $titulo = $maestros[$tabla] ?? 'Maestro no encontrado';
 $tablaValida = !empty($tabla) && isset($maestros[$tabla]);
 
 $esAdmin = esAdministrador();
+$esCoordinador = esCoordinador();
+$soloEdicion = !$esAdmin && in_array($tabla, [
+    'biblioteca',
+    'municipio',
+    'parroquia',
+    'nv_act',
+    'tipo_actividad',
+    'empleado',
+    'cargo',
+], true) && !($esCoordinador && $tabla === 'empleado');
+$mostrarNuevo = !$soloEdicion && !($esCoordinador && $tabla === 'biblioteca');
 
 
 
@@ -209,8 +211,8 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></title>
-    <link rel="stylesheet" href="./css/main.css">
-    <link rel="stylesheet" href="./css/maestro.css">
+    <link rel="stylesheet" href="./css/main.css?v=3">
+    <link rel="stylesheet" href="./css/maestro.css?v=2">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
@@ -239,18 +241,30 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     <div class="maestro__header">
                         <h1 class="planificacion__title"><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></h1>
                         <div class="maestro__acciones">
-                           <?php if (in_array($tabla, ['cargo', 'empleado'], true) && $esAdmin): ?>
-                                <button type="button" class="btn-primary btn-exportar" id="btnExportar">
-                                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                            <button type="button" class="btn-primary btn-exportar" id="btnExportar">
+                                <i class="fas fa-file-pdf"></i> Exportar PDF
+                            </button>
+                            <?php if ($mostrarNuevo): ?>
+                                <button type="button" class="btn-primary" id="btnNuevo">
+                                    <i class="fas fa-plus"></i> Nuevo
                                 </button>
                             <?php endif; ?>
-                            <button type="button" class="btn-primary" id="btnNuevo">
-                                <i class="fas fa-plus"></i> Nuevo
-                            </button>
                         </div>
                     </div>
 
                     <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
+
+                    <form class="tabla-buscador" id="buscarMaestroForm" role="search">
+                        <label class="sr-only" for="buscarMaestro">Buscar registro</label>
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input type="search"
+                               id="buscarMaestro"
+                               placeholder="Buscar registro..."
+                               autocomplete="off">
+                        <button type="button" class="tabla-buscador__limpiar" id="limpiarBusquedaMaestro" title="Limpiar búsqueda" aria-label="Limpiar búsqueda" hidden>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
 
                     <table class="tabla-planificacion" id="tablaMaestro">
                         <thead>
@@ -309,11 +323,15 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     </div>
     <?php endif; ?>
 
-    <script src="./js/app.js"></script>
+    <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
+    <script src="./js/reportes.js"></script>
     <?php if ($tablaValida): ?>
+    <script src="./js/anios_servicio.js?v=<?= filemtime(__DIR__ . '/js/anios_servicio.js') ?>"></script>
     <script>
     (function () {
         const tablaActual = <?php echo json_encode($tabla); ?>;
+        const puedeEditarRegistro = tablaActual !== 'empleado' || <?php echo json_encode($esAdmin || $esCoordinador); ?>;
+        const soloEdicion = <?php echo json_encode($soloEdicion); ?>;
         const endpoint = <?php echo json_encode($controladorPorMaestro[$tabla]); ?>;
         const campos = <?php echo json_encode($camposPorMaestro[$tabla], JSON_UNESCAPED_UNICODE); ?>;
         const camposKeys = Object.keys(campos);
@@ -321,6 +339,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         const tablaHead = document.getElementById('tablaHead');
         const tablaBody = document.getElementById('tablaBody');
         const paginacion = document.getElementById('maestroPagination');
+        const buscarMaestroForm = document.getElementById('buscarMaestroForm');
+        const buscarMaestro = document.getElementById('buscarMaestro');
+        const limpiarBusquedaMaestro = document.getElementById('limpiarBusquedaMaestro');
         const alertBox = document.getElementById('alertBox');
 
         const modal = document.getElementById('maestroModal');
@@ -366,6 +387,21 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         function ocultarErrorModal() {
             modalErrorBox.textContent = '';
             modalErrorBox.hidden = true;
+        }
+
+        function normalizarTexto(valor) {
+            return String(valor == null ? '' : valor)
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
+        }
+
+        function filasFiltradas() {
+            const termino = normalizarTexto(buscarMaestro.value.trim());
+            if (!termino) return filasCargadas;
+            return filasCargadas.filter(fila =>
+                normalizarTexto(Object.values(fila).join(' ')).includes(termino)
+            );
         }
 
         function mostrarEstadoCedula(mensaje, tipo) {
@@ -452,7 +488,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         }
 
         
-        const CAMPOS_SIN_CHEQUEO_REPETICION = ['telefono', 'capacidad', 'rif'];
+        const CAMPOS_SIN_CHEQUEO_REPETICION = ['telefono', 'capacidad', 'rif', 'cedula'];
 
        
         const REGEX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü '\-]+$/u;
@@ -496,6 +532,21 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             if (campo.formatoVenezolano && !REGEX_TELEFONO_VENEZUELA.test(valor)) {
                 return 'El campo "' + campo.label + '" debe tener el formato venezolano: empieza en 0, solo números, 11 dígitos en total (ej. 04141234567).';
+            }
+
+            if (campo.edadMinima) {
+                if (!/^\d+$/.test(valor)) {
+                    return 'El campo "' + campo.label + '" debe ser un número entero.';
+                }
+                if (Number(valor) < campo.edadMinima) {
+                    return 'El empleado debe tener una edad mínima de ' + campo.edadMinima + ' años.';
+                }
+            }
+
+            if (campo.esFechaIngreso) {
+                const campoFin = document.getElementById('campo_fecha_fin_cargo');
+                const errorFecha = validarFechaIngreso(valor, campoFin ? campoFin.value : '');
+                if (errorFecha) return errorFecha;
             }
 
             if (campo.esRif && !REGEX_RIF.test(valor)) {
@@ -582,7 +633,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
 
             try {
                 filasCargadas = json.data || [];
-                const totalPaginas = Math.max(1, Math.ceil(filasCargadas.length / filasPorPagina));
+                const totalPaginas = Math.max(1, Math.ceil(filasFiltradas().length / filasPorPagina));
                 paginaActual = Math.min(paginaActual, totalPaginas);
                 renderBody();
             } catch (e) {
@@ -592,12 +643,16 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         }
 
         function renderBody() {
-            const totalPaginas = Math.max(1, Math.ceil(filasCargadas.length / filasPorPagina));
+            const resultados = filasFiltradas();
+            const totalPaginas = Math.max(1, Math.ceil(resultados.length / filasPorPagina));
             const inicio = (paginaActual - 1) * filasPorPagina;
-            const filas = filasCargadas.slice(inicio, inicio + filasPorPagina);
+            const filas = resultados.slice(inicio, inicio + filasPorPagina);
             if (!filas.length) {
                 const colspan = camposKeys.filter(k => campos[k].type !== 'password' && !campos[k].soloFiltro).length + 2;
-                tablaBody.innerHTML = '<tr><td colspan="' + colspan + '">No hay registros todavía.</td></tr>';
+                const mensajeVacio = buscarMaestro.value.trim()
+                    ? 'No se encontraron registros para esa búsqueda.'
+                    : 'No hay registros todavía.';
+                tablaBody.innerHTML = '<tr><td colspan="' + colspan + '">' + mensajeVacio + '</td></tr>';
                 renderPaginacion(totalPaginas);
                 return;
             }
@@ -622,8 +677,12 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     }
                 });
                 html += '<td class="col-acciones">';
-                html += '<button type="button" class="btn-icon btn-edit" data-id="' + fila.id + '" title="Editar"><i class="fas fa-pen"></i></button>';
-                html += '<button type="button" class="btn-icon btn-delete" data-id="' + fila.id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
+                if (puedeEditarRegistro) {
+                    html += '<button type="button" class="btn-icon btn-edit" data-id="' + fila.id + '" title="Editar"><i class="fas fa-pen"></i></button>';
+                }
+                if (!soloEdicion) {
+                    html += '<button type="button" class="btn-icon btn-delete" data-id="' + fila.id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
+                }
                 html += '</td>';
                 html += '</tr>';
             });
@@ -732,7 +791,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                         ? ' pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü \'\\-]+" title="Solo letras y espacios, sin números"'
                         : (campo.soloNumeros ? ' pattern="[0-9]+"' : '');
                     const inputmodeAttr = campo.inputmode ? ' inputmode="' + campo.inputmode + '"' : '';
-                    html += '<input id="campo_' + key + '" name="' + key + '" type="' + campo.type + '" value="' + escapeHtml(valor) + '"' + maxLengthAttr + patternAttr + inputmodeAttr + (esOpcional ? '' : (campo.optionalOnEdit ? '' : ' required')) + ' />';
+                    const soloLecturaAttr = campo.soloLectura ? ' readonly tabindex="-1"' : '';
+                    const maxHoyAttr = campo.esFechaIngreso ? ' max="' + fechaHoyISO() + '"' : '';
+                    html += '<input id="campo_' + key + '" name="' + key + '" type="' + campo.type + '" value="' + escapeHtml(valor) + '"' + maxLengthAttr + patternAttr + inputmodeAttr + soloLecturaAttr + maxHoyAttr + (esOpcional ? '' : (campo.optionalOnEdit ? '' : ' required')) + ' />';
                     if (tablaActual === 'empleado' && key === 'cedula') {
                         html += '<small id="estado_cedula" class="maestro__field-status" aria-live="polite"></small>';
                     }
@@ -773,6 +834,30 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     selectDependiente.innerHTML = html;
                     selectDependiente.disabled = opciones.length === 0;
                 });
+            });
+
+            // Campos calculados (años de servicio a partir de la fecha de ingreso).
+            camposKeys.forEach(key => {
+                const campo = campos[key];
+                if (!campo.calculaDesde) return;
+                const origen = document.getElementById('campo_' + campo.calculaDesde);
+                const fin = campo.calculaHasta ? document.getElementById('campo_' + campo.calculaHasta) : null;
+                const destino = document.getElementById('campo_' + key);
+                if (!origen || !destino) return;
+
+                const actualizar = () => {
+                    const anios = calcularAniosServicio(origen.value, fin ? fin.value : '');
+                    destino.value = anios === null ? '' : anios;
+                };
+                origen.addEventListener('input', actualizar);
+                origen.addEventListener('change', actualizar);
+                origen.addEventListener('blur', actualizar);
+                if (fin) {
+                    fin.addEventListener('input', actualizar);
+                    fin.addEventListener('change', actualizar);
+                    fin.addEventListener('blur', actualizar);
+                }
+                actualizar();
             });
 
             if (tablaActual === 'empleado') {
@@ -829,76 +914,6 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 mostrarAlerta('Error de conexión con el servidor.', 'error');
             }
         }
-          //se cambio esto para que sea la funcion "general" de exportar a pdf, todo quedo igual solo que el  fetch sale de un mapa segun la tabla
-        async function exportarCargosPdf() {
-            const urlsReporte = {
-        cargo: '../reportes/exportar_cargos.php',
-        empleado: '../reportes/exportar_empleados.php'
-    };
-    const urlReporteActual = urlsReporte[tablaActual];
-    if (!urlReporteActual) {
-        mostrarAlerta('Esta tabla no tiene reporte PDF.', 'error');
-        return;
-    }
-
-    const textoOriginal = btnExportar.innerHTML;
-    let ventanaReporte = null;
-    let urlReporte = null;
-    btnExportar.disabled = true;
-    btnExportar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
-
-    try {
-        ventanaReporte = window.open('', '_blank');
-        if (!ventanaReporte) {
-            throw new Error('Permite las ventanas emergentes para abrir el reporte PDF.');
-        }
-
-        ventanaReporte.document.title = 'Generando reporte PDF';
-        ventanaReporte.document.body.textContent = 'Generando reporte PDF...';
-
-        const response = await fetch(urlReporteActual, {
-            headers: { 'Accept': 'application/json' },
-            cache: 'no-store'
-        });
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-            throw new Error('La sesión pudo expirar. Recarga la página e inténtalo de nuevo.');
-        }
-        const resultado = await response.json();
-        if (!response.ok || !resultado.success) {
-            throw new Error(resultado.message || 'No se pudo generar el PDF.');
-        }
-
-        const contenido = atob(resultado.pdf);
-        const bytes = new Uint8Array(contenido.length);
-        for (let i = 0; i < contenido.length; i++) {
-            bytes[i] = contenido.charCodeAt(i);
-        }
-
-        const archivo = new Blob([bytes], { type: 'application/pdf' });
-        urlReporte = URL.createObjectURL(archivo);
-        ventanaReporte.location.replace(urlReporte);
-
-        const liberarUrl = window.setInterval(() => {
-            if (ventanaReporte.closed) {
-                window.clearInterval(liberarUrl);
-                URL.revokeObjectURL(urlReporte);
-            }
-        }, 1000);
-        mostrarAlerta('El reporte PDF se abrió en una nueva pestaña.', 'success');
-    } catch (error) {
-        if (ventanaReporte && !ventanaReporte.closed) {
-            ventanaReporte.close();
-        }
-        if (urlReporte) {
-            URL.revokeObjectURL(urlReporte);
-        }
-        mostrarAlerta(error.message || 'No se pudo generar el PDF.', 'error');
-    } finally {
-        btnExportar.disabled = false;
-        btnExportar.innerHTML = textoOriginal;
-    }
-}
 
         maestroForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -961,6 +976,16 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
             }
 
             if (tablaActual === 'empleado') {
+                const edad = Number(document.getElementById('campo_edad').value);
+                const aniosServicio = Number(document.getElementById('campo_anios_servicio').value);
+                if (aniosServicio > edad) {
+                    mostrarErrorModal('Los años de servicio (' + aniosServicio + ') no pueden ser mayores que la edad del empleado (' + edad + ').');
+                    document.getElementById('campo_edad').focus();
+                    return;
+                }
+            }
+
+            if (tablaActual === 'empleado') {
                 const inputCedula = document.getElementById('campo_cedula');
                 const cedula = inputCedula.value.trim();
                 if (temporizadorCedula) clearTimeout(temporizadorCedula);
@@ -993,10 +1018,49 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                 mostrarErrorModal(e.message || 'Error de conexión con el servidor.');
             }
         });
-             //para la funcion de exportar en general
-               btnNuevo.addEventListener('click', abrirModalNuevo);
+
+        if (btnNuevo) {
+            btnNuevo.addEventListener('click', abrirModalNuevo);
+        }
+        buscarMaestroForm.addEventListener('submit', (event) => event.preventDefault());
+        buscarMaestro.addEventListener('input', () => {
+            paginaActual = 1;
+            limpiarBusquedaMaestro.hidden = !buscarMaestro.value.trim();
+            renderBody();
+        });
+        limpiarBusquedaMaestro.addEventListener('click', () => {
+            buscarMaestro.value = '';
+            limpiarBusquedaMaestro.hidden = true;
+            paginaActual = 1;
+            buscarMaestro.focus();
+            renderBody();
+        });
         if (btnExportar) {
-            btnExportar.addEventListener('click', exportarCargosPdf);  
+            btnExportar.addEventListener('click', () => {
+                let urlReporte;
+                if (tablaActual === 'cargo') {
+                    urlReporte = '../reportes/exportar_cargos.php';
+                } else if (tablaActual === 'empleado') {
+                    urlReporte = '../reportes/exportar_empleados.php';
+                } else {
+                    const reportesMaestros = {
+                        municipio: 'exportar_municipios.php',
+                        parroquia: 'exportar_parroquias.php',
+                        comuna: 'exportar_comunas.php',
+                        biblioteca: 'exportar_bibliotecas.php',
+                        institucion: 'exportar_instituciones.php',
+                        nv_act: 'exportar_niveles_impacto.php',
+                        espacio: 'exportar_espacios.php',
+                        tipo_actividad: 'exportar_tipos_actividad.php'
+                    };
+                    urlReporte = '../reportes/' + reportesMaestros[tablaActual];
+                }
+                const termino = buscarMaestro.value.trim();
+                if (termino) {
+                    urlReporte += (urlReporte.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(termino);
+                }
+                abrirReportePdf(urlReporte, 'Reporte de ' + tablaActual, btnExportar, mostrarAlerta);
+            });
         }
         modalClose.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);

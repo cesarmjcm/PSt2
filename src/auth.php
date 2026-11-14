@@ -35,7 +35,9 @@ if ($username !== '' && $password !== '') {
             }
 
             $rol = trim(strtolower($user['rol'] ?? 'usuario'));
-            $rol = $rol === 'administrador' ? 'administrador' : 'usuario';
+            if (!in_array($rol, ['administrador', 'coordinador', 'usuario'], true)) {
+                $rol = 'usuario';
+            }
             $idBiblioteca = (int) ($user['id_biblioteca'] ?? 0);
             if ($rol !== 'administrador' && ((int) ($user['id_empleado'] ?? 0) <= 0 || $idBiblioteca <= 0)) {
                 $message = 'El usuario no tiene un empleado vinculado a una biblioteca.';
@@ -44,6 +46,7 @@ if ($username !== '' && $password !== '') {
                 $_SESSION['user'] = $user['nombre'];
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_rol'] = $rol;
+                unset($_SESSION['user_profile']);
                 $_SESSION['id_empleado'] = (int) ($user['id_empleado'] ?? 0);
                 $_SESSION['id_biblioteca'] = $idBiblioteca > 0 ? $idBiblioteca : null;
                 $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';

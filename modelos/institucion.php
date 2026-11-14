@@ -3,14 +3,28 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Institucion
 {
-    public function mostrarInstituciones()
+    public function mostrarInstituciones(?int $idBiblioteca = null)
     {
         $sql = "SELECT i.id, i.nombre, i.rif, i.correo, i.direccion, i.id_municipio, m.nombre AS id_municipio_nombre
                 FROM institucion i
                 JOIN municipio m ON i.id_municipio = m.id
+                " . ($idBiblioteca !== null ? "WHERE (
+                    i.id_municipio = (
+                        SELECT p_usuario.id_municipio
+                        FROM biblioteca b_usuario
+                        JOIN parroquia p_usuario ON p_usuario.id = b_usuario.id_parroquia
+                        WHERE b_usuario.id = ?
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM solicitud s
+                        WHERE s.id_institucion = i.id
+                          AND s.id_biblioteca = ?
+                    )
+                ) " : "") . "
                 ORDER BY i.nombre";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -22,7 +36,7 @@ class Institucion
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, int $id_municipio, ?int $idExcluir = null): bool
+    public function existeNombre(string $nombre, int $id_municipio, int $idExcluir = null): bool
     {
         $sql = "SELECT id FROM institucion WHERE LOWER(nombre) = LOWER(?) AND id_municipio = ?";
         $params = [$nombre, $id_municipio];
@@ -36,7 +50,7 @@ class Institucion
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeRif(string $rif, ?int $idExcluir = null): bool
+    public function existeRif(string $rif, int $idExcluir = null): bool
     {
         $sql = "SELECT id FROM institucion WHERE rif = ?";
         $params = [$rif];

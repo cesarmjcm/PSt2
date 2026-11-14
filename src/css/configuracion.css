@@ -319,3 +319,25 @@
         align-items: stretch;
     }
 }
+
+/* Ojito para ver la clave */
+.campo-clave {
+    position: relative;
+}
+
+.campo-clave input {
+    padding-right: 48px;
+}
+
+.btn-ojo {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #25346b;
+    font-size: 1.05rem;
+    padding: 4px;
+}

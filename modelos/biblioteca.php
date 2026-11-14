@@ -8,6 +8,7 @@ public function mostrarBibliotecas(?int $idBiblioteca = null) {
                 b.id,
                 b.nombre,
                 b.id_parroquia,
+                p.id_municipio,
                 p.nombre AS id_parroquia_nombre,
                 b.Correo AS correo,
                 b.redes_sociales,
@@ -30,7 +31,7 @@ public function mostrarBibliotecas(?int $idBiblioteca = null) {
     }
 
     
-    public function existeNombre(string $nombre, int $id_parroquia, ?int $idExcluir = null): bool {
+    public function existeNombre(string $nombre, int $id_parroquia, int $idExcluir = null): bool {
         $sql = "SELECT id FROM biblioteca WHERE LOWER(nombre) = LOWER(?) AND id_parroquia = ?";
         $params = [$nombre, $id_parroquia];
         if ($idExcluir !== null) {

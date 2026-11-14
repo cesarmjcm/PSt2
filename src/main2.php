@@ -35,7 +35,7 @@ if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - Red de Bibliotecas</title>
-    <link rel="stylesheet" href="./css/main2.css?v=4">
+    <link rel="stylesheet" href="./css/main2.css?v=13">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
@@ -44,7 +44,11 @@ if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
     <?php include '../include/metrics.php'; ?>
     <?php include '../include/modal.php'; ?>
     <?php include '../include/calendario.php'; ?>
-    <script src="./js/app.js"></script>
-    <script src="./js/script.js"></script>
+    <script src="./js/utilidades.js?v=<?= filemtime(__DIR__ . '/js/utilidades.js') ?>"></script>
+    <script src="./js/validaciones.js?v=<?= filemtime(__DIR__ . '/js/validaciones.js') ?>"></script>
+    <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
+    <script src="./js/main2.js?v=<?= filemtime(__DIR__ . '/js/main2.js') ?>"></script>
+    <script src="./js/reportes.js?v=<?= filemtime(__DIR__ . '/js/reportes.js') ?>"></script>
+    <script src="./js/script.js?v=<?= filemtime(__DIR__ . '/js/script.js') ?>"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@ class ActividadController
     private $empleadoModel;
     private $conex;
 
-    private const TRANSICIONES_ESTADO = [
+    const TRANSICIONES_ESTADO = [
         'pendiente' => ['pendiente', 'confirmada', 'cancelada'],
         'confirmada' => ['confirmada', 'ejecutada', 'cancelada'],
         'ejecutada' => ['ejecutada'],
@@ -36,7 +36,7 @@ class ActividadController
         $this->conex = Conexion::conectar();
     }
 
-    public function dispatch(): void
+    public function dispatch()
     {
         $action = $_REQUEST['action'] ?? '';
 
@@ -59,7 +59,7 @@ class ActividadController
         }
     }
 
-    private function crear(): void
+    private function crear()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -73,11 +73,15 @@ class ActividadController
                 $this->error('El usuario no tiene una biblioteca asociada.');
                 return;
             }
-            $data['id_biblioteca'] = $idBibliotecaUsuario;
+            $data['id_biblioteca'] = $data['tipo_ubicacion'] === 'biblioteca' ? $idBibliotecaUsuario : 0;
         }
         $errorResponsable = $this->completarDatosResponsable($data);
         if ($errorResponsable !== null) {
             $this->error($errorResponsable);
+            return;
+        }
+        if (!esAdministrador() && $data['tipo_ubicacion'] === 'espacio' && $data['responsable'] === '') {
+            $this->error('Seleccione un responsable de su biblioteca para una actividad en un espacio cultural.');
             return;
         }
         $errors = $this->model->validarActividad($data);
@@ -98,6 +102,11 @@ class ActividadController
             . ' id_biblioteca=' . ($data['id_biblioteca'] ?? '') . ' id_espacio_cultural=' . ($data['id_espacio_cultural'] ?? ''));
         if ($hayConflicto) {
             $this->error('Ya existe otra actividad registrada en ese mismo lugar, fecha y hora.');
+            return;
+        }
+
+        if ($this->model->existeConflictoResponsableHorario($data)) {
+            $this->error('El responsable ya tiene otra actividad asignada en esa fecha y hora.');
             return;
         }
 
@@ -124,7 +133,7 @@ class ActividadController
         $this->error('No se pudo crear la actividad.');
     }
 
-    private function actualizar(): void
+    private function actualizar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -132,7 +141,7 @@ class ActividadController
         }
    
     
-        if (($_SESSION['user_rol'] ?? '') !== 'administrador') {
+        if (!esAdministrador() && !esCoordinador()) {
             $this->error('No tienes permisos para editar actividades.');
             return;
         }
@@ -142,16 +151,24 @@ class ActividadController
             return;
         }
 
-        $actual = $this->model->obtenerActividadPorId($id);
+        $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $actual = $this->model->obtenerActividadPorId($id, $idBibliotecaUsuario);
         if (!$actual) {
-            $this->error('La actividad no existe.');
+            $this->error('La actividad no existe o no pertenece a tu biblioteca.');
             return;
         }
 
         $data = $this->collectInput();
+        if (esCoordinador()) {
+            $data['id_biblioteca'] = $data['tipo_ubicacion'] === 'biblioteca' ? $idBibliotecaUsuario : 0;
+        }
         $errorResponsable = $this->completarDatosResponsable($data, $actual);
         if ($errorResponsable !== null) {
             $this->error($errorResponsable);
+            return;
+        }
+        if (esCoordinador() && $data['tipo_ubicacion'] === 'espacio' && $data['responsable'] === '') {
+            $this->error('Seleccione un responsable de su biblioteca para una actividad en un espacio cultural.');
             return;
         }
         $estadoActual = strtolower(Validador::normalizarTexto($actual['estado'] ?? 'pendiente'));
@@ -178,6 +195,11 @@ class ActividadController
             return;
         }
 
+        if ($this->model->existeConflictoResponsableHorario($data, $id)) {
+            $this->error('El responsable ya tiene otra actividad asignada en esa fecha y hora.');
+            return;
+        }
+
         try {
             $updated = $this->model->actualizarActividadCompleta($id, $data);
             if ($updated) {
@@ -199,7 +221,7 @@ class ActividadController
         $this->error('No se pudo actualizar la actividad.');
     }
 
-    private function eliminar(): void
+    private function eliminar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -233,7 +255,7 @@ class ActividadController
         $this->error('No se pudo eliminar la actividad.');
     }
 
-    private function listar(): void
+    private function listar()
     {
         
         
@@ -310,7 +332,7 @@ class ActividadController
         ];
     }
 
-    private function completarDatosResponsable(array &$data, ?array $actual = null): ?string
+    private function completarDatosResponsable(array &$data, array $actual = null)
     {
         $idEmpleado = $data['id_empleado'];
         if ($idEmpleado === '') {
@@ -335,7 +357,7 @@ class ActividadController
             return 'El empleado responsable seleccionado ya no existe.';
         }
 
-        $data['responsable'] = trim((string)($empleado['nombre'] ?? '') . ' ' . (string)($empleado['apellido'] ?? ''));
+        $data['responsable'] = (string)(int)$idEmpleado; // ahora se guarda el id del empleado
         $data['telefono_responsable'] = trim((string)($empleado['telefono'] ?? ''));
         return null;
     }
@@ -374,7 +396,7 @@ class ActividadController
         return '../src/main2.php';
     }
 
-    private function success(string $message, array $extra = []): void
+    private function success(string $message, array $extra = [])
     {
         if ($this->shouldReturnJson()) {
             $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
@@ -384,7 +406,7 @@ class ActividadController
         exit;
     }
 
-    private function error(string $message): void
+    private function error(string $message)
     {
         if ($this->shouldReturnJson()) {
             $this->respond(['success' => false, 'message' => $message]);
@@ -404,7 +426,7 @@ class ActividadController
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 
-    private function respond(array $payload): void
+    private function respond(array $payload)
     {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);

@@ -25,11 +25,19 @@ class UsuarioController
     
     private function telefonosCoinciden(string $a, string $b): bool
     {
-        $limpiar = static fn(string $v): string => preg_replace('/[^0-9]/', '', $v);
+        $limpiar = function ($v) {
+            return preg_replace('/[^0-9]/', '', (string) $v);
+        };
         return $limpiar($a) === $limpiar($b) && $limpiar($a) !== '';
     }
 
-    public function dispatch(): void
+    private function empleadoGestionable(int $idEmpleado)
+    {
+        $idBiblioteca = esCoordinador() ? (int) (guardian_idBibliotecaSesion() ?? 0) : null;
+        return $this->empleadoModel->obtenerEmpleadoPorId($idEmpleado, $idBiblioteca);
+    }
+
+    public function dispatch()
     {
         $action = $_REQUEST['action'] ?? '';
 
@@ -52,7 +60,7 @@ class UsuarioController
         }
     }
 
-    private function crear(): void
+    private function crear()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -60,7 +68,7 @@ class UsuarioController
         }
 
         
-        if (!esAdministrador()) {
+        if (!esAdministrador() && !esCoordinador()) {
             $this->error('No tienes permisos para crear usuarios.');
             return;
         }
@@ -70,8 +78,8 @@ class UsuarioController
         $claveConfirmacion = trim($_POST['clave_confirmacion'] ?? '');
         $telefono = trim($_POST['telefono'] ?? '');
         $id_empleado = intval($_POST['id_empleado'] ?? 0);
-        $rol = trim($_POST['rol'] ?? 'usuario');
-        if (!in_array($rol, ['administrador', 'usuario'], true)) {
+        $rol = esAdministrador() ? trim($_POST['rol'] ?? 'usuario') : 'usuario';
+        if (!in_array($rol, ['administrador', 'coordinador', 'usuario'], true)) {
             $rol = 'usuario';
         }
 
@@ -97,9 +105,9 @@ class UsuarioController
             return;
         }
 
-        $empleado = $this->empleadoModel->obtenerEmpleadoPorId($id_empleado);
+        $empleado = $this->empleadoGestionable($id_empleado);
         if (!$empleado) {
-            $this->error('El empleado seleccionado no existe.');
+            $this->error('El empleado seleccionado no existe o no pertenece a tu biblioteca.');
             return;
         }
 
@@ -131,7 +139,7 @@ class UsuarioController
         $this->error('No se pudo crear el usuario.');
     }
 
-    private function actualizar(): void
+    private function actualizar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
@@ -151,11 +159,27 @@ class UsuarioController
         }
 
         $esAdmin = esAdministrador();
+        $esCoordinador = esCoordinador();
         $idSesion = intval($_SESSION['user_id'] ?? 0);
 
-        
-        if (!$esAdmin && $id !== $idSesion) {
+        $usuarioActualizado = $this->model->obtenerUsuarioPorId($id);
+        if (!$usuarioActualizado) {
+            $this->error('El usuario seleccionado no existe.');
+            return;
+        }
+
+        if (!$esAdmin && !$esCoordinador && $id !== $idSesion) {
             $this->error('No tienes permisos para editar este usuario.');
+            return;
+        }
+        if (
+            $esCoordinador
+            && (
+                !$this->empleadoGestionable((int) ($usuarioActualizado['id_empleado'] ?? 0))
+                || ($id !== $idSesion && ($usuarioActualizado['rol'] ?? '') !== 'usuario')
+            )
+        ) {
+            $this->error('Solo puedes editar usuarios de tu biblioteca.');
             return;
         }
 
@@ -164,7 +188,7 @@ class UsuarioController
         $rol = null;
         if ($esAdmin) {
             $rolEnviado = trim($_POST['rol'] ?? '');
-            if ($rolEnviado !== '' && in_array($rolEnviado, ['administrador', 'usuario'], true)) {
+            if ($rolEnviado !== '' && in_array($rolEnviado, ['administrador', 'coordinador', 'usuario'], true)) {
                 $rol = $rolEnviado;
             }
         }
@@ -195,9 +219,18 @@ class UsuarioController
             return;
         }
 
-        $empleado = $this->empleadoModel->obtenerEmpleadoPorId($id_empleado);
+        if (!$esAdmin && !$esCoordinador && $id_empleado !== (int) ($_SESSION['id_empleado'] ?? 0)) {
+            $this->error('No puedes cambiar el empleado vinculado a tu usuario.');
+            return;
+        }
+        if ($esCoordinador && ($usuarioActualizado['rol'] ?? '') !== 'usuario' && $id_empleado !== (int) $usuarioActualizado['id_empleado']) {
+            $this->error('No puedes cambiar el empleado vinculado a un usuario con permisos elevados.');
+            return;
+        }
+
+        $empleado = $this->empleadoGestionable($id_empleado);
         if (!$empleado) {
-            $this->error('El empleado seleccionado no existe.');
+            $this->error('El empleado seleccionado no existe o no pertenece a tu biblioteca.');
             return;
         }
 
@@ -236,14 +269,14 @@ class UsuarioController
         $this->error('No se pudo actualizar el usuario.');
     }
 
-    private function eliminar(): void
+    private function eliminar()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Método no permitido.');
             return;
         }
 
-        if (!esAdministrador()) {
+        if (!esAdministrador() && !esCoordinador()) {
             $this->error('No tienes permisos para eliminar usuarios.');
             return;
         }
@@ -252,6 +285,18 @@ class UsuarioController
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
+        }
+        if (esCoordinador()) {
+            $usuario = $this->model->obtenerUsuarioPorId($id);
+            if (
+                $id === (int) ($_SESSION['user_id'] ?? 0)
+                || !$usuario
+                || ($usuario['rol'] ?? '') !== 'usuario'
+                || !$this->empleadoGestionable((int) ($usuario['id_empleado'] ?? 0))
+            ) {
+                $this->error('Solo puedes eliminar usuarios de tu biblioteca.');
+                return;
+            }
         }
 
         $deleted = $this->model->eliminarUsuario($id);
@@ -267,29 +312,38 @@ class UsuarioController
         $this->error('No se pudo eliminar el usuario.');
     }
 
-    private function listar(): void
+    private function listar()
     {
         $data = $this->model->mostrarUsuarios();
 
-        if (!esAdministrador()) {
+        if (esCoordinador()) {
+            $idBiblioteca = (int) (guardian_idBibliotecaSesion() ?? 0);
+            $idSesion = (int) ($_SESSION['user_id'] ?? 0);
+            $data = array_values(array_filter($data, static function ($usuario) use ($idBiblioteca, $idSesion) {
+                return (int) ($usuario['id_biblioteca'] ?? 0) === $idBiblioteca
+                    && ((int) $usuario['id'] === $idSesion || ($usuario['rol'] ?? '') === 'usuario');
+            }));
+        } elseif (!esAdministrador()) {
             $idSesion = intval($_SESSION['user_id'] ?? 0);
-            $data = array_values(array_filter($data, fn($u) => (int) $u['id'] === $idSesion));
+            $data = array_values(array_filter($data, function ($u) use ($idSesion) {
+                return (int) $u['id'] === $idSesion;
+            }));
         }
 
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = []): void
+    private function success(string $message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message): void
+    private function error(string $message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }
 
-    private function respond(array $payload): void
+    private function respond(array $payload)
     {
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);

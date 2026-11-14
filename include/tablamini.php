@@ -1,10 +1,12 @@
 <?php
+require_once __DIR__ . '/../helpers/busqueda.php';
+
 $actividades = [];
 $errorMessage = '';
 $totalActividades = 0;
 $totalParticipantes = 0;
 $municipiosActivos = [];
-$busqueda = trim((string)($_GET['q'] ?? ''));
+$busqueda = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
 
 try {
     require_once __DIR__ . '/../modelos/actividad.php';
@@ -13,10 +15,7 @@ try {
     
     $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
     if ($busqueda !== '') {
-        $actividades = array_values(array_filter($actividades, static function (array $actividad) use ($busqueda): bool {
-            $textoActividad = implode(' ', array_map('strval', $actividad));
-            return stripos($textoActividad, $busqueda) !== false;
-        }));
+        $actividades = filtrarFilasPorBusqueda($actividades, $busqueda);
     }
     $totalActividades = count($actividades);
     $actividadesPorPagina = 10;
@@ -46,17 +45,21 @@ try {
         text-transform: capitalize;
         white-space: nowrap;
     }
+    .badge-estado--pendiente {
+        background: #fde68a;
+        color: #78350f;
+    }
     .badge-estado--confirmada {
-        background: #e0edff;
-        color: #1d4ed8;
+        background: #bfdbfe;
+        color: #1e40af;
     }
     .badge-estado--ejecutada {
-        background: #dcfce7;
-        color: #15803d;
+        background: #bbf7d0;
+        color: #166534;
     }
     .badge-estado--cancelada {
-        background: #fee2e2;
-        color: #b91c1c;
+        background: #fecaca;
+        color: #991b1b;
     }
 </style>
 <div class="tabla__container">
@@ -77,6 +80,9 @@ try {
                             </a>
                         <?php endif; ?>
                     </form>
+                    <button type="button" class="btn-primary btn-exportar" id="btnExportarActividades">
+                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    </button>
                 </div>
                 <table class="tabla-planificacion">
                     <thead>
@@ -100,6 +106,17 @@ try {
                             </tr>
                         <?php else: ?>
                             <?php foreach ($actividades as $index => $actividad): ?>
+                                <?php
+                                    $idBibliotecaSesion = (int) (guardian_idBibliotecaSesion() ?? 0);
+                                    $puedeEditarActividad = esAdministrador()
+                                        || (esCoordinador() && (
+                                            (int) ($actividad['id_biblioteca'] ?? 0) === $idBibliotecaSesion
+                                            || (
+                                                empty($actividad['id_biblioteca'])
+                                                && (int) ($actividad['id_biblioteca_responsable'] ?? 0) === $idBibliotecaSesion
+                                            )
+                                        ));
+                                ?>
                                 <tr>
                                     <td><?php echo $index + 1; ?></td>
 
@@ -109,6 +126,7 @@ try {
                                         <?php
                                             $estadoActividad = strtolower(trim((string)($actividad['estado'] ?? 'confirmada')));
                                             $estadoLabels = [
+                                                'pendiente'  => 'Pendiente',
                                                 'confirmada' => 'Confirmada',
                                                 'ejecutada'  => 'Ejecutada',
                                                 'cancelada'  => 'Cancelada',
@@ -145,7 +163,7 @@ try {
                                                     data-target="detalle-actividad-<?php echo htmlspecialchars($actividad['id'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 <i class="fas fa-chevron-down"></i>
                                             </button>
-                                            <?php if (($_SESSION['user_rol'] ?? '') === 'administrador'): ?>
+                                            <?php if ($puedeEditarActividad): ?>
                                         <button type="button"
                                                 class="btn-icon btn-edit-actividad"
                                                 title="Editar"
@@ -162,7 +180,7 @@ try {
                                                 data-municipio-id="<?php echo htmlspecialchars($actividad['municipio_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-parroquia="<?php echo htmlspecialchars($actividad['parroquia'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-comuna="<?php echo htmlspecialchars($actividad['comuna'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                                                data-espacio="<?php echo htmlspecialchars($actividad['espacio_cultural'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-espacio="<?php echo htmlspecialchars((string)($actividad['id_espacio_cultural'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-id-biblioteca="<?php echo htmlspecialchars($actividad['id_biblioteca'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-id-tipo-actividad="<?php echo htmlspecialchars((string)($actividad['id_tipo_actividad'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                                 data-responsable="<?php echo htmlspecialchars($actividad['responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
@@ -203,8 +221,12 @@ try {
                                             <p><strong>Municipio:</strong> <?php echo htmlspecialchars($actividad['municipio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Parroquia:</strong> <?php echo htmlspecialchars($actividad['parroquia'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Comuna:</strong> <?php echo htmlspecialchars($actividad['comuna'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-                                            <p><strong>Espacio cultural:</strong> <?php echo htmlspecialchars($actividad['espacio_cultural'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-                                            <p><strong>Biblioteca:</strong> <?php echo htmlspecialchars($actividad['biblioteca'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <?php if (trim((string)($actividad['espacio_cultural'] ?? '')) !== ''): ?>
+                                            <p><strong>Espacio cultural:</strong> <?php echo htmlspecialchars($actividad['espacio_cultural'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <?php endif; ?>
+                                            <?php if (trim((string)($actividad['biblioteca'] ?? '')) !== ''): ?>
+                                            <p><strong>Biblioteca:</strong> <?php echo htmlspecialchars($actividad['biblioteca'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <?php endif; ?>
                                             <p><strong>Responsable:</strong> <?php echo htmlspecialchars($actividad['responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                             <p><strong>Teléfono responsable:</strong> <?php echo htmlspecialchars($actividad['telefono_responsable'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
                                         </div>

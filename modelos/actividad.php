@@ -4,37 +4,150 @@ require_once __DIR__ . '/../helpers/validador.php';
 
 class Actividad {
 
-    private function condicionBiblioteca(?int $idBiblioteca, string $alias = 'a'): string
+    // Convierte los nombres de parroquia y comuna que llegan del formulario en ids.
+    // Solo se guarda actividad.id_comuna: la parroquia y el municipio se obtienen
+    // con JOINs (actividad -> comuna -> parroquia -> municipio), la comuna hace de "puente".
+    private function resolverUbicacion(PDO $pdo, array $d): array
+    {
+        $idMunicipio = !empty($d['municipio_id']) ? (int) $d['municipio_id'] : 0;
+        $nombreParroquia = trim((string) ($d['parroquia'] ?? ''));
+        $nombreComuna = trim((string) ($d['comuna'] ?? ''));
+        $idParroquia = null;
+        $idComuna = null;
+
+        if ($nombreComuna !== '') {
+            $sql = "SELECT c.id, c.id_parroquia
+                    FROM comuna c
+                    JOIN parroquia p ON p.id = c.id_parroquia
+                    WHERE c.nombre = ?";
+            $params = [$nombreComuna];
+            if ($nombreParroquia !== '') {
+                $sql .= " AND p.nombre = ?";
+                $params[] = $nombreParroquia;
+            }
+            if ($idMunicipio > 0) {
+                $sql .= " AND p.id_municipio = ?";
+                $params[] = $idMunicipio;
+            }
+            $stmt = $pdo->prepare($sql . " LIMIT 1");
+            $stmt->execute($params);
+            $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($fila) {
+                $idComuna = (int) $fila['id'];
+                $idParroquia = (int) $fila['id_parroquia'];
+            }
+        } elseif ($nombreParroquia !== '') {
+            $sql = "SELECT id FROM parroquia WHERE nombre = ?";
+            $params = [$nombreParroquia];
+            if ($idMunicipio > 0) {
+                $sql .= " AND id_municipio = ?";
+                $params[] = $idMunicipio;
+            }
+            $stmt = $pdo->prepare($sql . " LIMIT 1");
+            $stmt->execute($params);
+            $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($fila) {
+                $idParroquia = (int) $fila['id'];
+            }
+        }
+
+        return [$idParroquia, $idComuna];
+    }
+
+    /**
+     * Valida con JOINs que la jerarquía municipio -> parroquia -> comuna elegida sea coherente.
+     * Si el espacio cultural es el lugar, exige comuna: así el espacio queda asociado a una
+     * parroquia (espacio_cultural -> actividad -> comuna -> parroquia).
+     */
+    public function validarUbicacionJerarquica(array $d): array
+    {
+        $errors = [];
+        $idMunicipio = !empty($d['municipio_id']) ? (int) $d['municipio_id'] : 0;
+        $nombreParroquia = trim((string) ($d['parroquia'] ?? ''));
+        $nombreComuna = trim((string) ($d['comuna'] ?? ''));
+        $esEspacio = trim((string) ($d['tipo_ubicacion'] ?? '')) === 'espacio';
+
+        if ($esEspacio && $nombreComuna === '') {
+            $errors[] = 'Seleccione la comuna para asociar el espacio cultural a una parroquia.';
+            return $errors;
+        }
+
+        $pdo = Conexion::conectar();
+        if ($nombreParroquia !== '') {
+            $sql = "SELECT p.id FROM parroquia p
+                    JOIN municipio m ON m.id = p.id_municipio
+                    WHERE p.nombre = ?";
+            $params = [$nombreParroquia];
+            if ($idMunicipio > 0) {
+                $sql .= " AND m.id = ?";
+                $params[] = $idMunicipio;
+            }
+            $stmt = $pdo->prepare($sql . " LIMIT 1");
+            $stmt->execute($params);
+            if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+                $errors[] = 'La parroquia seleccionada no pertenece al municipio indicado.';
+                return $errors;
+            }
+        }
+
+        if ($nombreComuna !== '') {
+            $sql = "SELECT c.id FROM comuna c
+                    JOIN parroquia p ON p.id = c.id_parroquia
+                    JOIN municipio m ON m.id = p.id_municipio
+                    WHERE c.nombre = ?";
+            $params = [$nombreComuna];
+            if ($nombreParroquia !== '') {
+                $sql .= " AND p.nombre = ?";
+                $params[] = $nombreParroquia;
+            }
+            if ($idMunicipio > 0) {
+                $sql .= " AND m.id = ?";
+                $params[] = $idMunicipio;
+            }
+            $stmt = $pdo->prepare($sql . " LIMIT 1");
+            $stmt->execute($params);
+            if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+                $errors[] = 'La comuna seleccionada no pertenece a la parroquia indicada.';
+            }
+        }
+
+        return $errors;
+    }
+
+    private function condicionBiblioteca($idBiblioteca, string $alias = 'a'): string
     {
         if ($idBiblioteca === null) {
             return '';
         }
 
-        return "(
-                    {$alias}.id_biblioteca = ?
-                    OR (
-                        {$alias}.id_biblioteca IS NULL
-                        AND {$alias}.id_espacio_cultural IS NOT NULL
-                        AND EXISTS (
-                            SELECT 1
-                            FROM actividad_comuna ac_scope
-                            JOIN comuna co_scope ON co_scope.id = ac_scope.id_comuna
-                            JOIN parroquia pa_scope ON pa_scope.id = co_scope.id_parroquia
-                            JOIN biblioteca bi_scope ON bi_scope.id = ?
-                            JOIN parroquia pb_scope ON pb_scope.id = bi_scope.id_parroquia
-                            WHERE ac_scope.id_actividad = {$alias}.id
-                                AND pa_scope.id_municipio = pb_scope.id_municipio
-                        )
-                    )
-                )";
+        return "({$alias}.id_biblioteca = ? OR ({$alias}.id_biblioteca IS NULL AND EXISTS (
+            SELECT 1 FROM empleado e
+            WHERE e.id = {$alias}.responsable AND e.id_biblioteca = ?
+        )))";
     }
 
-    public function mostrarActividades(?int $idBiblioteca = null) {
-        $sql = "SELECT a.* FROM actividad a" .
-            ($idBiblioteca !== null ? " WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") .
+    private function condicionVisibilidad(int $idBiblioteca, string $alias = 'a', string $municipioAlias = 'p'): string
+    {
+        return "({$municipioAlias}.id_municipio = (
+            SELECT p_usuario.id_municipio
+            FROM biblioteca b_usuario
+            JOIN parroquia p_usuario ON p_usuario.id = b_usuario.id_parroquia
+            WHERE b_usuario.id = ?
+        ) OR " . $this->condicionBiblioteca($idBiblioteca, $alias) . ")";
+    }
+
+    public function mostrarActividades(int $idBiblioteca = null) {
+        $sql = "SELECT a.* FROM actividad a
+            LEFT JOIN comuna c ON c.id = a.id_comuna
+            LEFT JOIN biblioteca b ON b.id = COALESCE(
+                a.id_biblioteca,
+                (SELECT e.id_biblioteca FROM empleado e WHERE e.id = a.responsable)
+            )
+            LEFT JOIN parroquia p ON p.id = COALESCE(c.id_parroquia, b.id_parroquia)" .
+            ($idBiblioteca !== null ? " WHERE " . $this->condicionVisibilidad($idBiblioteca) : "") .
             " ORDER BY a.fecha DESC";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
@@ -52,7 +165,7 @@ class Actividad {
         return $actividad;
     }
 
-    public function mostrarActividadesCompletas(?int $idBiblioteca = null) {
+    public function mostrarActividadesCompletas(int $idBiblioteca = null) {
         
         
         
@@ -73,49 +186,38 @@ class Actividad {
                 a.id_biblioteca,
                 a.id_espacio_cultural,
                 a.id_tipo_actividad,
-                a.responsable,
-                a.telefono_responsable,
+                CONCAT(er.nombre, ' ', er.apellido) AS responsable,
+                a.responsable AS id_empleado,
+                er.telefono AS telefono_responsable,
+                er.id_biblioteca AS id_biblioteca_responsable,
                 ta.nombre AS tipo_actividad,
                 b.nombre AS biblioteca,
-                COALESCE(m.id, (
-                    SELECT MIN(pa_espacio.id_municipio)
-                    FROM actividad_comuna ac_espacio
-                    JOIN comuna co_espacio ON co_espacio.id = ac_espacio.id_comuna
-                    JOIN parroquia pa_espacio ON pa_espacio.id = co_espacio.id_parroquia
-                    WHERE ac_espacio.id_actividad = a.id
-                )) AS municipio_id,
-                COALESCE(m.nombre, (
-                    SELECT MIN(mu_espacio.nombre)
-                    FROM actividad_comuna ac_espacio
-                    JOIN comuna co_espacio ON co_espacio.id = ac_espacio.id_comuna
-                    JOIN parroquia pa_espacio ON pa_espacio.id = co_espacio.id_parroquia
-                    JOIN municipio mu_espacio ON mu_espacio.id = pa_espacio.id_municipio
-                    WHERE ac_espacio.id_actividad = a.id
-                )) AS municipio,
-                COALESCE(p.nombre, (
-                    SELECT MIN(pa_espacio.nombre)
-                    FROM actividad_comuna ac_espacio
-                    JOIN comuna co_espacio ON co_espacio.id = ac_espacio.id_comuna
-                    JOIN parroquia pa_espacio ON pa_espacio.id = co_espacio.id_parroquia
-                    WHERE ac_espacio.id_actividad = a.id
-                )) AS parroquia,
-                GROUP_CONCAT(DISTINCT ni.nombre_impacto SEPARATOR ', ') AS nivel_impacto,
-                GROUP_CONCAT(DISTINCT co.nombre SEPARATOR ', ') AS comuna
+                ec.nombre AS espacio_cultural,
+                m.id AS municipio_id,
+                m.nombre AS municipio,
+                p.id AS parroquia_id,
+                p.nombre AS parroquia,
+                ni.nombre_impacto AS nivel_impacto,
+                c.nombre AS comuna
             FROM actividad a
             LEFT JOIN tipo_actividad ta ON ta.id = a.id_tipo_actividad
-            LEFT JOIN biblioteca b ON b.id = a.id_biblioteca
-            LEFT JOIN parroquia p ON p.id = b.id_parroquia
+            LEFT JOIN biblioteca b ON b.id = COALESCE(
+                a.id_biblioteca,
+                (SELECT e.id_biblioteca FROM empleado e WHERE e.id = a.responsable)
+            )
+            LEFT JOIN espacio_cultural ec ON ec.id = a.id_espacio_cultural
+            LEFT JOIN comuna c ON c.id = a.id_comuna
+            -- La parroquia sale de la comuna de la actividad (comuna -> parroquia); si no tiene comuna, de la biblioteca.
+            LEFT JOIN parroquia p ON p.id = COALESCE(c.id_parroquia, b.id_parroquia)
             LEFT JOIN municipio m ON m.id = p.id_municipio
-            LEFT JOIN impacto_actividad ia ON ia.id_actividad = a.id
-            LEFT JOIN nivel_impacto ni ON ni.id = ia.id_impacto
-            LEFT JOIN actividad_comuna ac ON ac.id_actividad = a.id
-            LEFT JOIN comuna co ON co.id = ac.id_comuna
-            " . ($idBiblioteca !== null ? "WHERE " . $this->condicionBiblioteca($idBiblioteca) : "") . "
+            LEFT JOIN nivel_impacto ni ON ni.id = a.id_nivel_impacto
+            LEFT JOIN empleado er ON er.id = a.responsable
+            " . ($idBiblioteca !== null ? "WHERE " . $this->condicionVisibilidad($idBiblioteca) : "") . "
             GROUP BY a.id
             ORDER BY a.fecha DESC
         ";
         $stmt = Conexion::conectar()->prepare($sql);
-        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca] : []);
+        $stmt->execute($idBiblioteca !== null ? [$idBiblioteca, $idBiblioteca, $idBiblioteca] : []);
         $actividades = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
@@ -203,13 +305,15 @@ class Actividad {
             $errors[] = 'Comuna inválida.';
         }
 
+        $errors = array_merge($errors, $this->validarUbicacionJerarquica($d));
+
         if (!Validador::esEnteroPositivo($d['id_tipo_actividad'] ?? 0)) {
             $errors[] = 'Tipo de actividad inválido.';
         }
 
         $responsable = trim($d['responsable'] ?? '');
-        if ($responsable !== '' && !Validador::esNombrePropioValido($responsable, 2, 100)) {
-            $errors[] = 'El responsable debe tener entre 2 y 100 caracteres y solo puede contener letras, espacios, apóstrofos o guiones.';
+        if ($responsable !== '' && !ctype_digit($responsable)) {
+            $errors[] = 'El responsable seleccionado no es válido.';
         }
 
         $telefonoResponsable = trim($d['telefono_responsable'] ?? '');
@@ -235,7 +339,7 @@ class Actividad {
         }
     }
 
-    public function obtenerActividadPorId(int $id, ?int $idBiblioteca = null) {
+    public function obtenerActividadPorId(int $id, int $idBiblioteca = null) {
         $sql = "SELECT a.* FROM actividad a WHERE a.id = ?" .
             ($idBiblioteca !== null ? " AND " . $this->condicionBiblioteca($idBiblioteca) : "");
         $stmt = Conexion::conectar()->prepare($sql);
@@ -254,7 +358,7 @@ class Actividad {
      * @param int|null $idExcluir ID de la actividad actual, para no compararla consigo misma al editar.
      * @return bool True si hay conflicto de horario/lugar.
      */
-    public function existeConflictoHorario(array $d, ?int $idExcluir = null): bool
+    public function existeConflictoHorario(array $d, int $idExcluir = null): bool
     {
         $fecha = trim($d['fecha'] ?? '');
         $hora = trim($d['hora'] ?? '');
@@ -281,6 +385,30 @@ class Actividad {
             $params[] = $idEspacio;
         }
 
+        if ($idExcluir !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $idExcluir;
+        }
+        $sql .= " LIMIT 1";
+
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute($params);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function existeConflictoResponsableHorario(array $d, int $idExcluir = null): bool
+    {
+        $fecha = trim($d['fecha'] ?? '');
+        $hora = trim($d['hora'] ?? '');
+        $responsable = trim($d['responsable'] ?? '');
+        $estado = trim($d['estado'] ?? '');
+        if ($fecha === '' || $hora === '' || $responsable === '' || $estado === 'cancelada') {
+            return false;
+        }
+
+        $sql = "SELECT id FROM actividad
+                WHERE fecha = ? AND hora = ? AND responsable = ? AND estado != 'cancelada'";
+        $params = [$fecha, $hora, (int) $responsable];
         if ($idExcluir !== null) {
             $sql .= " AND id != ?";
             $params[] = $idExcluir;
@@ -323,20 +451,24 @@ class Actividad {
             
             
             
-            $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
-            $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
-            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad, estado, responsable, telefono_responsable)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $idBiblioteca = ($d['tipo_ubicacion'] ?? '') === 'biblioteca' && !empty($d['id_biblioteca'])
+                ? (int)$d['id_biblioteca']
+                : null;
+            $idEspacioCultural = ($d['tipo_ubicacion'] ?? '') === 'espacio' && !empty($d['id_espacio_cultural'])
+                ? (int)$d['id_espacio_cultural']
+                : null;
+            $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
+            list(, $idComuna) = $this->resolverUbicacion($pdo, $d);
+            $sql = "INSERT INTO actividad (nombre, descripcion, objetivo, participantes, fecha, hora, dia_semana, id_biblioteca, id_espacio_cultural, id_tipo_actividad, estado, responsable, id_nivel_impacto, id_comuna)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
                 $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
-                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null
+                $d['responsable'] ?: null, $idNivel, $idComuna
             ]);
             $idActividad = (int)$pdo->lastInsertId();
-
-            $this->guardarRelaciones($pdo, $idActividad, $d);
 
             $pdo->commit();
             return $idActividad;
@@ -353,26 +485,22 @@ class Actividad {
         try {
             
             
-            $idBiblioteca = !empty($d['id_biblioteca']) ? (int)$d['id_biblioteca'] : null;
-            $idEspacioCultural = !empty($d['id_espacio_cultural']) ? (int)$d['id_espacio_cultural'] : null;
-            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=?, estado=?, responsable=?, telefono_responsable=? WHERE id=?";
+            $idBiblioteca = ($d['tipo_ubicacion'] ?? '') === 'biblioteca' && !empty($d['id_biblioteca'])
+                ? (int)$d['id_biblioteca']
+                : null;
+            $idEspacioCultural = ($d['tipo_ubicacion'] ?? '') === 'espacio' && !empty($d['id_espacio_cultural'])
+                ? (int)$d['id_espacio_cultural']
+                : null;
+            $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
+            list(, $idComuna) = $this->resolverUbicacion($pdo, $d);
+            $sql = "UPDATE actividad SET nombre=?, descripcion=?, objetivo=?, participantes=?, fecha=?, hora=?, dia_semana=?, id_biblioteca=?, id_espacio_cultural=?, id_tipo_actividad=?, estado=?, responsable=?, id_nivel_impacto=?, id_comuna=? WHERE id=?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
                 $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
-                $d['responsable'] ?: null, $d['telefono_responsable'] ?: null, $id
+                $d['responsable'] ?: null, $idNivel, $idComuna, $id
             ]);
-
-            
-            
-            
-            
-            foreach (['impacto_actividad', 'actividad_comuna'] as $tabla) {
-                $pdo->prepare("DELETE FROM {$tabla} WHERE id_actividad = ?")->execute([$id]);
-            }
-
-            $this->guardarRelaciones($pdo, $id, $d);
 
             $pdo->commit();
             return true;
@@ -383,7 +511,7 @@ class Actividad {
     }
 
     
-    private function buscarOCrearId(PDO $pdo, string $tabla, string $columnaNombre, string $valor): ?int {
+    private function buscarOCrearId(PDO $pdo, string $tabla, string $columnaNombre, string $valor) {
         $valor = Validador::normalizarTexto($valor);
         if ($valor === '') return null;
 
@@ -397,30 +525,5 @@ class Actividad {
         return (int)$pdo->lastInsertId();
     }
 
-    private function guardarRelaciones(PDO $pdo, int $idActividad, array $d): void {
-        
-        if (!empty($d['nivel_impacto'])) {
-            $idImpacto = $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']);
-            if ($idImpacto) {
-                $pdo->prepare("INSERT INTO impacto_actividad (id_actividad, id_impacto) VALUES (?, ?)")
-                    ->execute([$idActividad, $idImpacto]);
-            }
-        }
-
-        
-        if (!empty($d['comuna'])) {
-            $idComuna = $this->buscarOCrearId($pdo, 'comuna', 'nombre', $d['comuna']);
-            if ($idComuna) {
-                $pdo->prepare("INSERT INTO actividad_comuna (id_actividad, id_comuna) VALUES (?, ?)")
-                    ->execute([$idActividad, $idComuna]);
-            }
-        }
-
-        
-        
-        
-
-        
-    }
 }
 ?>

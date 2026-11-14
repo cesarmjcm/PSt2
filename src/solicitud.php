@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
+$puedeEditarSolicitudes = $esAdmin || esCoordinador();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -24,9 +25,14 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             <div class="tabla__container tabla__container--solicitudes">
                 <div class="maestro__header">
                     <h1 class="planificacion__title">Solicitudes de Escuelas</h1>
-                    <button type="button" class="btn-primary" id="btnNuevaSolicitud">
-                        <i class="fas fa-plus"></i> Nueva Solicitud
-                    </button>
+                    <div class="maestro__acciones">
+                        <button type="button" class="btn-primary btn-exportar" id="btnExportarSolicitudes">
+                            <i class="fas fa-file-pdf"></i> Exportar PDF
+                        </button>
+                        <button type="button" class="btn-primary" id="btnNuevaSolicitud">
+                            <i class="fas fa-plus"></i> Nueva Solicitud
+                        </button>
+                    </div>
                 </div>
 
                 <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
@@ -43,12 +49,13 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     </button>
                 </form>
 
-                <table class="tabla-planificacion solicitudes-tabla<?= $esAdmin ? ' solicitudes-tabla--admin' : '' ?>" id="tablaSolicitudes">
+                <table class="tabla-planificacion solicitudes-tabla<?= $puedeEditarSolicitudes ? ' solicitudes-tabla--admin' : '' ?>" id="tablaSolicitudes">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Institución</th>
-                            <th>Fecha</th>
+                            <th>Nombre de la actividad</th>
+                            <th>Fecha de la actividad</th>
                             <th>Fecha de registro</th>
                             <th>Hora</th>
                             <th>Lugar</th>
@@ -56,7 +63,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                             <th>Participantes</th>
                             <th>Descripción</th>
                             <th>Estado</th>
-                            <?php if ($esAdmin): ?><th class="col-acciones">Acciones</th><?php endif; ?>
+                            <?php if ($puedeEditarSolicitudes): ?><th class="col-acciones">Acciones</th><?php endif; ?>
                         </tr>
                     </thead>
                     <tbody id="tablaBody">
@@ -87,7 +94,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     </select>
                 </div>
                 <div class="config-field">
-                    <label for="campo_fecha_solicitud">Fecha de solicitud</label>
+                    <label for="campo_fecha_solicitud">Fecha de la actividad</label>
                     <input type="date" id="campo_fecha_solicitud" name="fecha_solicitud" required>
                 </div>
                 <div class="config-field">
@@ -111,6 +118,10 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     <input type="number" id="campo_participantes" name="participantes" min="0" max="99999" required>
                 </div>
                 <div class="config-field config-field--descripcion">
+                    <label for="campo_nombre_actividad">Nombre de la actividad</label>
+                    <input type="text" id="campo_nombre_actividad" name="nombre_actividad" maxlength="100" required>
+                </div>
+                <div class="config-field config-field--descripcion">
                     <label for="campo_descripcion">Descripción</label>
                     <textarea id="campo_descripcion" name="descripcion" maxlength="250" rows="3"></textarea>
                     <span class="solicitud-form__nota">Importante: La descripción aparece al cargar una solicitud.</span>
@@ -118,7 +129,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 <div class="config-field">
                     <label for="campo_estado">Estado</label>
                     <select id="campo_estado" name="estado" required>
-                        <option value="pendiente">Pendiente</option>
+                        <option value="pendiente" selected>Pendiente</option>
                         <option value="aprobada">Aprobada</option>
                         <option value="rechazada">Rechazada</option>
                         <option value="cancelada">Cancelada</option>
@@ -131,11 +142,13 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             </form>
         </div>
     </div>
-    <script src="./js/app.js"></script>
+     <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
+    <script src="./js/reportes.js"></script>
     <script>
     (function () {
         const endpoint = '../controladores/solicitud_contr.php';
         const esAdmin = <?= json_encode($esAdmin) ?>;
+        const puedeEditarSolicitudes = <?= json_encode($puedeEditarSolicitudes) ?>;
         // Debe coincidir con TRANSICIONES_ESTADO de solicitud_contr.php (el servidor es quien manda).
         const TRANSICIONES_ESTADO = {
             pendiente: ['pendiente', 'aprobada', 'rechazada', 'cancelada'],
@@ -143,7 +156,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             rechazada: ['rechazada', 'cancelada'],
             cancelada: ['cancelada'],
         };
-        const columnasTabla = esAdmin ? 11 : 10;
+        const columnasTabla = puedeEditarSolicitudes ? 12 : 11;
         const tablaBody = document.getElementById('tablaBody');
         const paginacion = document.getElementById('solicitudPagination');
         const alertBox = document.getElementById('alertBox');
@@ -156,6 +169,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
         const formId = document.getElementById('formId');
         const modalErrorBox = document.getElementById('modalError');
         const btnNuevaSolicitud = document.getElementById('btnNuevaSolicitud');
+        const btnExportarSolicitudes = document.getElementById('btnExportarSolicitudes');
         const buscarSolicitudesForm = document.getElementById('buscarSolicitudesForm');
         const buscarSolicitudes = document.getElementById('buscarSolicitudes');
         const limpiarBusquedaSolicitud = document.getElementById('limpiarBusquedaSolicitud');
@@ -169,7 +183,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
         let solicitudesCargadas = [];
 
         function normalizarTexto(valor) {
-            return String(valor ?? '')
+            return String(valor != null ? valor : '')
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase();
@@ -209,6 +223,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             formId.value = '';
             modalTitulo.textContent = 'Nueva solicitud';
             solicitudForm.reset();
+            document.getElementById('campo_estado').value = 'pendiente';
             establecerFechaMinimaSolicitud();
             ocultarErrorModal();
             llenarInstituciones();
@@ -220,12 +235,23 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
 
         function establecerFechaMinimaSolicitud() {
             const ahora = new Date();
-            const hoy = [
+            ahora.setDate(ahora.getDate() + 3);
+            const fechaMinima = [
                 ahora.getFullYear(),
                 String(ahora.getMonth() + 1).padStart(2, '0'),
                 String(ahora.getDate()).padStart(2, '0'),
             ].join('-');
-            document.getElementById('campo_fecha_solicitud').min = hoy;
+            document.getElementById('campo_fecha_solicitud').min = fechaMinima;
+        }
+
+        function validarAnticipacionFechaActividad() {
+            const campoFecha = document.getElementById('campo_fecha_solicitud');
+            establecerFechaMinimaSolicitud();
+            if (campoFecha.value && campoFecha.value < campoFecha.min) {
+                mostrarErrorModal('La fecha de la actividad debe tener al menos 3 días de anticipación.');
+                return false;
+            }
+            return true;
         }
 
         function abrirModalEditar(solicitud) {
@@ -241,10 +267,12 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             document.getElementById('campo_fecha_solicitud').value = solicitud.fecha_solicitud;
             document.getElementById('campo_hora_solicitud').value = String(solicitud.hora_solicitud || '').slice(0, 5);
             document.getElementById('campo_participantes').value = solicitud.participantes;
+            document.getElementById('campo_nombre_actividad').value = solicitud.nombre_actividad || '';
             document.getElementById('campo_descripcion').value = solicitud.descripcion;
             document.getElementById('campo_estado').value = estadoActual;
             restringirEstados(estadoActual);
             modal.hidden = false;
+            validarAnticipacionFechaActividad();
         }
 
         function cerrarModal() {
@@ -289,9 +317,12 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
 
         function llenarEmpleados(nombreActual = '') {
             const select = document.getElementById('campo_empleado');
-            select.innerHTML = '<option value="">-- Seleccione --</option>';
+            const idBiblioteca = campoBiblioteca.value;
+            select.innerHTML = '<option value="">' + (idBiblioteca ? '-- Seleccione --' : '-- Seleccione primero la biblioteca --') + '</option>';
             let encontrado = false;
             empleados.forEach(emp => {
+                // Solo empleados de la biblioteca elegida arriba
+                if (!idBiblioteca || String(emp.id_biblioteca) !== String(idBiblioteca)) return;
                 const nombreCompleto = `${emp.nombre} ${emp.apellido}`.trim();
                 const option = document.createElement('option');
                 option.value = emp.id;
@@ -390,6 +421,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 <tr>
                     <td>${row.id}</td>
                     <td>${escapeHtml(row.institucion)}</td>
+                    <td>${escapeHtml(row.nombre_actividad)}</td>
                     <td>${escapeHtml(row.fecha_solicitud)}</td>
                     <td>${escapeHtml(String(row.fecha_registro || '').replace('T', ' ').slice(0, 16))}</td>
                     <td>${escapeHtml(row.hora_solicitud)}</td>
@@ -398,9 +430,9 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                     <td>${escapeHtml(row.participantes)}</td>
                     <td>${escapeHtml(row.descripcion)}</td>
                     <td>${escapeHtml(formatearEstado(row.estado))}</td>
-                    ${esAdmin ? `<td class="col-acciones">
+                    ${puedeEditarSolicitudes ? `<td class="col-acciones">
                         <button type="button" class="btn-icon btn-edit" data-id="${row.id}"><i class="fas fa-pen"></i></button>
-                        <button type="button" class="btn-icon btn-delete" data-id="${row.id}"><i class="fas fa-trash"></i></button>
+                        ${esAdmin ? `<button type="button" class="btn-icon btn-delete" data-id="${row.id}"><i class="fas fa-trash"></i></button>` : ''}
                     </td>` : ''}
                 </tr>
             `).join('');
@@ -495,6 +527,7 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 lugar: textoSeleccionado(campoBiblioteca),
                 responsable: textoSeleccionado(campoEmpleado),
                 participantes: document.getElementById('campo_participantes').value,
+                nombre_actividad: document.getElementById('campo_nombre_actividad').value.trim(),
                 descripcion: document.getElementById('campo_descripcion').value.trim(),
                 estado: document.getElementById('campo_estado').value,
             };
@@ -502,15 +535,12 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             if (!data.id_institucion) { mostrarErrorModal('Seleccione una institución.'); return; }
             if (!data.id_biblioteca) { mostrarErrorModal('Seleccione la biblioteca de la solicitud.'); return; }
             if (!data.id_empleado) { mostrarErrorModal('Seleccione el empleado responsable.'); return; }
-            if (!data.fecha_solicitud) { mostrarErrorModal('Seleccione la fecha de la solicitud.'); return; }
-            establecerFechaMinimaSolicitud();
-            if (data.fecha_solicitud < document.getElementById('campo_fecha_solicitud').min) {
-                mostrarErrorModal('La fecha de solicitud no puede ser anterior a la fecha actual.');
-                return;
-            }
+            if (!data.fecha_solicitud) { mostrarErrorModal('Seleccione la fecha de la actividad.'); return; }
+            if (!validarAnticipacionFechaActividad()) return;
             if (!data.hora_solicitud) { mostrarErrorModal('Indique la hora de la solicitud.'); return; }
             if (!data.lugar) { mostrarErrorModal('Seleccione la biblioteca (lugar) de la solicitud.'); return; }
             if (!data.responsable) { mostrarErrorModal('Seleccione el empleado responsable de la solicitud.'); return; }
+            if (!data.nombre_actividad) { mostrarErrorModal('Indique el nombre de la actividad.'); return; }
             if (data.participantes === '') { mostrarErrorModal('Indique la cantidad de participantes.'); return; }
 
             const body = new URLSearchParams();
@@ -534,7 +564,20 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
             }
         });
 
+        document.getElementById('campo_fecha_solicitud').addEventListener('input', validarAnticipacionFechaActividad);
+        document.getElementById('campo_fecha_solicitud').addEventListener('change', validarAnticipacionFechaActividad);
         btnNuevaSolicitud.addEventListener('click', abrirModalNuevo);
+        btnExportarSolicitudes.addEventListener('click', () => {
+            const termino = buscarSolicitudes.value.trim();
+            const urlReporte = '../reportes/exportar_solicitudes.php' +
+                (termino ? '?q=' + encodeURIComponent(termino) : '');
+            abrirReportePdf(
+                urlReporte,
+                'Reporte de solicitudes',
+                btnExportarSolicitudes,
+                mostrarAlerta
+            );
+        });
         modalClose.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);
         modalBackdrop.addEventListener('click', cerrarModal);
@@ -544,6 +587,9 @@ $esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
                 cerrarModal();
             }
         });
+
+        // Al cambiar la biblioteca, se recarga la lista de responsables
+        campoBiblioteca.addEventListener('change', () => llenarEmpleados());
 
         cargarInstituciones();
         cargarBibliotecas();

@@ -3,6 +3,7 @@ include '../include/guardian.php';
 require_once __DIR__ . '/../modelos/usuario.php';
 require_once __DIR__ . '/../modelos/empleado.php';
 require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+require_once __DIR__ . '/../helpers/busqueda.php';
 
 $model = new Usuario();
 $empleadoModel = new Empleado();
@@ -10,6 +11,9 @@ $mensajeUsuarios = '';
 $errorUsuarios = '';
 
 $esAdmin = esAdministrador();
+$esCoordinador = esCoordinador();
+$puedeGestionarUsuarios = $esAdmin || $esCoordinador;
+$idBibliotecaSesion = $esCoordinador ? (int) (guardian_idBibliotecaSesion() ?? 0) : null;
 $idSesion = intval($_SESSION['user_id'] ?? 0);
 
 
@@ -17,13 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
     $usuarioAction = $_POST['usuario_action'];
 
     
-    if ($usuarioAction === 'crear' && !$esAdmin) {
+    if ($usuarioAction === 'crear' && !$puedeGestionarUsuarios) {
         $usuarioAction = null;
         $errorUsuarios = 'No tienes permisos para crear usuarios.';
-    } elseif ($usuarioAction === 'eliminar' && !$esAdmin) {
+    } elseif ($usuarioAction === 'eliminar' && !$puedeGestionarUsuarios) {
         $usuarioAction = null;
         $errorUsuarios = 'No tienes permisos para eliminar usuarios.';
-    } elseif ($usuarioAction === 'actualizar' && !$esAdmin && intval($_POST['id'] ?? 0) !== $idSesion) {
+    } elseif ($usuarioAction === 'actualizar' && !$puedeGestionarUsuarios && intval($_POST['id'] ?? 0) !== $idSesion) {
         $usuarioAction = null;
         $errorUsuarios = 'No tienes permisos para editar este usuario.';
     }
@@ -42,16 +46,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
         $rol = null;
         if ($esAdmin) {
             $rolEnviado = trim($_POST['nuevo_rol'] ?? '');
-            if (in_array($rolEnviado, ['administrador', 'usuario'], true)) {
+            if (in_array($rolEnviado, ['administrador', 'coordinador', 'usuario'], true)) {
                 $rol = $rolEnviado;
             }
         }
 
+        $usuarioObjetivo = $esActualizacion ? $model->obtenerUsuarioPorId($id) : null;
+        if ($esActualizacion && !$usuarioObjetivo) {
+            $errorUsuarios = 'El usuario seleccionado no existe.';
+        } elseif (
+            $esCoordinador
+            && $esActualizacion
+            && $id !== $idSesion
+            && ($usuarioObjetivo['rol'] ?? '') !== 'usuario'
+        ) {
+            $errorUsuarios = 'Solo puedes gestionar usuarios de tu biblioteca.';
+        } elseif (
+            $esCoordinador
+            && $esActualizacion
+            && !$empleadoModel->obtenerEmpleadoPorId((int) ($usuarioObjetivo['id_empleado'] ?? 0), $idBibliotecaSesion)
+        ) {
+            $errorUsuarios = 'El usuario no pertenece a tu biblioteca.';
+        }
+
         if ($esActualizacion && $id <= 0) {
             $errorUsuarios = 'ID de usuario inválido.';
-        } elseif (!$esActualizacion && ($nombre === '' || $clave === '')) {
+        } elseif (!$esActualizacion && ($nombre === '' || $clave === '') && $errorUsuarios === '') {
             $errorUsuarios = 'Nombre y clave son obligatorios.';
-        } else {
+        } elseif ($errorUsuarios === '') {
             $datosValidar = [
                 'nombre' => $nombre,
                 'clave' => $clave,
@@ -62,8 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 $datosValidar['rol'] = $rol;
             }
             $errors = $model->validarUsuario($datosValidar, $esActualizacion);
-            if (!$esAdmin && $id_empleado !== (int) ($_SESSION['id_empleado'] ?? 0)) {
+            if (!$puedeGestionarUsuarios && $id_empleado !== (int) ($_SESSION['id_empleado'] ?? 0)) {
                 $errors[] = 'No puedes cambiar el empleado vinculado a tu usuario.';
+            }
+            if ($esCoordinador && $usuarioObjetivo && ($usuarioObjetivo['rol'] ?? '') !== 'usuario' && $id_empleado !== (int) $usuarioObjetivo['id_empleado']) {
+                $errors[] = 'No puedes cambiar el empleado vinculado a un usuario con permisos elevados.';
             }
 
             if ($clave !== '' && $clave !== $claveConfirmacion) {
@@ -72,7 +97,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 
             }
 
-            $empleadoSeleccionado = $empleadoModel->obtenerEmpleadoPorId($id_empleado);
+            $empleadoSeleccionado = $empleadoModel->obtenerEmpleadoPorId(
+                $id_empleado,
+                $esCoordinador ? $idBibliotecaSesion : null
+            );
 
             if (!empty($errors)) {
                 $errorUsuarios = implode(' ', $errors);
@@ -115,12 +143,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 }
             }
         }
-    } elseif ($usuarioAction === 'eliminar' && $esAdmin) {
+    } elseif ($usuarioAction === 'eliminar' && $puedeGestionarUsuarios) {
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             $errorUsuarios = 'ID inválido.';
+        } elseif ($esCoordinador && $id === $idSesion) {
+            $errorUsuarios = 'No puedes eliminar tu propio usuario.';
         } else {
-            $ok = $model->eliminarUsuario($id);
+            $usuarioObjetivo = $model->obtenerUsuarioPorId($id);
+            if (
+                $esCoordinador
+                && (
+                    !$usuarioObjetivo
+                    || ($usuarioObjetivo['rol'] ?? '') !== 'usuario'
+                    || !$empleadoModel->obtenerEmpleadoPorId((int) ($usuarioObjetivo['id_empleado'] ?? 0), $idBibliotecaSesion)
+                )
+            ) {
+                $errorUsuarios = 'Solo puedes eliminar usuarios de tu biblioteca.';
+                $usuarioObjetivo = null;
+            }
+            $ok = $usuarioObjetivo ? $model->eliminarUsuario($id) : false;
             if ($ok) {
                 if (!empty($_SESSION['user_id'])) {
                     registrar_bitacora(
@@ -132,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                     );
                 }
                 $mensajeUsuarios = 'Usuario eliminado correctamente.';
-            } else {
+            } elseif ($errorUsuarios === '') {
                 $errorUsuarios = 'No se pudo eliminar el usuario.';
             }
         }
@@ -141,18 +183,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
 
 $usuarios = [];
 try {
-    $usuarios = $model->mostrarUsuarios();
-    if (!$esAdmin) {
-        $usuarios = array_values(array_filter($usuarios, fn($u) => (int) $u['id'] === $idSesion));
+    $usuarios = $model->mostrarUsuarios($idBibliotecaSesion);
+    if ($esCoordinador) {
+        $usuarios = array_values(array_filter($usuarios, static function ($u) use ($idSesion) {
+            return (int) $u['id'] === $idSesion || ($u['rol'] ?? '') === 'usuario';
+        }));
+    } elseif (!$esAdmin) {
+        $usuarios = array_values(array_filter($usuarios, function ($u) use ($idSesion) {
+            return (int) $u['id'] === $idSesion;
+        }));
     }
 } catch (Exception $e) {
     $usuarios = [];
 }
 
+$busquedaUsuarios = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
+$usuariosTabla = $usuarios;
+if ($puedeGestionarUsuarios && $busquedaUsuarios !== '') {
+    $usuariosTabla = array_values(array_filter($usuariosTabla, static function (array $usuario) use ($busquedaUsuarios): bool {
+        $valoresVisibles = [
+            $usuario['id'] ?? '',
+            $usuario['nombre'] ?? '',
+            $usuario['telefono'] ?? '',
+            $usuario['id_empleado_nombre'] ?? 'Sin empleado',
+            [
+                'administrador' => 'Administrador',
+                'coordinador' => 'Coordinador',
+                'usuario' => 'Usuario',
+            ][$usuario['rol'] ?? 'usuario'] ?? 'Usuario',
+        ];
+        return coincideTextoBusqueda($valoresVisibles, $busquedaUsuarios);
+    }));
+}
+$usuariosPorPagina = 10;
+$paginaUsuarios = max(1, (int) ($_GET['page'] ?? 1));
+$totalPaginasUsuarios = max(1, (int) ceil(count($usuariosTabla) / $usuariosPorPagina));
+$paginaUsuarios = min($paginaUsuarios, $totalPaginasUsuarios);
+$usuariosTabla = array_slice($usuariosTabla, ($paginaUsuarios - 1) * $usuariosPorPagina, $usuariosPorPagina);
+
 $empleados = [];
 try {
     if ($esAdmin) {
         $empleados = $empleadoModel->mostrarEmpleados();
+    } elseif ($esCoordinador) {
+        $empleados = $empleadoModel->mostrarEmpleados($idBibliotecaSesion);
     } else {
         $empleado = $empleadoModel->obtenerEmpleadoPorId(
             (int) ($_SESSION['id_empleado'] ?? 0),
@@ -172,7 +246,7 @@ try {
     <title>Configuración de usuario</title>
     <link rel="stylesheet" href="./css/main.css">
     <link rel="icon" type="image/png" href="./assets/icon__icey.png">
-    <link rel="stylesheet" href="./css/configuracion.css?v=4">
+    <link rel="stylesheet" href="./css/configuracion.css?v=5">
     <link rel="stylesheet" href="./css/fontawesome-all.min.css">
 </head>
 <body>
@@ -184,7 +258,7 @@ try {
                     <div>
                         <span class="config-badge">Configuración</span>
                         <h1>Configuración de usuario</h1>
-                        <p>Gestiona los usuarios del sistema con un diseño limpio y moderno.</p>
+                        <p><?php echo $esCoordinador ? 'Gestiona los usuarios vinculados a tu biblioteca.' : 'Gestiona los usuarios del sistema con un diseño limpio y moderno.'; ?></p>
                     </div>
                    
                 </div>
@@ -198,7 +272,7 @@ try {
                         
 
                         <div class="config-panel active" id="usuarios">
-                            <h2 id="usuario-form-titulo"><?php echo $esAdmin ? 'Usuarios' : 'Mi perfil'; ?></h2>
+                            <h2 id="usuario-form-titulo"><?php echo $puedeGestionarUsuarios ? 'Usuarios' : 'Mi perfil'; ?></h2>
 
                             <?php if ($mensajeUsuarios): ?>
                                 <div class="config-note" style="border-color:#156939; color:#156939;">
@@ -215,33 +289,33 @@ try {
                             <?php
                                 
                                 
-                                $miUsuario = $esAdmin ? null : ($usuarios[0] ?? null);
+                                $miUsuario = $puedeGestionarUsuarios ? null : ($usuarios[0] ?? null);
                             ?>
                             <form method="POST" action="" id="form-usuario" style="margin-top:16px;">
                                 <input type="hidden" name="usuario_action" id="usuario_action"
-                                       value="<?php echo $esAdmin ? 'crear' : 'actualizar'; ?>">
+                                       value="<?php echo $puedeGestionarUsuarios ? 'crear' : 'actualizar'; ?>">
                                 <input type="hidden" name="id" id="usuario_id"
-                                       value="<?php echo $esAdmin ? '' : htmlspecialchars($miUsuario['id'] ?? ''); ?>">
+                                       value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars($miUsuario['id'] ?? ''); ?>">
 
                                 <div class="config-field">
                                     <label for="nuevo_nombre">Nombre</label>
                                     <input id="nuevo_nombre" name="nuevo_nombre" type="text" required
-                                           value="<?php echo $esAdmin ? '' : htmlspecialchars($miUsuario['nombre'] ?? ''); ?>">
+                                           value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars($miUsuario['nombre'] ?? ''); ?>">
                                 </div>
 
                                 <div class="config-field">
                                     <label for="nuevo_id_empleado">Empleado</label>
-                                    <select id="nuevo_id_empleado" name="nuevo_id_empleado" required<?php echo !$esAdmin ? ' disabled' : ''; ?>>
+                                    <select id="nuevo_id_empleado" name="nuevo_id_empleado" required<?php echo !$puedeGestionarUsuarios ? ' disabled' : ''; ?>>
                                         <option value="">Seleccione un empleado</option>
                                         <?php foreach ($empleados as $emp): ?>
                                             <option value="<?php echo htmlspecialchars($emp['id']); ?>"
                                                     data-telefono="<?php echo htmlspecialchars($emp['telefono'] ?? ''); ?>"
-                                                    <?php echo (!$esAdmin && (string) $emp['id'] === (string) ($miUsuario['id_empleado'] ?? '')) ? 'selected' : ''; ?>>
+                                                    <?php echo (!$puedeGestionarUsuarios && (string) $emp['id'] === (string) ($miUsuario['id_empleado'] ?? '')) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <?php if (!$esAdmin): ?>
+                                    <?php if (!$puedeGestionarUsuarios): ?>
                                         <input type="hidden" name="nuevo_id_empleado" value="<?php echo htmlspecialchars((string) ($_SESSION['id_empleado'] ?? '')); ?>">
                                     <?php endif; ?>
                                     <small>Cada empleado solo puede tener un usuario.</small>
@@ -251,7 +325,7 @@ try {
                                     <label for="nuevo_telefono">Teléfono</label>
                                     <input id="nuevo_telefono" name="nuevo_telefono" type="text"
                                            placeholder="Selecciona primero un empleado" required readonly
-                                           value="<?php echo $esAdmin ? '' : htmlspecialchars($miUsuario['telefono'] ?? ''); ?>">
+                                           value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars($miUsuario['telefono'] ?? ''); ?>">
                                     <small>Se autocompleta con el teléfono registrado del empleado; deben coincidir.</small>
                                 </div>
 
@@ -260,33 +334,53 @@ try {
                                     <label for="nuevo_rol">Rol</label>
                                     <select id="nuevo_rol" name="nuevo_rol">
                                         <option value="usuario">Usuario</option>
+                                        <option value="coordinador">Coordinador</option>
                                         <option value="administrador">Administrador</option>
                                     </select>
-                                    <small>Solo un administrador puede asignar este privilegio.</small>
+                                    <small>Solo un administrador puede asignar o cambiar roles.</small>
                                 </div>
                                 <?php endif; ?>
 
                                 <div class="config-field">
                                     <label for="nueva_clave" id="label-clave">
-                                        <?php echo $esAdmin ? 'Clave' : 'Nueva clave (dejar en blanco para no cambiarla)'; ?>
+                                        <?php echo $puedeGestionarUsuarios ? 'Clave' : 'Nueva clave (dejar en blanco para no cambiarla)'; ?>
                                     </label>
-                                    <input id="nueva_clave" name="nueva_clave" type="password">
+                                    <div class="campo-clave">
+                                        <input id="nueva_clave" name="nueva_clave" type="password">
+                                        <button type="button" class="btn-ojo" data-target="nueva_clave" aria-label="Mostrar u ocultar clave"><i class="fas fa-eye"></i></button>
+                                    </div>
                                 </div>
                                 <div class="config-field">
                                     <label for="nueva_clave_confirmacion">Confirmar clave</label>
-                                    <input id="nueva_clave_confirmacion" name="nueva_clave_confirmacion" type="password">
+                                    <div class="campo-clave">
+                                        <input id="nueva_clave_confirmacion" name="nueva_clave_confirmacion" type="password">
+                                        <button type="button" class="btn-ojo" data-target="nueva_clave_confirmacion" aria-label="Mostrar u ocultar confirmación de clave"><i class="fas fa-eye"></i></button>
+                                    </div>
                                 </div>
 
                                 <button class="btn-save" type="submit" id="btn-guardar-usuario">
-                                    <?php echo $esAdmin ? 'Crear usuario' : 'Guardar cambios'; ?>
+                                    <?php echo $puedeGestionarUsuarios ? 'Crear usuario' : 'Guardar cambios'; ?>
                                 </button>
                                 <button class="btn-secondary" type="button" id="btn-cancelar-edicion" style="display:none;">Cancelar edición</button>
                             </form>
 
-                            <?php if ($esAdmin): ?>
-                            <div class="config-note" style="margin-top:24px;">
-                                <p>Listado de usuarios registrados en la base de datos.</p>
-                            </div>
+                            <?php if ($puedeGestionarUsuarios): ?>
+                           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:24px;">
+    <div class="config-note" style="margin:0; flex:1;">
+        <p><?php echo $esAdmin ? 'Listado de usuarios registrados en la base de datos.' : 'Usuarios vinculados a tu biblioteca.'; ?></p>
+    </div>
+    <?php if ($esAdmin): ?>
+    <button type="button" class="btn-primary btn-exportar" id="btnExportarUsuarios">
+        <i class="fas fa-file-pdf"></i> Exportar PDF
+    </button>
+    <?php endif; ?>
+</div>
+<div id="alertBox" class="config-note" style="display:none; margin-top:12px;"></div>
+                            <form class="tabla-buscador" method="get" action="configUser.php" role="search" style="margin-top:16px;">
+                                <label class="sr-only" for="buscarUsuarios">Buscar usuario</label>
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                                <input type="search" name="q" id="buscarUsuarios" value="<?php echo htmlspecialchars($busquedaUsuarios, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Buscar usuario..." autocomplete="off">
+                            </form>
                             <div class="tabla__container tabla-usuarios-wrap" style="margin-top:30px;">
                                 <table class="tabla-planificacion tabla-usuarios">
                                     <thead>
@@ -300,8 +394,8 @@ try {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!empty($usuarios)): ?>
-                                            <?php foreach ($usuarios as $u): ?>
+                                        <?php if (!empty($usuariosTabla)): ?>
+                                            <?php foreach ($usuariosTabla as $u): ?>
                                                 <?php
                                                     $empleadoNombre = trim($u['id_empleado_nombre'] ?? '');
                                                     $empleadoNombre = $empleadoNombre !== '' ? $empleadoNombre : 'Sin empleado';
@@ -312,7 +406,11 @@ try {
                                                     <td><?php echo htmlspecialchars($u['nombre']); ?></td>
                                                     <td><?php echo htmlspecialchars($u['telefono'] ?? ''); ?></td>
                                                     <td><?php echo htmlspecialchars($empleadoNombre); ?></td>
-                                                    <td><?php echo $rolUsuario === 'administrador' ? 'Administrador' : 'Usuario'; ?></td>
+                                                    <td><?php echo htmlspecialchars([
+                                                        'administrador' => 'Administrador',
+                                                        'coordinador' => 'Coordinador',
+                                                        'usuario' => 'Usuario',
+                                                    ][$rolUsuario] ?? 'Usuario', ENT_QUOTES, 'UTF-8'); ?></td>
                                                     <td>
                                                         <button type="button" class="btn-secondary btn-editar-usuario"
                                                                 data-id="<?php echo htmlspecialchars($u['id']); ?>"
@@ -322,19 +420,32 @@ try {
                                                                 data-rol="<?php echo htmlspecialchars($rolUsuario); ?>">
                                                             Editar
                                                         </button>
+                                                        <?php if ($esAdmin || ((int) $u['id'] !== $idSesion && ($u['rol'] ?? '') === 'usuario')): ?>
                                                         <form method="POST" action="" style="display:inline;">
                                                             <input type="hidden" name="usuario_action" value="eliminar">
                                                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($u['id']); ?>">
                                                             <button class="btn-secondary" type="submit" onclick="return confirm('¿Eliminar este usuario?');">Eliminar</button>
                                                         </form>
+                                                        <?php endif; ?>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         <?php else: ?>
-                                            <tr><td colspan="6">No hay usuarios registrados.</td></tr>
+                                            <tr><td colspan="6"><?php echo $busquedaUsuarios !== '' ? 'No se encontraron usuarios para esa búsqueda.' : 'No hay usuarios registrados.'; ?></td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
+                                <?php if ($totalPaginasUsuarios > 1): ?>
+                                    <nav class="paginacion" aria-label="Páginas de usuarios">
+                                        <?php for ($pagina = 1; $pagina <= $totalPaginasUsuarios; $pagina++): ?>
+                                            <a href="?<?php echo htmlspecialchars(http_build_query(['q' => $busquedaUsuarios, 'page' => $pagina]), ENT_QUOTES, 'UTF-8'); ?>"
+                                               class="paginacion__pagina<?php echo $pagina === $paginaUsuarios ? ' activa' : ''; ?>"
+                                               <?php echo $pagina === $paginaUsuarios ? 'aria-current="page"' : ''; ?>>
+                                                <?php echo $pagina; ?>
+                                            </a>
+                                        <?php endfor; ?>
+                                    </nav>
+                                <?php endif; ?>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -348,8 +459,22 @@ try {
             </div>
         </div>
     </main>
+ <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
+<script src="./js/reportes.js"></script>
     <script>
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Ojito para mostrar/ocultar la clave
+            document.querySelectorAll('.btn-ojo').forEach(boton => {
+                boton.addEventListener('click', () => {
+                    const campo = document.getElementById(boton.dataset.target);
+                    const icono = boton.querySelector('i');
+                    const mostrar = campo.type === 'password';
+                    campo.type = mostrar ? 'text' : 'password';
+                    icono.className = mostrar ? 'fas fa-eye-slash' : 'fas fa-eye';
+                });
+            });
+
             const menuButtons = document.querySelectorAll('.config-menu__item[data-tab]');
             const panels = document.querySelectorAll('.config-panel');
 
@@ -360,14 +485,39 @@ try {
                     panels.forEach(panel => panel.classList.toggle('active', panel.id === target));
                 });
             });
-
+          
             const logoutBtn = document.getElementById('cerrarSesion');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', () => {
                     window.location.href = 'logout.php';
                 });
             }
+                          const btnExportarUsuarios = document.getElementById('btnExportarUsuarios');
+            const alertBox = document.getElementById('alertBox');
+            const buscarUsuarios = document.getElementById('buscarUsuarios');
+            let alertTimeoutId = null;
 
+            function mostrarAlerta(mensaje, tipo) {
+                const color = tipo === 'success' ? '#156939' : '#b3261e';
+                clearTimeout(alertTimeoutId);
+                alertBox.style.borderColor = color;
+                alertBox.style.color = color;
+                alertBox.innerHTML = '';
+                const p = document.createElement('p');
+                p.textContent = mensaje;
+                alertBox.appendChild(p);
+                alertBox.style.display = 'block';
+                alertTimeoutId = setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
+            }
+
+            if (btnExportarUsuarios) {
+                btnExportarUsuarios.addEventListener('click', () => {
+                    const termino = buscarUsuarios ? buscarUsuarios.value.trim() : '';
+                    const urlReporte = '../reportes/exportar_usuarios.php' +
+                        (termino ? '?q=' + encodeURIComponent(termino) : '');
+                    abrirReportePdf(urlReporte, 'Reporte de usuarios', btnExportarUsuarios, mostrarAlerta);
+                });
+            }
             
             const formTitulo = document.getElementById('usuario-form-titulo');
             const usuarioActionInput = document.getElementById('usuario_action');

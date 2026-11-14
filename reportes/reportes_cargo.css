@@ -10,22 +10,47 @@ body {
 
 .reporte-header {
     border-bottom: 2px solid #25346b;
-    margin-bottom: 22px;
-    padding-bottom: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
 }
 
-.reporte-etiqueta {
-    color: #62708f;
-    font-size: 9px;
-    letter-spacing: 1px;
-    margin: 0 0 6px;
+.membrete-logos {
+    margin: 0 auto 7px;
+    width: 100%;
+}
+
+.membrete-logos td {
+    border: 0;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    width: 50%;
+}
+
+.membrete-logos img {
+    display: inline-block;
+    max-height: 42px;
+    max-width: 100%;
+}
+
+.membrete-instituciones {
+    color: #25346b;
+    font-size: 8px;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    text-align: center;
     text-transform: uppercase;
+}
+
+.membrete-instituciones p {
+    margin: 0;
 }
 
 h1 {
     color: #25346b;
-    font-size: 22px;
-    margin: 0 0 7px;
+    font-size: 18px;
+    margin: 0 0 5px;
 }
 
 .reporte-fecha {

@@ -19,7 +19,17 @@ if (session_status() === PHP_SESSION_NONE) {
         $cookieParams['secure'] = true;
     }
 
-    session_set_cookie_params($cookieParams);
+    if (PHP_VERSION_ID >= 70300) {
+        session_set_cookie_params($cookieParams);
+    } else {
+        session_set_cookie_params(
+            $cookieParams['lifetime'],
+            $cookieParams['path'],
+            '',
+            !empty($cookieParams['secure']),
+            $cookieParams['httponly']
+        );
+    }
     session_start();
 }
 
@@ -79,6 +89,12 @@ function esAdministrador(): bool
 {
     $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
     return $rol === 'administrador';
+}
+
+function esCoordinador(): bool
+{
+    $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
+    return $rol === 'coordinador';
 }
 
 function guardian_idBibliotecaSesion(): ?int

@@ -58,7 +58,8 @@
 }
 
 .bitacora__filtros select,
-.bitacora__filtros input[type="date"] {
+.bitacora__filtros input[type="date"],
+.bitacora__filtros input[type="search"] {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid #bbc1d6;
@@ -70,7 +71,8 @@
 }
 
 .bitacora__filtros select:focus,
-.bitacora__filtros input[type="date"]:focus {
+.bitacora__filtros input[type="date"]:focus,
+.bitacora__filtros input[type="search"]:focus {
     outline: none;
     border-color: #5792ff;
     box-shadow: 0 0 0 3px rgba(87, 146, 255, 0.15);

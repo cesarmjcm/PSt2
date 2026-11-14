@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../include/guardian.php';
-guardian_requerirAdmin('json');
+require_once __DIR__ . '/funciones_pdf.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -9,7 +9,7 @@ header('Pragma: no-cache');
 function responderReporte(array $respuesta, int $estado = 200): void
 {
     http_response_code($estado);
-    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -44,7 +44,15 @@ try {
 
     require_once __DIR__ . '/../modelos/empleado.php';
 
-    $empleados = (new Empleado())->mostrarEmpleados();
+    $idBiblioteca = esAdministrador() ? null : (int) guardian_idBibliotecaSesion();
+    $empleados = (new Empleado())->mostrarEmpleados($idBiblioteca);
+    if (isset($_GET['q']) && !is_string($_GET['q'])) {
+        responderReporte([
+            'success' => false,
+            'message' => 'El término de búsqueda no es válido.',
+        ], 400);
+    }
+    $empleados = filtrarFilasReportePdf($empleados, trim((string) ($_GET['q'] ?? '')));
 
     $css = file_get_contents(__DIR__ . '/reportes_empleado.css');
     if ($css === false) {
@@ -74,21 +82,18 @@ try {
     <head>
         <meta charset="UTF-8">
         <title>Reporte de empleados</title>
-        <style><?php echo $css; ?></style>
+        <style>
+            <?php echo $css; ?>
+            table.membrete-logos { border-collapse: collapse; margin: 0 auto 5px; width: 100%; }
+            .membrete-logos td { border: 0; padding: 0; text-align: center; vertical-align: middle; width: 50%; }
+            .membrete-logos img { display: inline-block; height: 48px; max-width: 100%; }
+            .membrete-instituciones { color: #25346b; font-size: 8px; font-weight: bold; line-height: 1.4; margin-bottom: 8px; text-align: center; text-transform: uppercase; }
+            .membrete-instituciones p { color: #25346b; font-size: 8px; margin: 0; }
+        </style>
     </head>
     <body>
-        <table class="membrete">
-            <tr>
-       
-                <td class="membrete-texto">
-                    <p class="membrete-pais">República Bolivariana de Venezuela</p>
-                    <p class="membrete-inst">Instituto de Cultura del Estado Yaracuy (ICEY)</p>
-                    <p class="membrete-sub">Red de Bibliotecas del Estado Yaracuy</p>
-                </td>
-            </tr>
-        </table>
-
         <header class="reporte-header">
+            <?php echo membreteReportePdf(); ?>
             <h1>Reporte de empleados</h1>
             <p class="reporte-fecha">Generado el <?php echo $escapar($fechaGeneracion); ?></p>
         </header>
@@ -149,11 +154,7 @@ try {
     $dompdf->setPaper('A4', 'landscape');
     $dompdf->render();
 
-    responderReporte([
-        'success' => true,
-        'filename' => 'reporte_empleados_' . $fechaActual->format('Ymd_His') . '.pdf',
-        'pdf' => base64_encode($dompdf->output()),
-    ]);
+    enviarReportePdf($dompdf, 'reporte_empleados_' . $fechaActual->format('Ymd_His') . '.pdf');
 } catch (Throwable $error) {
     error_log('Error al generar el reporte PDF de empleados: ' . $error->getMessage());
     responderReporte([

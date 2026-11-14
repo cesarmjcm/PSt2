@@ -208,12 +208,33 @@ header nav {
     color: #25346b;
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    min-width: 160px;
+    min-width: 240px;
     overflow: hidden;
     border: 1px solid #e6e9f2;
     z-index: 1500;
     display: flex;
     flex-direction: column;
+}
+.nav__user-info {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e6e9f2;
+    overflow-wrap: anywhere;
+}
+.nav__user-name {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+.nav__user-info p {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+}
+.nav__user-info p span {
+    display: block;
+    color: #68718a;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 .nav__user-menu a {
     padding: 10px 14px;
@@ -813,13 +834,21 @@ td.col-acciones {
 	cursor: pointer;
 	transition: all 0.2s ease;
 	padding: 0;
+	font: inherit;
 	font-size: 0.95rem;
+	appearance: none;
 }
 
 .btn-icon:hover {
 	background-color: #e7f1ff;
 	border-color: #5792ff;
 	transform: translateY(-1px);
+}
+
+.btn-icon:focus-visible,
+.btn-primary:focus-visible {
+	outline: 3px solid rgba(87, 146, 255, 0.45);
+	outline-offset: 2px;
 }
 
 .btn-ver-mas[aria-expanded="true"] {
@@ -856,6 +885,38 @@ td.col-acciones {
 	gap: 10px 24px;
 }
 
+.btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	background-color: #156939;
+	color: #ffffff;
+	border: none;
+	border-radius: 14px;
+	padding: 12px 22px;
+	font-weight: 700;
+	margin-top: 10px;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	font-family: inherit;
+	line-height: 1.2;
+	appearance: none;
+}
+
+.btn-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 12px 24px rgba(21, 105, 57, 0.24);
+}
+
+.btn-primary.btn-exportar {
+	background-color: #b3261e;
+}
+
+.btn-primary.btn-exportar:hover {
+	box-shadow: 0 12px 24px rgba(179, 38, 30, 0.24);
+}
+
 .detalle-actividad p {
 	margin: 0;
 	font-size: 0.9rem;
@@ -867,8 +928,4 @@ td.col-acciones {
 	color: #25346b;
 	font-weight: 700;
 }
-
-
-
-
 

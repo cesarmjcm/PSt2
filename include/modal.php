@@ -18,7 +18,8 @@ $tipoActividadModel = new TipoActividad();
 $nivelImpactoModel = new NivelImpacto();
 
 $municipios = $municipioModel->mostrarMunicipios();
-$comunas = $comunaModel->mostrarComunas();
+// Comunas con su parroquia y municipio (JOIN comuna -> parroquia -> municipio).
+$comunas = $comunaModel->mostrarComunasConUbicacion();
 $parroquias = $parroquiaModel->mostrarParroquias();
 $parroquiasUnicas = [];
 foreach ($parroquias as $parroquia) {
@@ -38,7 +39,7 @@ $parroquias = array_values($parroquiasUnicas);
 $espacios = $espacioModel->mostrarEspacios();
 $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
 $empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
-$bibliotecas = $bibliotecaModel->mostrarBibliotecas($idBibliotecaUsuario);
+$bibliotecas = $bibliotecaModel->mostrarBibliotecas();
 $tiposActividad = $tipoActividadModel->mostrarTipos();
 $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
 ?>
@@ -158,7 +159,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                             <select name="comuna" id="planificacion-comunas" disabled>
                                                 <option value="">Seleccione una comuna</option>
                                                 <?php foreach ($comunas as $c): ?>
-                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>">
+                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars((string) $c['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $c['id_municipio'], ENT_QUOTES, 'UTF-8') ?>">
                                                         <?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -183,7 +184,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                                 <select name="id_biblioteca" id="plan-biblioteca">
                                                     <option value="">Seleccione una biblioteca</option>
                                                     <?php foreach ($bibliotecas as $b): ?>
-                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>"<?= !$esAdmin ? ' selected' : '' ?>><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $b['id_municipio'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) $b['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>"<?= !$esAdmin ? ' selected' : '' ?>><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -241,17 +242,51 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
         const inputTelefono = document.getElementById('plan-telefono');
         if (selectResponsable && inputTelefono) {
             selectResponsable.addEventListener('change', () => {
-                inputTelefono.value = selectResponsable.selectedOptions[0]?.dataset.telefono || '';
+                inputTelefono.value = (selectResponsable.selectedOptions[0] && selectResponsable.selectedOptions[0].dataset.telefono) || '';
             });
         }
 
         const selectMunicipio = document.getElementById('planificacion-municipios');
         const selectParroquia = document.getElementById('plan-parroquia');
         const selectComuna = document.getElementById('planificacion-comunas');
+        const selectBiblioteca = document.getElementById('plan-biblioteca');
+        const selectEspacio = document.getElementById('plan-espacio');
 
         if (selectMunicipio && selectParroquia && selectComuna) {
             const opcionesParroquias = Array.from(selectParroquia.options).slice(1);
             const opcionesComunas = Array.from(selectComuna.options).slice(1);
+            const opcionesBibliotecas = Array.from(selectBiblioteca.options).slice(1);
+            const opcionesEspacios = Array.from(selectEspacio.options).slice(1);
+            const bibliotecaSeleccionadaInicial = selectBiblioteca.value;
+
+            const filtrarUbicaciones = () => {
+                const municipioId = selectMunicipio.value;
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
+                const bibliotecaSeleccionada = selectBiblioteca.value || bibliotecaSeleccionadaInicial;
+
+                selectBiblioteca.replaceChildren(new Option('Seleccione una biblioteca', ''));
+                opcionesBibliotecas.forEach((opcion) => {
+                    const coincideUbicacion = municipioId !== '' && parroquiaId !== ''
+                        ? opcion.dataset.municipio === municipioId && opcion.dataset.parroquia === parroquiaId
+                        : municipioId === '' && parroquiaId === '' && opcion.value === bibliotecaSeleccionadaInicial;
+                    if (coincideUbicacion) {
+                        selectBiblioteca.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                if (Array.from(selectBiblioteca.options).some(opcion => opcion.value === bibliotecaSeleccionada)) {
+                    selectBiblioteca.value = bibliotecaSeleccionada;
+                }
+
+                // El espacio cultural no tiene parroquia propia: se asocia a la parroquia/comuna
+                // elegidas arriba al guardar la actividad (actividad -> comuna -> parroquia).
+                // Por eso se listan todos los espacios.
+                const espacioSeleccionado = selectEspacio.value;
+                selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
+                opcionesEspacios.forEach((opcion) => selectEspacio.appendChild(opcion.cloneNode(true)));
+                if (espacioSeleccionado !== '') {
+                    selectEspacio.value = espacioSeleccionado;
+                }
+            };
 
             const filtrarParroquias = () => {
                 const municipioId = selectMunicipio.value;
@@ -265,7 +300,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
             };
 
             const filtrarComunas = () => {
-                const parroquiaId = selectParroquia.selectedOptions[0]?.dataset.id || '';
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
                 selectComuna.replaceChildren(new Option('Seleccione una comuna', ''));
                 opcionesComunas.forEach((opcion) => {
                     if (opcion.dataset.parroquia === parroquiaId) {
@@ -280,13 +315,17 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                 selectComuna.value = '';
                 filtrarParroquias();
                 filtrarComunas();
+                filtrarUbicaciones();
             });
             selectParroquia.addEventListener('change', () => {
                 selectComuna.value = '';
                 filtrarComunas();
+                filtrarUbicaciones();
             });
+            selectComuna.addEventListener('change', filtrarUbicaciones);
             filtrarParroquias();
             filtrarComunas();
+            filtrarUbicaciones();
         }
     })();
 </script>

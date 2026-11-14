@@ -17,7 +17,7 @@ class NivelImpacto {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, ?int $idExcluir = null): bool {
+    public function existeNombre(string $nombre, int $idExcluir = null): bool {
         $sql = "SELECT id FROM nivel_impacto WHERE LOWER(nombre_impacto) = LOWER(?)";
         $params = [$nombre];
         if ($idExcluir !== null) {
