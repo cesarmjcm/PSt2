@@ -324,7 +324,7 @@ class SolicitudController
                     $conex = Conexion::conectar();
                     registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Solicitud', "Solicitud #$id actualizada");
                 }
-                $this->success('Solicitud actualizada correctamente.');
+                $this->success('Solicitud actualizada exitosamente.');
                 return;
             }
         } catch (PDOException $e) {
