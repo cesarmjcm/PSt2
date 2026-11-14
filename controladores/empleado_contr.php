@@ -1,0 +1,343 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../include/guardian.php';
+require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../modelos/biblioteca.php';
+require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
+
+class EmpleadoController
+{
+    private $model;
+
+    public function __construct()
+    {
+        $this->model = new Empleado();
+    }
+
+    public function dispatch()
+    {
+        $action = $_REQUEST['action'] ?? '';
+
+        switch ($action) {
+            case 'crear':
+                $this->crear();
+                break;
+            case 'actualizar':
+                $this->actualizar();
+                break;
+            case 'eliminar':
+                $this->eliminar();
+                break;
+            case 'listar':
+                $this->listar();
+                break;
+            case 'validar_cedula':
+                $this->validarCedula();
+                break;
+            default:
+                $this->error('Acción inválida.');
+                break;
+        }
+    }
+
+    private function validarCedula()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+        $cedulaRaw = trim($_POST['cedula'] ?? '');
+        if (!Validador::esCedulaValida($cedulaRaw)) {
+            $this->error('La cédula debe contener solo números y tener entre 6 y 8 dígitos.');
+            return;
+        }
+
+        $idExcluirRaw = trim($_POST['id'] ?? '');
+        $idExcluir = null;
+        if ($idExcluirRaw !== '') {
+            if (!ctype_digit($idExcluirRaw) || (int) $idExcluirRaw <= 0) {
+                $this->error('ID inválido.');
+                return;
+            }
+            $idExcluir = (int) $idExcluirRaw;
+            if (!$this->model->obtenerEmpleadoPorId($idExcluir, esAdministrador() ? null : $this->idBibliotecaUsuario())) {
+                $this->error('No tienes permisos para modificar empleados de otra biblioteca.');
+                return;
+            }
+        }
+
+        if ($this->model->existeCedula((int) $cedulaRaw, $idExcluir)) {
+            $this->respond([
+                'success' => true,
+                'disponible' => false,
+                'message' => 'Ya existe un empleado con esa cédula.',
+            ]);
+            return;
+        }
+
+        $this->respond([
+            'success' => true,
+            'disponible' => true,
+            'message' => 'Cédula disponible.',
+        ]);
+    }
+
+    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = '')
+    {
+        if ($nombre === '' || $apellido === '' || $telefono === '' || $cedula === '' || $genero === '') {
+            return 'Nombre, apellido, teléfono, cédula y género son obligatorios.';
+        }
+        if ($id_cargo <= 0) {
+            return 'Debe seleccionar un cargo.';
+        }
+        if (!Validador::esNombrePropioValido($nombre, 2, 40)) {
+            return 'El nombre debe tener entre 2 y 40 caracteres y solo puede contener letras, espacios y los signos - \'';
+        }
+        if (!Validador::esNombrePropioValido($apellido, 2, 20)) {
+            return 'El apellido debe tener entre 2 y 20 caracteres y solo puede contener letras, espacios y los signos - \'';
+        }
+        if (!Validador::esTelefonoVenezolano($telefono)) {
+            return 'El teléfono debe tener el formato venezolano: empieza en 0, solo números, 11 dígitos en total (ej. 04141234567).';
+        }
+        if (!Validador::esCedulaValida($cedula)) {
+            return 'La cédula debe contener solo números y tener entre 6 y 8 dígitos.';
+        }
+        if (!in_array($genero, ['M', 'F'], true)) {
+            return 'Debe seleccionar Masculino o Femenino.';
+        }
+        if (!Validador::esEdadMinimaValida($edad, 17)) {
+            return 'El empleado debe tener una edad mínima de 17 años.';
+        }
+        if ($id_biblioteca <= 0) {
+            return 'Debe seleccionar la biblioteca donde trabaja el empleado.';
+        }
+        if (!(new Biblioteca())->obtenerBibliotecaPorId($id_biblioteca)) {
+            return 'La biblioteca seleccionada no existe.';
+        }
+        if ($fecha_inicio === '') {
+            return 'Debe indicar la fecha de inicio del cargo.';
+        }
+        if (!Validador::esFechaValida($fecha_inicio)) {
+            return 'La fecha de inicio del cargo no es válida.';
+        }
+        if ($fecha_fin !== '' && !Validador::esFechaValida($fecha_fin)) {
+            return 'La fecha final del cargo no es válida.';
+        }
+        if ($fecha_fin !== '' && $fecha_inicio !== '' && $fecha_fin < $fecha_inicio) {
+            return 'La fecha final del cargo no puede ser anterior a la fecha de inicio.';
+        }
+        // La fecha de inicio del cargo se usa como fecha de ingreso para calcular los años de servicio.
+        if (!Validador::esFechaIngresoValida($fecha_inicio, 70, $fecha_fin !== '' ? $fecha_fin : null)) {
+            return 'La fecha de ingreso no puede ser futura ni el período de servicio superar los 70 años.';
+        }
+        $maxAnios = Validador::aniosServicioMaximos($edad);
+        if (Validador::calcularAniosServicio($fecha_inicio, $fecha_fin !== '' ? $fecha_fin : null) > $maxAnios) {
+            return 'Con ' . $edad . ' años de edad el empleado puede tener como máximo ' . $maxAnios . ' ' . ($maxAnios === 1 ? 'año' : 'años') . ' de servicio. Revise la edad o la fecha de ingreso.';
+        }
+        return null;
+    }
+
+    private function idBibliotecaUsuario(): int
+    {
+        return (int) (guardian_idBibliotecaSesion() ?? 0);
+    }
+
+    private function crear()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador() && !esCoordinador()) {
+            $this->error('No tienes permisos para gestionar empleados.');
+            return;
+        }
+
+        $nombre = trim($_POST['nombre'] ?? '');
+        $apellido = trim($_POST['apellido'] ?? '');
+        $telefono = trim($_POST['telefono'] ?? '');
+        $id_cargo = intval($_POST['id_cargo'] ?? 0);
+        $cedulaRaw = trim($_POST['cedula'] ?? '');
+        $genero = trim($_POST['genero'] ?? '');
+        $edad = intval($_POST['edad'] ?? 0);
+        $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
+        $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
+        $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
+
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $id_biblioteca, $fecha_inicio, $fecha_fin);
+        if ($errorValidacion !== null) {
+            $this->error($errorValidacion);
+            return;
+        }
+
+        $cedula = (int) $cedulaRaw;
+        // Los años de servicio SIEMPRE se calculan en el servidor (no se confía en el navegador).
+        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio, $fecha_fin !== '' ? $fecha_fin : null);
+
+        if ($this->model->existeCedula($cedula)) {
+            $this->error('Ya existe un empleado con esa cédula.');
+            return;
+        }
+
+        try {
+            $created = $this->model->crearEmpleado($nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
+            if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Crear', 'Empleado', 'Empleado registrado: ' . $nombre . ' ' . $apellido);
+                }
+                $this->success('Empleado creado correctamente.');
+                return;
+            }
+        } catch (Throwable $e) {
+            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ($e->errorInfo[1] ?? 0) === 1062) {
+                $this->error('Ya existe un empleado con esa cédula.');
+                return;
+            }
+            error_log('No se pudo crear el empleado y su asignación: ' . $e->getMessage());
+            $this->error('No se pudo crear el empleado y su asignación.');
+            return;
+        }
+
+        $this->error('No se pudo crear el empleado.');
+    }
+
+    private function actualizar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+        $id = intval($_POST['id'] ?? 0);
+        $nombre = trim($_POST['nombre'] ?? '');
+        $apellido = trim($_POST['apellido'] ?? '');
+        $telefono = trim($_POST['telefono'] ?? '');
+        $id_cargo = intval($_POST['id_cargo'] ?? 0);
+        $cedulaRaw = trim($_POST['cedula'] ?? '');
+        $genero = trim($_POST['genero'] ?? '');
+        $edad = intval($_POST['edad'] ?? 0);
+        $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
+        $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
+        $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
+
+        if ($id <= 0) {
+            $this->error('ID inválido.');
+            return;
+        }
+        if (!$this->model->obtenerEmpleadoPorId($id, esAdministrador() ? null : $this->idBibliotecaUsuario())) {
+            $this->error('No tienes permisos para modificar empleados de otra biblioteca.');
+            return;
+        }
+
+        $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $id_biblioteca, $fecha_inicio, $fecha_fin);
+        if ($errorValidacion !== null) {
+            $this->error($errorValidacion);
+            return;
+        }
+
+        $cedula = (int) $cedulaRaw;
+        // Los años de servicio SIEMPRE se calculan en el servidor (no se confía en el navegador).
+        $anios_servicio = Validador::calcularAniosServicio($fecha_inicio, $fecha_fin !== '' ? $fecha_fin : null);
+
+        if ($this->model->existeCedula($cedula, $id)) {
+            $this->error('Ya existe otro empleado con esa cédula.');
+            return;
+        }
+
+        try {
+            $updated = $this->model->actualizarEmpleado($id, $nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio, $fecha_fin);
+            if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Empleado', "Empleado #$id actualizado: " . $nombre . ' ' . $apellido);
+                }
+                if ($id === (int) ($_SESSION['id_empleado'] ?? 0)) {
+                    unset($_SESSION['user_profile']);
+                }
+                $this->success('Empleado actualizado correctamente.');
+                return;
+            }
+        } catch (Throwable $e) {
+            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ($e->errorInfo[1] ?? 0) === 1062) {
+                $this->error('Ya existe otro empleado con esa cédula.');
+                return;
+            }
+            error_log("No se pudo actualizar el empleado #$id y su asignación: " . $e->getMessage());
+            $this->error('No se pudo actualizar el empleado y su asignación.');
+            return;
+        }
+
+        $this->error('No se pudo actualizar el empleado.');
+    }
+
+    private function eliminar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador() && !esCoordinador()) {
+            $this->error('No tienes permisos para gestionar empleados.');
+            return;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->error('ID inválido.');
+            return;
+        }
+        if (!$this->model->obtenerEmpleadoPorId($id, esAdministrador() ? null : $this->idBibliotecaUsuario())) {
+            $this->error('No tienes permisos para eliminar empleados de otra biblioteca.');
+            return;
+        }
+
+        try {
+            $deleted = $this->model->eliminarEmpleado($id);
+            if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Eliminar', 'Empleado', "Empleado #$id eliminado");
+                }
+                $this->success('Empleado eliminado correctamente.');
+                return;
+            }
+        } catch (Exception $e) {
+            $this->error('No se pudo eliminar el empleado.');
+            return;
+        }
+
+        $this->error('No se pudo eliminar el empleado.');
+    }
+
+    private function listar()
+    {
+        $data = $this->model->mostrarEmpleados(esAdministrador() ? null : $this->idBibliotecaUsuario());
+        $this->respond(['success' => true, 'data' => $data]);
+    }
+
+    private function success(string $message, array $extra = [])
+    {
+        $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
+    }
+
+    private function error(string $message)
+    {
+        $this->respond(['success' => false, 'message' => $message]);
+    }
+
+    private function respond(array $payload)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
+
+$controller = new EmpleadoController();
+$controller->dispatch();

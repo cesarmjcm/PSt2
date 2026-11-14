@@ -1,0 +1,532 @@
+
+.maestro__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.maestro__header .planificacion__title {
+    margin: 0;
+}
+
+.maestro__acciones {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.maestro__alert {
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+.maestro__alert--success {
+    background-color: #e7f6ec;
+    color: #156939;
+    border: 1px solid #b7e3c5;
+}
+
+.maestro__alert--error {
+    background-color: #fdeceb;
+    color: #b3261e;
+    border: 1px solid #f3c2bd;
+}
+
+
+.col-acciones {
+    white-space: nowrap;
+    text-align: right;
+    width: 1%;
+}
+
+.btn-icon {
+    border: none;
+    background-color: #f4f6ff;
+    color: #25346b;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-icon:hover {
+    background-color: #25346b;
+    color: #ffffff;
+}
+
+.btn-icon.btn-delete:hover {
+    background-color: #b3261e;
+    color: #ffffff;
+
+}
+.btn-secondary {
+    background-color: #f4f6ff;
+    color: #25346b;
+    border: 1px solid #d8e1f3;
+    border-radius: 14px;
+    padding: 12px 22px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #e6ebf6;
+}
+
+.btn-danger {
+    background-color: #b3261e;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 22px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #8f1e18;
+}
+
+
+.maestro-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.maestro-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(20, 26, 51, 0.45);
+}
+
+.maestro-modal__dialog {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    width: 100%;
+    max-width: 460px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+}
+
+.maestro-modal__dialog--small {
+    max-width: 380px;
+}
+
+.maestro-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.maestro-modal__header h2 {
+    margin: 0;
+    color: #25346b;
+    font-size: 1.3rem;
+}
+
+.maestro-modal__close {
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: #4a587e;
+    cursor: pointer;
+}
+
+.maestro-modal__text {
+    color: #4a587e;
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.maestro-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+
+.maestro-modal .config-field {
+    margin-bottom: 16px;
+}
+
+.maestro-modal .config-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #25346b;
+    font-weight: 700;
+}
+
+.maestro__field-status {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.875rem;
+}
+
+.maestro__field-status--error {
+    color: #b3261e;
+}
+
+.maestro__field-status--correcto {
+    color: #156939;
+}
+
+.maestro__field-status--pendiente {
+    color: #4a587e;
+}
+
+.maestro-modal .config-field input[aria-invalid="true"] {
+    border-color: #b3261e;
+}
+
+.maestro-modal .config-field input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #cdd5e5;
+    background-color: #f9fbff;
+    color: #25346b;
+    font-size: 1rem;
+}
+
+.maestro-modal .config-field select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #cdd5e5;
+    background-color: #ffffff;
+    color: #25346b;
+    font-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 8'%3E%3Cpath fill='%2325346b' d='M1 1l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 12px 7px;
+}
+
+.maestro-modal .config-field select:focus {
+    outline: none;
+    border-color: #8aa1d5;
+    box-shadow: 0 0 0 4px rgba(53, 112, 216, 0.08);
+}
+
+.empleado-datos-laborales {
+    min-width: 0;
+    margin: 0 0 16px;
+    padding: 16px 16px 0;
+    border: 1px solid #cdd5e5;
+    border-radius: 14px;
+    background-color: #f9fbff;
+}
+
+.empleado-datos-laborales legend {
+    padding: 0 8px;
+    color: #25346b;
+    font-weight: 700;
+}
+
+.maestro-modal .config-field input,
+.maestro-modal .config-field select {
+    width: 100%;
+}
+
+.maestro-modal[hidden] {
+    display: none !important;
+}
+
+.solicitud-modal__dialog {
+    box-sizing: border-box;
+    width: min(760px, calc(100vw - 32px));
+    max-width: 760px;
+}
+
+.solicitud-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 20px;
+}
+
+.solicitud-form .config-field {
+    min-width: 0;
+}
+
+.solicitud-form .config-field input,
+.solicitud-form .config-field select,
+.solicitud-form .config-field textarea {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.solicitud-form .config-field--descripcion,
+.solicitud-form #modalError,
+.solicitud-form .maestro-modal__actions {
+    grid-column: 1 / -1;
+}
+
+.solicitud-form .config-field textarea {
+    display: block;
+    min-height: 112px;
+    padding: 14px 16px;
+    border: 1px solid #cdd5e5;
+    border-radius: 14px;
+    background-color: #f9fbff;
+    color: #25346b;
+    font: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.solicitud-form .config-field textarea:focus {
+    outline: none;
+    border-color: #8aa1d5;
+    box-shadow: 0 0 0 4px rgba(53, 112, 216, 0.08);
+}
+
+.solicitud-form__nota {
+    display: block;
+    margin-top: 9px;
+    padding: 10px 12px;
+    border-left: 3px solid #7188d4;
+    border-radius: 0 8px 8px 0;
+    background-color: #f1f4ff;
+    color: #4a587e;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.tabla__container--solicitudes {
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+.tabla__container--solicitudes .tabla-buscador--solicitudes {
+    width: min(100%, 360px);
+    min-width: min(100%, 240px);
+    margin: 0 0 12px;
+}
+
+.solicitudes-tabla {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 0.72rem;
+    line-height: 1.3;
+}
+
+.solicitudes-tabla th,
+.solicitudes-tabla td {
+    padding: 7px 5px;
+    vertical-align: middle;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.solicitudes-tabla th {
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+.solicitudes-tabla th:nth-child(1),
+.solicitudes-tabla td:nth-child(1) {
+    width: 4%;
+}
+
+.solicitudes-tabla th:nth-child(2),
+.solicitudes-tabla td:nth-child(2) {
+    width: 10%;
+}
+
+.solicitudes-tabla th:nth-child(3),
+.solicitudes-tabla td:nth-child(3) {
+    width: 13%;
+}
+
+.solicitudes-tabla th:nth-child(4),
+.solicitudes-tabla td:nth-child(4) {
+    width: 8%;
+}
+
+.solicitudes-tabla th:nth-child(5),
+.solicitudes-tabla td:nth-child(5) {
+    width: 11%;
+}
+
+.solicitudes-tabla th:nth-child(6),
+.solicitudes-tabla td:nth-child(6) {
+    width: 6%;
+}
+
+.solicitudes-tabla th:nth-child(7),
+.solicitudes-tabla td:nth-child(7) {
+    width: 9%;
+}
+
+.solicitudes-tabla th:nth-child(8),
+.solicitudes-tabla td:nth-child(8) {
+    width: 10%;
+}
+
+.solicitudes-tabla th:nth-child(9),
+.solicitudes-tabla td:nth-child(9) {
+    width: 6%;
+}
+
+.solicitudes-tabla th:nth-child(10),
+.solicitudes-tabla td:nth-child(10) {
+    width: 9%;
+}
+
+.solicitudes-tabla th:nth-child(11),
+.solicitudes-tabla td:nth-child(11) {
+    width: 7%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(2),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(2),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(3),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(3),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(4),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(4),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(5),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(5),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(6),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(6),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(7),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(7),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(8),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(8),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(10),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(10) {
+    width: 11%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(3),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(3) {
+    width: 14%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(4),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(4) {
+    width: 9%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(5),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(5) {
+    width: 12%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(6),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(6) {
+    width: 7%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(9),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(9) {
+    width: 6%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(10),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(10) {
+    width: 9%;
+}
+
+.solicitudes-tabla:not(.solicitudes-tabla--admin) th:nth-child(11),
+.solicitudes-tabla:not(.solicitudes-tabla--admin) td:nth-child(11) {
+    width: 6%;
+}
+
+.solicitudes-tabla--admin th:nth-child(12),
+.solicitudes-tabla--admin td:nth-child(12) {
+    width: 7%;
+    white-space: nowrap;
+}
+
+.solicitudes-tabla .col-acciones {
+    text-align: center;
+}
+
+.solicitudes-tabla .btn-icon {
+    width: 28px;
+    height: 28px;
+    margin-left: 2px;
+    border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+    .maestro__header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .maestro-modal__dialog {
+        margin: 16px;
+        max-width: none;
+    }
+
+    .solicitud-modal__dialog {
+        width: calc(100vw - 24px);
+        margin: 12px;
+    }
+
+    .solicitud-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .solicitud-form .config-field--descripcion,
+    .solicitud-form #modalError,
+    .solicitud-form .maestro-modal__actions {
+        grid-column: auto;
+    }
+
+    .tabla__container--solicitudes {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .solicitudes-tabla {
+        font-size: 0.62rem;
+        line-height: 1.2;
+    }
+
+    .solicitudes-tabla th,
+    .solicitudes-tabla td {
+        padding: 5px 3px;
+    }
+
+    .solicitudes-tabla--admin .btn-icon {
+        width: 24px;
+        height: 24px;
+        margin: 1px 0;
+    }
+}
+
+
+#tablaMaestro {
+    width: auto;
+    min-width: 320px;
+    max-width: 100%;
+    display: inline-table;
+}
+
+#tablaMaestro th,
+#tablaMaestro td {
+    padding: 12px 28px;
+    white-space: nowrap;
+}

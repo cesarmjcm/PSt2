@@ -1,0 +1,403 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../include/guardian.php';
+require_once __DIR__ . '/../modelos/solicitud.php';
+require_once __DIR__ . '/../modelos/biblioteca.php';
+require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
+
+class SolicitudController
+{
+    private $model;
+
+    // Estados a los que se puede pasar desde cada estado (incluye mantenerse igual).
+    const TRANSICIONES_ESTADO = [
+        'pendiente' => ['pendiente', 'aprobada', 'rechazada', 'cancelada'],
+        'aprobada'  => ['aprobada', 'cancelada'],
+        'rechazada' => ['rechazada', 'cancelada'],
+        'cancelada' => ['cancelada'],
+    ];
+
+    public function __construct()
+    {
+        $this->model = new Solicitud();
+    }
+
+    public function dispatch()
+    {
+        $action = $_REQUEST['action'] ?? '';
+
+        switch ($action) {
+            case 'crear':
+                $this->crear();
+                break;
+            case 'actualizar':
+                $this->actualizar();
+                break;
+            case 'eliminar':
+                $this->eliminar();
+                break;
+            case 'listar':
+                $this->listar();
+                break;
+            default:
+                $this->error('Acción inválida.');
+                break;
+        }
+    }
+
+    
+    private function esAdmin(): bool
+    {
+        return ($_SESSION['user_rol'] ?? '') === 'administrador';
+    }
+
+    private function puedeEditar(): bool
+    {
+        return $this->esAdmin() || esCoordinador();
+    }
+
+    private function obtenerSolicitud(int $id)
+    {
+        return $this->model->obtenerSolicitudPorId(
+            $id,
+            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0)
+        ) ?: null;
+    }
+
+    private function prepararAlcanceBiblioteca(array &$data)
+    {
+        if (!$this->esAdmin()) {
+            $data['id_biblioteca'] = (int) (guardian_idBibliotecaSesion() ?? 0);
+        }
+        if ($data['id_biblioteca'] <= 0) {
+            return 'Debe seleccionar una biblioteca válida.';
+        }
+
+        $biblioteca = (new Biblioteca())->obtenerBibliotecaPorId($data['id_biblioteca']);
+        if (!$biblioteca) {
+            return 'La biblioteca seleccionada no existe.';
+        }
+        $data['lugar'] = trim((string) $biblioteca['nombre']);
+
+        $idEmpleado = (int) $data['id_empleado'];
+        $empleado = $idEmpleado > 0
+            ? (new Empleado())->obtenerEmpleadoPorId($idEmpleado, $data['id_biblioteca'])
+            : null;
+        if (!$empleado) {
+            return 'Seleccione un empleado responsable de la biblioteca asignada.';
+        }
+        $data['responsable'] = trim((string) $empleado['nombre'] . ' ' . (string) $empleado['apellido']);
+        return null;
+    }
+
+    private function esCampoEnBlanco(string $valor): bool
+    {
+        
+        $sinEspacios = preg_replace('/[\s\x{00A0}\x{200B}]+/u', '', $valor);
+        return $sinEspacios === null || $sinEspacios === '';
+    }
+
+    private function collectInput(): array
+    {
+        return [
+            'id_institucion' => intval($_POST['id_institucion'] ?? 0),
+            'id_biblioteca' => intval($_POST['id_biblioteca'] ?? 0),
+            'id_empleado' => intval($_POST['id_empleado'] ?? 0),
+            'fecha_solicitud' => trim($_POST['fecha_solicitud'] ?? ''),
+            'hora_solicitud' => trim($_POST['hora_solicitud'] ?? ''),
+            'lugar' => trim($_POST['lugar'] ?? ''),
+            'nombre_actividad' => trim($_POST['nombre_actividad'] ?? ''),
+            'responsable' => trim($_POST['responsable'] ?? ''),
+            'participantes' => intval($_POST['participantes'] ?? 0),
+            'descripcion' => trim($_POST['descripcion'] ?? ''),
+            'estado' => strtolower(trim($_POST['estado'] ?? 'pendiente')),
+        ];
+    }
+
+    private function validarSolicitud(array $data): array
+    {
+        $errors = [];
+
+        
+        
+        $camposObligatorios = [
+            'id_institucion'  => 'La institución',
+            'fecha_solicitud' => 'La fecha de solicitud',
+            'hora_solicitud'  => 'La hora de solicitud',
+            'lugar'           => 'El lugar',
+            'nombre_actividad' => 'El nombre de la actividad',
+            'responsable'     => 'El responsable',
+        ];
+        foreach ($camposObligatorios as $campo => $etiqueta) {
+            $valor = $data[$campo];
+            
+            $estaVacio = is_string($valor)
+                ? $this->esCampoEnBlanco($valor)
+                : (int) $valor <= 0;
+            if ($estaVacio) {
+                $errors[] = "{$etiqueta} no puede estar vacío ni contener solo espacios en blanco.";
+            }
+        }
+        
+        
+        if (!isset($_POST['participantes']) || $this->esCampoEnBlanco((string) $_POST['participantes'])) {
+            $errors[] = 'La cantidad de participantes no puede estar vacía ni contener solo espacios en blanco.';
+        }
+
+        
+        
+        if (!empty($errors)) {
+            return $errors;
+        }
+
+        
+        if (!Validador::esEnteroPositivo($data['id_institucion'])) {
+            $errors[] = 'Institución inválida: debe ser un identificador numérico positivo.';
+        }
+        if (!Validador::esFechaValida($data['fecha_solicitud'])) {
+            $errors[] = 'Fecha de actividad inválida: debe tener el formato AAAA-MM-DD.';
+        } elseif ($data['fecha_solicitud'] < (new DateTimeImmutable('today'))->modify('+3 days')->format('Y-m-d')) {
+            $errors[] = 'La fecha de la actividad debe tener al menos 3 días de anticipación.';
+        }
+        if (!Validador::esHoraValida($data['hora_solicitud'])) {
+            $errors[] = 'Hora de solicitud inválida: debe tener el formato HH:MM (24 horas).';
+        }
+        if (!Validador::esTextoValido($data['lugar'], 2, 100)) {
+            $errors[] = 'El lugar debe tener entre 2 y 100 caracteres y puede contener letras, números y signos básicos.';
+        }
+        if (!Validador::esTextoValido($data['nombre_actividad'], 2, 100)) {
+            $errors[] = 'El nombre de la actividad debe tener entre 2 y 100 caracteres y puede contener letras, números y signos básicos.';
+        }
+        if (!Validador::esNombrePropioValido($data['responsable'], 2, 50)) {
+            $errors[] = 'El responsable debe tener entre 2 y 50 caracteres y solo puede contener letras, espacios y los signos - \' .';
+        }
+        if (!Validador::esEnteroNoNegativo($data['participantes'])) {
+            $errors[] = 'La cantidad de participantes debe ser un número entero mayor o igual a cero.';
+        }
+        if (!Validador::esDescripcionValida($data['descripcion'], 0, 250)) {
+            $errors[] = 'La descripción de la solicitud no puede ser mayor a 250 caracteres y solo puede contener letras, números y signos básicos.';
+        }
+        if (!in_array($data['estado'], ['pendiente', 'aprobada', 'rechazada', 'cancelada'], true)) {
+            $errors[] = 'Estado de solicitud inválido.';
+        }
+
+        
+        
+        $camposTexto = [
+            'lugar'       => 'lugar',
+            'nombre_actividad' => 'nombre de la actividad',
+            'responsable' => 'responsable',
+            'descripcion' => 'descripción',
+        ];
+        foreach ($camposTexto as $campo => $etiqueta) {
+            $valor = $data[$campo];
+            if ($valor !== '' && Validador::tieneRepeticionSospechosa($valor)) {
+                $errors[] = "El campo {$etiqueta} contiene caracteres o texto repetido de forma sospechosa.";
+            }
+        }
+
+        return $errors;
+    }
+
+    private function crear()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+
+        $data = $this->collectInput();
+        $errorAlcance = $this->prepararAlcanceBiblioteca($data);
+        if ($errorAlcance !== null) {
+            $this->error($errorAlcance);
+            return;
+        }
+        $errors = $this->validarSolicitud($data);
+        if (!empty($errors)) {
+            $this->error(implode(' ', $errors));
+            return;
+        }
+        if ($this->model->existeConflictoHorario($data)) {
+            $this->error('Ya existe otra solicitud en esa biblioteca, fecha y hora.');
+            return;
+        }
+
+        try {
+            $created = $this->model->crearSolicitud(
+                $data['id_institucion'],
+                $data['id_biblioteca'],
+                $data['fecha_solicitud'],
+                $data['hora_solicitud'],
+                $data['lugar'],
+                $data['id_empleado'],
+                $data['participantes'],
+                $data['descripcion'],
+                $data['estado'],
+                $data['nombre_actividad']
+            );
+            if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Crear', 'Solicitud', 'Solicitud registrada para institución #' . $data['id_institucion']);
+                }
+                $this->success('Solicitud creada correctamente.');
+                return;
+            }
+        } catch (PDOException $e) {
+            $this->error('No se pudo crear la solicitud.');
+            return;
+        }
+
+        $this->error('No se pudo crear la solicitud.');
+    }
+
+    private function actualizar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+
+        if (!$this->puedeEditar()) {
+            $this->error('No tiene permisos para editar solicitudes.');
+            return;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->error('ID inválido.');
+            return;
+        }
+
+        $actual = $this->obtenerSolicitud($id);
+        if ($actual === null) {
+            $this->error('La solicitud no existe.');
+            return;
+        }
+
+        $data = $this->collectInput();
+        $errorAlcance = $this->prepararAlcanceBiblioteca($data);
+        if ($errorAlcance !== null) {
+            $this->error($errorAlcance);
+            return;
+        }
+        $errors = $this->validarSolicitud($data);
+        if (!empty($errors)) {
+            $this->error(implode(' ', $errors));
+            return;
+        }
+
+        $estadoActual = strtolower(trim((string) ($actual['estado'] ?? 'pendiente')));
+        $permitidos = self::TRANSICIONES_ESTADO[$estadoActual] ?? [$estadoActual];
+        if (!in_array($data['estado'], $permitidos, true)) {
+            $this->error("No se puede cambiar una solicitud de {$estadoActual} a {$data['estado']}.");
+            return;
+        }
+        if ($this->model->existeConflictoHorario($data, $id)) {
+            $this->error('Ya existe otra solicitud en esa biblioteca, fecha y hora.');
+            return;
+        }
+
+        try {
+            $updated = $this->model->actualizarSolicitud(
+                $id,
+                $data['id_institucion'],
+                $data['id_biblioteca'],
+                $data['fecha_solicitud'],
+                $data['hora_solicitud'],
+                $data['lugar'],
+                $data['id_empleado'],
+                $data['participantes'],
+                $data['descripcion'],
+                $data['estado'],
+                $data['nombre_actividad']
+            );
+            if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Solicitud', "Solicitud #$id actualizada");
+                }
+                $this->success('Solicitud actualizada exitosamente.');
+                return;
+            }
+        } catch (PDOException $e) {
+            $this->error('No se pudo actualizar la solicitud.');
+            return;
+        }
+
+        $this->error('No se pudo actualizar la solicitud.');
+    }
+
+    private function eliminar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+
+        if (!$this->esAdmin()) {
+            $this->error('No tiene permisos para eliminar solicitudes.');
+            return;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->error('ID inválido.');
+            return;
+        }
+
+        try {
+            $deleted = $this->model->eliminarSolicitud($id);
+            if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora($conex, $_SESSION['user_id'], 'Eliminar', 'Solicitud', "Solicitud #$id eliminada");
+                }
+                $this->success('Solicitud eliminada correctamente.');
+                return;
+            }
+        } catch (Exception $e) {
+            $this->error('No se pudo eliminar la solicitud.');
+            return;
+        }
+
+        $this->error('No se pudo eliminar la solicitud.');
+    }
+
+    private function listar()
+    {
+        $data = $this->model->mostrarSolicitudes(
+            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0),
+            ($_GET['solo_aprobadas'] ?? '') === '1'
+        );
+        $this->respond(['success' => true, 'data' => $data]);
+    }
+
+    private function success(string $message, array $extra = [])
+    {
+        $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
+    }
+
+    private function error(string $message)
+    {
+        $this->respond(['success' => false, 'message' => $message]);
+    }
+
+    private function respond(array $payload)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    
+}
+
+$controller = new SolicitudController();
+$controller->dispatch();

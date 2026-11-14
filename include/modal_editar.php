@@ -1,0 +1,415 @@
+<?php
+require_once __DIR__ . '/../modelos/municipio.php';
+require_once __DIR__ . '/../modelos/comuna.php';
+require_once __DIR__ . '/../modelos/parroquia.php';
+require_once __DIR__ . '/../modelos/espacio.php';
+require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../modelos/biblioteca.php';
+require_once __DIR__ . '/../modelos/tipo_actividad.php';
+require_once __DIR__ . '/../modelos/nv_act.php';
+
+$municipioModel = new Municipio();
+$comunaModel = new Comuna();
+$parroquiaModel = new Parroquia();
+$espacioModel = new Espacio();
+$empleadoModel = new Empleado();
+$bibliotecaModel = new Biblioteca();
+$tipoActividadModel = new TipoActividad();
+$nivelImpactoModel = new NivelImpacto();
+
+$municipios = $municipioModel->mostrarMunicipios();
+// Comunas con su parroquia y municipio (JOIN comuna -> parroquia -> municipio).
+$comunas = $comunaModel->mostrarComunasConUbicacion();
+$parroquias = $parroquiaModel->mostrarParroquias();
+$parroquiasUnicas = [];
+foreach ($parroquias as $parroquia) {
+    $nombreParroquia = trim((string)($parroquia['nombre'] ?? ''));
+    $idParroquia = (string)($parroquia['id'] ?? '');
+    $municipioParroquia = (string)($parroquia['id_municipio'] ?? '');
+    if ($nombreParroquia !== '') {
+        $claveParroquia = $municipioParroquia . '|' . mb_strtolower($nombreParroquia, 'UTF-8');
+        $parroquiasUnicas[$claveParroquia] = [
+            'id' => $idParroquia,
+            'nombre' => $nombreParroquia,
+            'id_municipio' => $municipioParroquia,
+        ];
+    }
+}
+$parroquias = array_values($parroquiasUnicas);
+$espacios = $espacioModel->mostrarEspacios();
+$idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+$empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
+$bibliotecas = $bibliotecaModel->mostrarBibliotecas();
+$tiposActividad = $tipoActividadModel->mostrarTipos();
+$nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
+?>
+
+<section>
+
+    <div id="modalEditarActividad" class="modal" style="display:none;">
+        <div class="modal-content-wrapper">
+            <section class="formulario-planificacion">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                    <h2 class="section-title" style="margin: 0;">Editar Actividad</h2>
+                    <span class="close-button-editar" style="cursor:pointer; font-size: 1.5rem;">&times;</span>
+                </div>
+                <div class="container__planificacion">
+                    <form id="form-editar-actividad" action="../controladores/actividad_contr.php" method="post" onsubmit="return validacionesformulario(this)" novalidate>
+                        <input type="hidden" name="action" value="actualizar">
+                        <input type="hidden" name="id" id="editar-id" value="">
+                        <input type="hidden" id="editar-dia" name="dia_semana" value="">
+                        <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? '../src/index.php', ENT_QUOTES, 'UTF-8'); ?>">
+
+                        <input type="hidden" name="tipo_formulario" value="completa">
+
+                        <div id="form-editar-aviso" class="form-aviso" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
+
+                        <div class="planificacion-grid">
+                            <fieldset class="planificacion-group">
+                                <fieldset>
+                                    <label for="editar-nombre">Nombre de la actividad</label>
+                                    <input type="text" id="editar-nombre" maxlength="30" name="nombre" placeholder="Nombre de la actividad">
+
+                                    <div id="editar-fields-hidden">
+                                        <label for="editar-descripcion">Descripción de la actividad</label>
+                                        <textarea id="editar-descripcion" maxlength="200" name="descripcion" placeholder="Descripción breve"></textarea>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <label for="editar-fecha">Fecha de la actividad</label>
+                                    <input type="date" id="editar-fecha" name="fecha">
+
+                                    <label for="editar-hora">Hora de la actividad</label>
+                                    <input type="time" id="editar-hora" name="horaActividad">
+
+                                    <label for="editar-estado">Estado de la actividad</label>
+                                    <select id="editar-estado" name="estado">
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="confirmada">Confirmada</option>
+                                        <option value="ejecutada">Ejecutada</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
+                                </fieldset>
+
+                                <fieldset id="editar-campos-completa">
+                                    <legend>Detalles de actividad completa</legend>
+
+                                    <label for="editar-objetivo">Objetivo / enfoque</label>
+                                    <input type="text" id="editar-objetivo" maxlength="50" name="objetivo" placeholder="Objetivo de la actividad">
+
+                                    <label for="editar-participantes">Cantidad de participantes</label>
+                                    <input type="number" id="editar-participantes" name="participantes" min="0" max="99999" placeholder="Ej. 25">
+
+                                    <label for="editar-nivel-impacto">Nivel de impacto</label>
+                                    <select id="editar-nivel-impacto" name="nivel_impacto">
+                                        <option value="">Seleccione un nivel de impacto</option>
+                                        <?php foreach ($nivelesImpacto as $nivel): ?>
+                                            <option value="<?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </fieldset>
+                            </fieldset>
+
+                            <fieldset class="planificacion-group">
+                                <fieldset>
+                                    <label for="editar-municipio">Municipio</label>
+                                    <select name="municipio_id" id="editar-municipio">
+                                        <option value="">Seleccione un municipio</option>
+                                        <?php foreach ($municipios as $m): ?>
+                                            <option value="<?= htmlspecialchars($m['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($m['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                    <div id="editar-municipio-hidden">
+                                        <fieldset>
+                                            <label for="editar-parroquia">Parroquia</label>
+                                            <select id="editar-parroquia" name="parroquia" disabled>
+                                                <option value="">Seleccione una parroquia</option>
+                                                <?php foreach ($parroquias as $p): ?>
+                                                    <option value="<?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars($p['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars($p['id_municipio'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </fieldset>
+
+                                        <fieldset>
+                                            <label for="editar-comuna">Comuna</label>
+                                            <select name="comuna" id="editar-comuna" disabled>
+                                                <option value="">Seleccione una comuna</option>
+                                                <?php foreach ($comunas as $c): ?>
+                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars((string) $c['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $c['id_municipio'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </fieldset>
+
+                                        <fieldset>
+                                            <legend>¿Dónde se realiza?</legend>
+                                            <div style="display:flex; gap:18px; margin-bottom:10px; flex-wrap:wrap;">
+                                                <label style="display:flex; align-items:center; gap:6px; margin:0;">
+                                                    <input type="radio" name="tipo_ubicacion" id="editar-tipo-ubicacion-biblioteca" value="biblioteca">
+                                                    Biblioteca
+                                                </label>
+                                                <label style="display:flex; align-items:center; gap:6px; margin:0;">
+                                                    <input type="radio" name="tipo_ubicacion" id="editar-tipo-ubicacion-espacio" value="espacio">
+                                                    Espacio
+                                                </label>
+                                            </div>
+
+                                            <div id="editar-ubicacion-biblioteca">
+                                                <label for="editar-biblioteca">Biblioteca</label>
+                                                <select name="id_biblioteca" id="editar-biblioteca">
+                                                    <option value="">Seleccione una biblioteca</option>
+                                                    <?php foreach ($bibliotecas as $b): ?>
+                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $b['id_municipio'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) $b['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+
+                                            <div id="editar-ubicacion-espacio" class="hidden">
+                                                <label for="editar-espacio">Espacio cultural</label>
+                                                <select name="id_espacio_cultural" id="editar-espacio">
+                                                    <option value="">Seleccione un espacio cultural</option>
+                                                    <?php foreach ($espacios as $e): ?>
+                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+
+                                    <fieldset>
+                                        <label for="editar-tipo-actividad">Tipo de actividad</label>
+                                        <select name="id_tipo_actividad" id="editar-tipo-actividad">
+                                            <option value="">Seleccione un tipo de actividad</option>
+                                            <?php foreach ($tiposActividad as $t): ?>
+                                                <option value="<?= htmlspecialchars($t['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </fieldset>
+
+                                    <fieldset>
+                                        <legend>Responsable</legend>
+                                        <label for="editar-responsable">Nombre</label>
+                                        <select name="id_empleado" id="editar-responsable">
+                                            <option value="">Seleccione un responsable</option>
+                                            <?php foreach ($empleados as $e): ?>
+                                                <?php $nombreCompleto = trim($e['nombre'].' '.$e['apellido']); ?>
+                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <label for="editar-telefono">Teléfono responsable</label>
+                                        <input type="tel" id="editar-telefono" maxlength="15" inputmode="tel" placeholder="Teléfono del empleado" readonly>
+                                    </fieldset>
+                                </fieldset>
+                            </fieldset>
+                        </div>
+
+                        <button type="submit" class="btn-ingresar-planificacion">Guardar cambios</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function () {
+        
+        
+        const radiosUbicacion = document.querySelectorAll('#form-editar-actividad input[name="tipo_ubicacion"]');
+        const ubicacionBiblioteca = document.getElementById('editar-ubicacion-biblioteca');
+        const ubicacionEspacio = document.getElementById('editar-ubicacion-espacio');
+        let filtrarUbicaciones = () => {};
+
+        function actualizarUbicacion() {
+            const radioEspacio = document.getElementById('editar-tipo-ubicacion-espacio');
+            const esEspacio = radioEspacio !== null && radioEspacio.checked;
+            ubicacionBiblioteca.classList.toggle('hidden', esEspacio);
+            ubicacionEspacio.classList.toggle('hidden', !esEspacio);
+            filtrarUbicaciones();
+        }
+
+        radiosUbicacion.forEach(radio => radio.addEventListener('change', actualizarUbicacion));
+
+        const selectMunicipio = document.getElementById('editar-municipio');
+        const selectParroquia = document.getElementById('editar-parroquia');
+        const selectComuna = document.getElementById('editar-comuna');
+        const selectBiblioteca = document.getElementById('editar-biblioteca');
+        const selectEspacio = document.getElementById('editar-espacio');
+        let seleccionarEspacioGuardado = id => {
+            selectEspacio.value = String(id || '');
+        };
+
+        if (selectMunicipio && selectParroquia && selectComuna) {
+            const opcionesParroquias = Array.from(selectParroquia.options).slice(1);
+            const opcionesComunas = Array.from(selectComuna.options).slice(1);
+            const opcionesBibliotecas = Array.from(selectBiblioteca.options).slice(1);
+            const opcionesEspacios = Array.from(selectEspacio.options).slice(1);
+            seleccionarEspacioGuardado = id => {
+                const idEspacio = String(id || '');
+                const opcion = opcionesEspacios.find(item => item.value === idEspacio);
+                if (!opcion) {
+                    selectEspacio.value = '';
+                    return;
+                }
+                if (!Array.from(selectEspacio.options).some(item => item.value === idEspacio)) {
+                    selectEspacio.add(opcion.cloneNode(true));
+                }
+                selectEspacio.value = idEspacio;
+            };
+
+            filtrarUbicaciones = () => {
+                const municipioId = selectMunicipio.value;
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
+                const bibliotecaSeleccionada = selectBiblioteca.value;
+                const espacioSeleccionado = selectEspacio.value;
+
+                selectBiblioteca.replaceChildren(new Option('Seleccione una biblioteca', ''));
+                opcionesBibliotecas.forEach((opcion) => {
+                    if (opcion.dataset.municipio === municipioId && opcion.dataset.parroquia === parroquiaId) {
+                        selectBiblioteca.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                if (Array.from(selectBiblioteca.options).some(opcion => opcion.value === bibliotecaSeleccionada)) {
+                    selectBiblioteca.value = bibliotecaSeleccionada;
+                }
+
+                // El espacio cultural no tiene parroquia propia: se asocia a la parroquia/comuna
+                // elegidas arriba al guardar la actividad (actividad -> comuna -> parroquia).
+                // Por eso se listan todos los espacios.
+                selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
+                opcionesEspacios.forEach((opcion) => selectEspacio.appendChild(opcion.cloneNode(true)));
+                if (Array.from(selectEspacio.options).some(opcion => opcion.value === espacioSeleccionado)) {
+                    selectEspacio.value = espacioSeleccionado;
+                }
+            };
+
+            const filtrarParroquias = () => {
+                const municipioId = selectMunicipio.value;
+                selectParroquia.replaceChildren(new Option('Seleccione una parroquia', ''));
+                opcionesParroquias.forEach((opcion) => {
+                    if (opcion.dataset.municipio === municipioId) {
+                        selectParroquia.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectParroquia.disabled = municipioId === '';
+            };
+
+            const filtrarComunas = () => {
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
+                selectComuna.replaceChildren(new Option('Seleccione una comuna', ''));
+                opcionesComunas.forEach((opcion) => {
+                    if (opcion.dataset.parroquia === parroquiaId) {
+                        selectComuna.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectComuna.disabled = parroquiaId === '';
+            };
+
+            selectMunicipio.addEventListener('change', () => {
+                selectParroquia.value = '';
+                selectComuna.value = '';
+                filtrarParroquias();
+                filtrarComunas();
+                filtrarUbicaciones();
+            });
+            selectParroquia.addEventListener('change', () => {
+                selectComuna.value = '';
+                filtrarComunas();
+                filtrarUbicaciones();
+            });
+            selectComuna.addEventListener('change', filtrarUbicaciones);
+            filtrarParroquias();
+            filtrarComunas();
+            filtrarUbicaciones();
+        }
+
+        const selectResponsable = document.getElementById('editar-responsable');
+        const inputTelefono = document.getElementById('editar-telefono');
+        selectResponsable.addEventListener('change', () => {
+            inputTelefono.value = (selectResponsable.selectedOptions[0] && selectResponsable.selectedOptions[0].dataset.telefono) || '';
+        });
+
+        window.seleccionarResponsableActividad = function (nombre, telefono) {
+            (function () { var o = selectResponsable.querySelector('option[value="__actual__"]'); if (o) o.remove(); })();
+            const nombreBuscado = String(nombre || '').trim().toLocaleLowerCase();
+            const opcion = Array.from(selectResponsable.options).find(item =>
+                item.textContent.trim().toLocaleLowerCase() === nombreBuscado
+            );
+            if (opcion && nombreBuscado) {
+                selectResponsable.value = opcion.value;
+                selectResponsable.dispatchEvent(new Event('change'));
+                return;
+            }
+
+            if (nombreBuscado) {
+                const opcionActual = new Option(`${nombre} (actual)`, '__actual__');
+                opcionActual.dataset.telefono = telefono || '';
+                selectResponsable.add(opcionActual);
+                selectResponsable.value = '__actual__';
+            } else {
+                selectResponsable.value = '';
+            }
+            inputTelefono.value = telefono || '';
+        };
+
+        window.restringirEstadoActividad = function (estadoActual) {
+            const transiciones = {
+                pendiente: ['pendiente', 'confirmada', 'cancelada'],
+                confirmada: ['confirmada', 'ejecutada', 'cancelada'],
+                ejecutada: ['ejecutada'],
+                cancelada: ['cancelada'],
+            };
+            const selectEstado = document.getElementById('editar-estado');
+            const estado = String(estadoActual || 'pendiente').toLowerCase();
+            const permitidos = transiciones[estado] || [estado];
+            Array.from(selectEstado.options).forEach(opcion => {
+                opcion.disabled = !permitidos.includes(opcion.value);
+            });
+        };
+
+        
+        
+        
+        
+        
+        
+        
+        
+        window.actualizarUbicacionEditar = actualizarUbicacion;
+        window.seleccionarEspacioGuardadoEditar = seleccionarEspacioGuardado;
+
+        
+        window.precargarFormularioEditar = function (actividad) {
+            document.getElementById('editar-id').value = (actividad.id != null ? actividad.id : '');
+            document.getElementById('editar-dia').value = (actividad.dia_semana != null ? actividad.dia_semana : '');
+            document.getElementById('editar-nombre').value = (actividad.nombre != null ? actividad.nombre : '');
+            document.getElementById('editar-descripcion').value = (actividad.descripcion != null ? actividad.descripcion : '');
+            document.getElementById('editar-fecha').value = (actividad.fecha != null ? actividad.fecha : '');
+            document.getElementById('editar-hora').value = (actividad.horaActividad != null ? actividad.horaActividad : '');
+            document.getElementById('editar-estado').value = (actividad.estado != null ? actividad.estado : 'pendiente');
+            window.restringirEstadoActividad(actividad.estado != null ? actividad.estado : 'pendiente');
+            document.getElementById('editar-objetivo').value = (actividad.objetivo != null ? actividad.objetivo : '');
+            document.getElementById('editar-participantes').value = (actividad.participantes != null ? actividad.participantes : '');
+            document.getElementById('editar-nivel-impacto').value = (actividad.nivel_impacto != null ? actividad.nivel_impacto : '');
+            document.getElementById('editar-municipio').value = (actividad.municipio_id != null ? actividad.municipio_id : '');
+            document.getElementById('editar-municipio').dispatchEvent(new Event('change'));
+            document.getElementById('editar-parroquia').value = (actividad.parroquia != null ? actividad.parroquia : '');
+            document.getElementById('editar-parroquia').dispatchEvent(new Event('change'));
+            document.getElementById('editar-comuna').value = (actividad.comuna != null ? actividad.comuna : '');
+            document.getElementById('editar-comuna').dispatchEvent(new Event('change'));
+            document.getElementById('editar-tipo-actividad').value = (actividad.id_tipo_actividad != null ? actividad.id_tipo_actividad : '');
+            window.seleccionarResponsableActividad(actividad.responsable, actividad.telefono_responsable);
+
+            const esEspacio = !!actividad.id_espacio_cultural;
+            document.getElementById('editar-tipo-ubicacion-' + (esEspacio ? 'espacio' : 'biblioteca')).checked = true;
+
+            actualizarUbicacion();
+            document.getElementById('editar-biblioteca').value = (actividad.id_biblioteca != null ? actividad.id_biblioteca : '');
+            seleccionarEspacioGuardado(actividad.id_espacio_cultural);
+        };
+
+        
+        actualizarUbicacion();
+    })();
+</script>

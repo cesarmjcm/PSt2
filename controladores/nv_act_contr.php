@@ -1,0 +1,196 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../include/guardian.php';
+require_once __DIR__ . '/../modelos/nv_act.php';
+require_once __DIR__ . '/../helpers/validador.php';
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+
+$conex = Conexion::conectar();
+
+class NvActController
+{
+    private $model;
+
+    public function __construct()
+    {
+        $this->model = new NivelImpacto();
+    }
+
+    public function dispatch()
+    {
+        $action = $_REQUEST['action'] ?? '';
+
+        switch ($action) {
+            case 'crear':
+                $this->crear();
+                break;
+            case 'actualizar':
+                $this->actualizar();
+                break;
+            case 'eliminar':
+                $this->eliminar();
+                break;
+            case 'listar':
+                $this->listar();
+                break;
+            default:
+                $this->error('Acción inválida.');
+                break;
+        }
+    }
+
+    private function crear()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede registrar niveles de impacto.');
+            return;
+        }
+
+        $nombre = trim($_POST['nombre_impacto'] ?? '');
+        if ($nombre === '') {
+            $this->error('Nombre es obligatorio.');
+            return;
+        }
+        if (!Validador::esNombrePropioValido($nombre, 2, 20)) {
+            $this->error('El nombre debe tener entre 2 y 20 caracteres y solo puede contener letras, espacios y los signos - \'');
+            return;
+        }
+        if ($this->model->existeNombre($nombre)) {
+            $this->error('Ya existe un nivel de impacto con ese nombre.');
+            return;
+        }
+
+        try {
+            $created = $this->model->crearNivel($nombre);
+            if ($created) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Crear', 'Nivel de impacto', 'Nivel de impacto registrado: ' . $nombre);
+                }
+                $this->success('Nivel de impacto creado correctamente.');
+                return;
+            }
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                $this->error('Ya existe un nivel de impacto con ese nombre.');
+                return;
+            }
+            $this->error('No se pudo crear el nivel de impacto.');
+            return;
+        }
+
+        $this->error('No se pudo crear el nivel de impacto.');
+    }
+
+    private function actualizar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
+        $nombre = trim($_POST['nombre_impacto'] ?? '');
+        if ($id <= 0 || $nombre === '') {
+            $this->error('ID y nombre son obligatorios.');
+            return;
+        }
+        if (!Validador::esNombrePropioValido($nombre, 2, 20)) {
+            $this->error('El nombre debe tener entre 2 y 20 caracteres y solo puede contener letras, espacios y los signos - \'');
+            return;
+        }
+        if ($this->model->existeNombre($nombre, $id)) {
+            $this->error('Ya existe otro nivel de impacto con ese nombre.');
+            return;
+        }
+
+        try {
+            $updated = $this->model->actualizarNivel($id, $nombre);
+            if ($updated) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Nivel de impacto', "Nivel de impacto #$id actualizado: " . $nombre);
+                }
+                $this->success('Nivel de impacto actualizado correctamente.');
+                return;
+            }
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                $this->error('Ya existe otro nivel de impacto con ese nombre.');
+                return;
+            }
+            $this->error('No se pudo actualizar el nivel de impacto.');
+            return;
+        }
+
+        $this->error('No se pudo actualizar el nivel de impacto.');
+    }
+
+    private function eliminar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Método no permitido.');
+            return;
+        }
+        if (!esAdministrador()) {
+            $this->error('Solo un administrador puede eliminar niveles de impacto.');
+            return;
+        }
+
+        $id = intval($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->error('ID inválido.');
+            return;
+        }
+
+        try {
+            $deleted = $this->model->eliminarNivel($id);
+            if ($deleted) {
+                if (!empty($_SESSION['user_id'])) {
+                    $conex = Conexion::conectar();
+                    registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Eliminar', 'Nivel de impacto', "Nivel de impacto #$id eliminado");
+                }
+                $this->success('Nivel de impacto eliminado correctamente.');
+                return;
+            }
+        } catch (Exception $e) {
+            $this->error('No se pudo eliminar: este nivel de impacto tiene actividades asociadas.');
+            return;
+        }
+
+        $this->error('No se pudo eliminar el nivel de impacto.');
+    }
+
+    private function listar()
+    {
+        $data = $this->model->mostrarNiveles();
+        $this->respond(['success' => true, 'data' => $data]);
+    }
+
+    private function success(string $message, array $extra = [])
+    {
+        $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
+    }
+
+    private function error(string $message)
+    {
+        $this->respond(['success' => false, 'message' => $message]);
+    }
+
+    private function respond(array $payload)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
+
+$controller = new NvActController();
+$controller->dispatch();

@@ -1,0 +1,109 @@
+@page {
+    margin: 32px 38px;
+}
+
+body {
+    color: #25346b;
+    font-family: "DejaVu Sans", sans-serif;
+    font-size: 11px;
+}
+
+.reporte-header {
+    border-bottom: 2px solid #25346b;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+}
+
+.membrete-logos {
+    margin: 0 auto 7px;
+    width: 100%;
+}
+
+.membrete-logos td {
+    border: 0;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    width: 50%;
+}
+
+.membrete-logos img {
+    display: inline-block;
+    max-height: 42px;
+    max-width: 100%;
+}
+
+.membrete-instituciones {
+    color: #25346b;
+    font-size: 8px;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.membrete-instituciones p {
+    margin: 0;
+}
+
+h1 {
+    color: #25346b;
+    font-size: 18px;
+    margin: 0 0 5px;
+}
+
+.reporte-fecha {
+    color: #62708f;
+    font-size: 9px;
+    margin: 0;
+}
+
+.resumen {
+    background: #f0f3fa;
+    border-left: 4px solid #156939;
+    margin-bottom: 16px;
+    padding: 9px 12px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    background: #25346b;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: left;
+}
+
+th,
+td {
+    border: 1px solid #d8e1f3;
+    padding: 8px;
+}
+
+tr:nth-child(even) td {
+    background: #f7f8fc;
+}
+
+.col-id {
+    text-align: center;
+    width: 48px;
+}
+
+.sin-registros {
+    color: #62708f;
+    padding: 18px;
+    text-align: center;
+}
+
+footer {
+    border-top: 1px solid #d8e1f3;
+    color: #62708f;
+    font-size: 8px;
+    margin-top: 24px;
+    padding-top: 8px;
+    text-align: center;
+}

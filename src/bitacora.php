@@ -1,0 +1,163 @@
+<?php
+
+
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../include/guardian.php';
+require_once __DIR__ . '/../modelos/modelo_bitacora.php';
+require_once __DIR__ . '/../helpers/busqueda.php';
+
+$conex = Conexion::conectar(); 
+
+
+
+
+guardian_requerirAdmin();
+
+
+$filtros = [
+    'id_usu'      => $_GET['id_usu']      ?? '',
+    'accion'      => $_GET['accion']      ?? '',
+    'fecha_desde' => $_GET['fecha_desde'] ?? '',
+    'fecha_hasta' => $_GET['fecha_hasta'] ?? '',
+];
+$busqueda = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
+
+$registros = obtener_bitacora($conex, $filtros);
+$usuarios  = obtener_usuarios_para_filtro($conex);
+if ($busqueda !== '') {
+    $registros = filtrarFilasPorBusqueda($registros, $busqueda);
+}
+$registrosPorPagina = 10;
+$paginaActual = max(1, intval($_GET['page'] ?? 1));
+$totalPaginas = max(1, (int)ceil(count($registros) / $registrosPorPagina));
+$paginaActual = min($paginaActual, $totalPaginas);
+$registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, $registrosPorPagina);
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bitácora del sistema - Red de Bibliotecas</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/bitacora.css">
+    <link rel="icon" type="image/png" href="./assets/icon__icey.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<?php require_once __DIR__ . '/../include/header.php'; ?>
+
+<main class="container__bitacora">
+    <h1 class="bitacora__title">Bitácora del sistema</h1>
+    <p class="bitacora__subtitle">Historial de acciones realizadas por los usuarios.</p>
+
+    <form method="GET" action="bitacora.php" class="bitacora__filtros">
+        <div class="campo">
+            <label for="id_usu">Usuario</label>
+            <select name="id_usu" id="id_usu">
+                <option value="">Todos los usuarios</option>
+                <?php foreach ($usuarios as $u): ?>
+                    <option value="<?= (int)$u['id'] ?>" <?= ($filtros['id_usu'] == $u['id']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($u['nombre']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="accion">Acción</label>
+            <select name="accion" id="accion">
+                <option value="">Toda acción</option>
+                <?php foreach (['Crear', 'Editar', 'Eliminar', 'Login'] as $acc): ?>
+                    <option value="<?= $acc ?>" <?= ($filtros['accion'] === $acc) ? 'selected' : '' ?>>
+                        <?= $acc ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="fecha_desde">Desde</label>
+            <input type="date" name="fecha_desde" id="fecha_desde" value="<?= htmlspecialchars($filtros['fecha_desde']) ?>">
+        </div>
+
+        <div class="campo">
+            <label for="fecha_hasta">Hasta</label>
+            <input type="date" name="fecha_hasta" id="fecha_hasta" value="<?= htmlspecialchars($filtros['fecha_hasta']) ?>">
+        </div>
+
+        <div class="campo">
+            <label for="q">Buscar en registros</label>
+            <input type="search" name="q" id="q" value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>" placeholder="Buscar...">
+        </div>
+
+        <button type="submit">Filtrar</button>
+        <a href="bitacora.php" class="bitacora__limpiar">Limpiar</a>
+    </form>
+
+    <div class="tabla__container bitacora__tabla-wrap">
+        <table class="bitacora__tabla">
+            <caption class="tabla-planificacion__caption">Registros de actividad</caption>
+            <thead>
+                <tr>
+                    <th class="col-fecha">Fecha</th>
+                    <th class="col-dia">Día</th>
+                    <th class="col-hora">Hora</th>
+                    <th class="col-usuario">Usuario</th>
+                    <th class="col-accion">Acción</th>
+                    <th class="col-modulo">Módulo</th>
+                    <th class="col-detalle">Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($registros)): ?>
+                    <tr>
+                        <td colspan="7" class="bitacora__vacio">No hay registros de bitácora para los filtros seleccionados.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($registros as $r):
+                        switch (strtolower($r['accion'])) {
+                            case 'crear':    $accionClase = 'bitacora__badge--crear';    break;
+                            case 'editar':   $accionClase = 'bitacora__badge--editar';   break;
+                            case 'eliminar': $accionClase = 'bitacora__badge--eliminar'; break;
+                            default:         $accionClase = 'bitacora__badge--login';    break;
+                        }
+                    ?>
+                        <tr>
+                            <td data-label="Fecha"><?= htmlspecialchars($r['fecha']) ?></td>
+                            <td data-label="Día"><?= htmlspecialchars($r['nom_dia']) ?></td>
+                            <td data-label="Hora"><?= htmlspecialchars(date('g:i:s A', strtotime($r['hora']))) ?></td>
+                            <td data-label="Usuario"><?= htmlspecialchars($r['nombre_usuario']) ?></td>
+                            <td data-label="Acción">
+                                <span class="bitacora__badge <?= $accionClase ?>"><?= htmlspecialchars($r['accion']) ?></span>
+                            </td>
+                            <td data-label="Módulo"><?= htmlspecialchars($r['descripcion']) ?></td>
+                            <td data-label="Detalle"><?= htmlspecialchars($r['detalle']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+        <?php if ($totalPaginas > 1): ?>
+            <nav class="paginacion" aria-label="Páginas de bitácora">
+                <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
+                    <?php $parametrosPagina = array_merge($filtros, ['q' => $busqueda, 'page' => $pagina]); ?>
+                    <a href="?<?php echo htmlspecialchars(http_build_query($parametrosPagina), ENT_QUOTES, 'UTF-8'); ?>"
+                       class="paginacion__pagina<?php echo $pagina === $paginaActual ? ' activa' : ''; ?>"
+                       <?php echo $pagina === $paginaActual ? 'aria-current="page"' : ''; ?>>
+                        <?php echo $pagina; ?>
+                    </a>
+                <?php endfor; ?>
+            </nav>
+        <?php endif; ?>
+    </div>
+</main>
+   <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<?php
+require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../helpers/validador.php';
+
+class Usuario {
+
+public function mostrarUsuarios(int $idBiblioteca = null) {
+
+    $sql = "SELECT
+    u.id,
+    u.nombre,
+    u.telefono,
+    u.id_empleado,
+    u.rol,
+    CONCAT(e.nombre, ' ', e.apellido) AS id_empleado_nombre,
+    e.id_biblioteca
+FROM usuario u
+LEFT JOIN empleado e ON e.id = u.id_empleado
+";
+    if ($idBiblioteca !== null) {
+        $sql .= "WHERE e.id_biblioteca = ? ";
+    }
+    $sql .= "
+ORDER BY u.nombre";
+
+    $stmt = Conexion::conectar()->prepare($sql);
+    $stmt->execute($idBiblioteca !== null ? [$idBiblioteca] : []);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+ 
+    public function validarUsuario(array $data, bool $isUpdate = false): array
+    {
+        $errors = [];
+        $nombre = trim($data['nombre'] ?? '');
+        $clave = trim($data['clave'] ?? '');
+        $telefono = trim($data['telefono'] ?? '');
+        $id_empleado = $data['id_empleado'] ?? null;
+
+        if (!Validador::esTextoValido($nombre, 2, 100)) {
+            $errors[] = 'Nombre de usuario inválido.';
+        }
+
+        if (!$isUpdate || $clave !== '') {
+            if (!Validador::esClaveValida($clave, 6, 100)) {
+                $errors[] = 'Clave inválida. Debe tener al menos 6 caracteres.';
+            }
+        }
+
+        if (!Validador::esTelefonoValido($telefono)) {
+            $errors[] = 'Teléfono inválido. Debe contener solo números, espacios, + o - (entre 7 y 15 caracteres).';
+        }
+
+        if (!Validador::esEnteroPositivo($id_empleado)) {
+            $errors[] = 'Debe seleccionar un empleado válido.';
+        }
+
+        if (array_key_exists('rol', $data)) {
+            $rol = $data['rol'];
+            if (!in_array($rol, ['administrador', 'coordinador', 'usuario'], true)) {
+                $errors[] = 'Rol inválido.';
+            }
+        }
+
+        return $errors;
+    }
+
+    public function obtenerUsuarioPorId(int $id) {
+        $sql = "SELECT id, nombre, telefono, id_empleado, rol FROM usuario WHERE id = ?";
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerPerfilUsuario(int $id) {
+        $sql = "SELECT
+                    u.id AS user_id,
+                    TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, ''))) AS empleado,
+                    b.nombre AS biblioteca
+                FROM usuario u
+                LEFT JOIN empleado e ON e.id = u.id_empleado
+                LEFT JOIN biblioteca b ON b.id = e.id_biblioteca
+                WHERE u.id = ?";
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerUsuarioPorNombre(string $nombre) {
+        $sql = "SELECT u.id, u.nombre, u.clave, u.rol, u.id_empleado, e.id_biblioteca
+                FROM usuario u
+                LEFT JOIN empleado e ON e.id = u.id_empleado
+                WHERE u.nombre = ?";
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute([$nombre]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            $rol = trim(strtolower($user['rol'] ?? 'usuario'));
+            $user['rol'] = in_array($rol, ['administrador', 'coordinador', 'usuario'], true)
+                ? $rol
+                : 'usuario';
+        }
+
+        return $user;
+    }
+
+    public function actualizarClave(int $id, string $clave): bool
+    {
+        $hash = password_hash($clave, PASSWORD_DEFAULT);
+        $sql = 'UPDATE usuario SET clave = ? WHERE id = ?';
+        $stmt = Conexion::conectar()->prepare($sql);
+        return $stmt->execute([$hash, $id]);
+    }
+
+    public function existeUsuario(string $nombre, int $idExcluir = null): bool
+    {
+        $sql = "SELECT id FROM usuario WHERE nombre = ?";
+        $params = [$nombre];
+        if ($idExcluir !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $idExcluir;
+        }
+        $sql .= " LIMIT 1";
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute($params);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    
+    public function existeUsuarioPorEmpleado(int $id_empleado, int $idExcluir = null): bool
+    {
+        $sql = "SELECT id FROM usuario WHERE id_empleado = ?";
+        $params = [$id_empleado];
+        if ($idExcluir !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $idExcluir;
+        }
+        $sql .= " LIMIT 1";
+        $stmt = Conexion::conectar()->prepare($sql);
+        $stmt->execute($params);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function crearUsuario(string $nombre, string $clave, string $telefono, int $id_empleado, string $rol = 'usuario')
+    {
+        try {
+            $hash = password_hash($clave, PASSWORD_DEFAULT);
+            $sql = "INSERT INTO usuario (nombre, clave, telefono, id_empleado, rol) VALUES (?, ?, ?, ?, ?)";
+            $stmt = Conexion::conectar()->prepare($sql);
+            return $stmt->execute([$nombre, $hash, $telefono, $id_empleado, $rol]);
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                
+                return false;
+            }
+            throw $e;
+        }
+    }
+
+    
+    
+    public function actualizarUsuario(int $id, string $nombre, string $telefono, int $id_empleado, string $clave = null, string $rol = null)
+    {
+        try {
+            $campos = ['nombre = ?', 'telefono = ?', 'id_empleado = ?'];
+            $params = [$nombre, $telefono, $id_empleado];
+
+            if ($clave !== null && $clave !== '') {
+                $campos[] = 'clave = ?';
+                $params[] = password_hash($clave, PASSWORD_DEFAULT);
+            }
+
+            if ($rol !== null) {
+                $campos[] = 'rol = ?';
+                $params[] = $rol;
+            }
+
+            $params[] = $id;
+            $sql = "UPDATE usuario SET " . implode(', ', $campos) . " WHERE id = ?";
+            $stmt = Conexion::conectar()->prepare($sql);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000') {
+                return false;
+            }
+            throw $e;
+        }
+    }
+
+    public function eliminarUsuario(int $id) {
+        $sql = "DELETE FROM usuario WHERE id = ?";
+        $stmt = Conexion::conectar()->prepare($sql);
+        return $stmt->execute([$id]);
+    }
+}
+?>

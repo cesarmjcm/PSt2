@@ -1,0 +1,331 @@
+<?php
+require_once __DIR__ . '/../modelos/municipio.php';
+require_once __DIR__ . '/../modelos/comuna.php';
+require_once __DIR__ . '/../modelos/parroquia.php';
+require_once __DIR__ . '/../modelos/espacio.php';
+require_once __DIR__ . '/../modelos/empleado.php';
+require_once __DIR__ . '/../modelos/biblioteca.php';
+require_once __DIR__ . '/../modelos/tipo_actividad.php';
+require_once __DIR__ . '/../modelos/nv_act.php';
+
+$municipioModel = new Municipio();
+$comunaModel = new Comuna();
+$parroquiaModel = new Parroquia();
+$espacioModel = new Espacio();
+$empleadoModel = new Empleado();
+$bibliotecaModel = new Biblioteca();
+$tipoActividadModel = new TipoActividad();
+$nivelImpactoModel = new NivelImpacto();
+
+$municipios = $municipioModel->mostrarMunicipios();
+// Comunas con su parroquia y municipio (JOIN comuna -> parroquia -> municipio).
+$comunas = $comunaModel->mostrarComunasConUbicacion();
+$parroquias = $parroquiaModel->mostrarParroquias();
+$parroquiasUnicas = [];
+foreach ($parroquias as $parroquia) {
+    $nombreParroquia = trim((string)($parroquia['nombre'] ?? ''));
+    $idParroquia = (string)($parroquia['id'] ?? '');
+    $municipioParroquia = (string)($parroquia['id_municipio'] ?? '');
+    if ($nombreParroquia !== '') {
+        $claveParroquia = $municipioParroquia . '|' . mb_strtolower($nombreParroquia, 'UTF-8');
+        $parroquiasUnicas[$claveParroquia] = [
+            'id' => $idParroquia,
+            'nombre' => $nombreParroquia,
+            'id_municipio' => $municipioParroquia,
+        ];
+    }
+}
+$parroquias = array_values($parroquiasUnicas);
+$espacios = $espacioModel->mostrarEspacios();
+$idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+$empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
+$bibliotecas = $bibliotecaModel->mostrarBibliotecas();
+$tiposActividad = $tipoActividadModel->mostrarTipos();
+$nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
+?>
+
+<section>
+
+    
+    <div id="modalPlanificacion" class="modal" style="display:none;">
+        <div class="modal-content-wrapper">
+            <section class="formulario-planificacion">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                    <h2 class="section-title" id="planModalTitulo" style="margin: 0;">Planificación de Actividad</h2>
+                    <span class="close-button" style="cursor:pointer; font-size: 1.5rem;">&times;</span>
+                </div>
+                <div class="container__planificacion">
+                    <form id="form-planificacion" action="../controladores/actividad_contr.php?action=crear" method="post" onsubmit="return validacionesformulario(this)" novalidate>
+                                <input type="hidden" name="action" id="plan-action" value="crear">
+                        <input type="hidden" name="id" id="actividad-id" value="">
+                        <input type="hidden" id="plan-dia" name="dia_semana" value="">
+                        <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? 'main2.php', ENT_QUOTES, 'UTF-8'); ?>">
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin:0 0 16px;">
+                            <fieldset class="tipo-formulario-selector" style="border:none; padding:0; margin:0; display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
+                                <legend style="font-weight:600; margin-bottom:6px; padding:0; width:100%;">Tipo de planificación</legend>
+                                <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                    <input type="radio" name="tipo_formulario" id="tipo-formulario-simple" value="simple" checked>
+                                    Actividad simple
+                                </label>
+                                <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+                                    <input type="radio" name="tipo_formulario" id="tipo-formulario-completa" value="completa">
+                                    Actividad completa
+                                </label>
+                            </fieldset>
+                            <button type="button" class="btn-secondary" id="btnCargarSolicitud" style="white-space:nowrap;">Cargar solicitud</button>
+                        </div>
+                        <div id="solicitudesSelector" class="solicitudes-selector" hidden>
+                            <label for="solicitudSeleccion">Selecciona una solicitud para cargar</label>
+                            <select id="solicitudSeleccion" class="solicitudes-selector__select">
+                                <option value="">Seleccione una solicitud...</option>
+                            </select>
+                        </div>
+
+                        <div id="form-planificacion-aviso" class="form-aviso" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
+
+                        <div class="planificacion-grid">
+                            <fieldset class="planificacion-group">
+                                <fieldset>
+                                    <label for="plan-tipo">Nombre de la actividad</label>
+                                    <input type="text" id="plan-tipo" maxlength="30" name="nombre" placeholder="Nombre de la actividad">
+
+                                    <label for="plan-descripcion">Descripción de la actividad</label>
+                                    <textarea id="plan-descripcion" maxlength="200" name="descripcion" placeholder="Descripción breve"></textarea>
+                                </fieldset>
+
+                                <fieldset>
+                                    <label for="plan-fecha">Fecha de la actividad</label>
+                                    <input type="date" id="plan-fecha" name="fecha" placeholder="Ej. 20/04/2026">
+
+                                    <label for="plan-hora">Hora de la actividad</label>
+                                    <input type="time" id="plan-hora" name="horaActividad" placeholder="Ej. 09:00">
+
+                                    <label for="plan-estado">Estado de la actividad</label>
+                                    <select id="plan-estado" name="estado">
+                                        <option value="pendiente" selected>Pendiente</option>
+                                        <option value="confirmada">Confirmada</option>
+                                        <option value="ejecutada">Ejecutada</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
+                                </fieldset>
+
+                                <fieldset id="campos-completa" class="hidden">
+                                    <legend>Detalles de actividad completa</legend>
+
+                                    <label for="plan-objetivo">Objetivo / enfoque</label>
+                                    <input type="text" id="plan-objetivo" maxlength="50" name="objetivo" placeholder="Objetivo de la actividad">
+
+                                    <label for="plan-participantes">Cantidad de participantes</label>
+                                    <input type="number" id="plan-participantes" name="participantes" min="0" max="99999" placeholder="Ej. 25">
+
+                                    <label for="plan-nivel-impacto">Nivel de impacto</label>
+                                    <select id="plan-nivel-impacto" name="nivel_impacto">
+                                        <option value="">Seleccione un nivel de impacto</option>
+                                        <?php foreach ($nivelesImpacto as $nivel): ?>
+                                            <option value="<?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?>">
+                                                <?= htmlspecialchars($nivel['nombre_impacto'], ENT_QUOTES, 'UTF-8') ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </fieldset>
+                            </fieldset>
+
+                            <fieldset class="planificacion-group">
+                                <fieldset>
+                                    <label for="plan-municipio">Municipio</label>
+                                    <select name="municipio_id" id="planificacion-municipios">
+                                        <option value="">Seleccione un municipio</option>
+                                        <?php foreach ($municipios as $m): ?>
+                                            <option value="<?= htmlspecialchars($m['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($m['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                    <div id="municipio-hidden" class="hidden">
+                                        <fieldset>
+                                            <label for="plan-parroquia">Parroquia</label>
+                                            <select id="plan-parroquia" name="parroquia" disabled>
+                                                <option value="">Seleccione una parroquia</option>
+                                                <?php foreach ($parroquias as $parroquia): ?>
+                                                    <option value="<?= htmlspecialchars($parroquia['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars($parroquia['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars($parroquia['id_municipio'], ENT_QUOTES, 'UTF-8') ?>">
+                                                        <?= htmlspecialchars($parroquia['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </fieldset>
+
+                                        <fieldset>
+                                            <label for="plan-comuna">Comuna</label>
+                                            <select name="comuna" id="planificacion-comunas" disabled>
+                                                <option value="">Seleccione una comuna</option>
+                                                <?php foreach ($comunas as $c): ?>
+                                                    <option value="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>" data-id="<?= htmlspecialchars((string) $c['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars($c['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $c['id_municipio'], ENT_QUOTES, 'UTF-8') ?>">
+                                                        <?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </fieldset>
+
+                                        <fieldset>
+                                            <legend>¿Dónde se realiza?</legend>
+                                            <div style="display:flex; gap:18px; margin-bottom:10px; flex-wrap:wrap;">
+                                                <label style="display:flex; align-items:center; gap:6px; margin:0;">
+                                                    <input type="radio" name="tipo_ubicacion" value="biblioteca" checked>
+                                                    Biblioteca
+                                                </label>
+                                                <label style="display:flex; align-items:center; gap:6px; margin:0;">
+                                                    <input type="radio" name="tipo_ubicacion" value="espacio">
+                                                    Espacio
+                                                </label>
+                                            </div>
+
+                                            <div id="ubicacion-biblioteca">
+                                                <label for="plan-biblioteca">Biblioteca</label>
+                                                <select name="id_biblioteca" id="plan-biblioteca">
+                                                    <option value="">Seleccione una biblioteca</option>
+                                                    <?php foreach ($bibliotecas as $b): ?>
+                                                        <option value="<?= htmlspecialchars($b['id'], ENT_QUOTES, 'UTF-8') ?>" data-municipio="<?= htmlspecialchars((string) $b['id_municipio'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) $b['id_parroquia'], ENT_QUOTES, 'UTF-8') ?>"<?= !$esAdmin ? ' selected' : '' ?>><?= htmlspecialchars($b['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+
+                                            <div id="ubicacion-espacio" class="hidden">
+                                                <label for="plan-espacio">Espacio cultural</label>
+                                                <select name="id_espacio_cultural" id="plan-espacio">
+                                                    <option value="">Seleccione un espacio cultural</option>
+                                                    <?php foreach ($espacios as $e): ?>
+                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+
+                                    <fieldset>
+                                        <label for="plan-tipo-actividad">Tipo de actividad</label>
+                                        <select name="id_tipo_actividad" id="plan-tipo-actividad">
+                                            <option value="">Seleccione un tipo de actividad</option>
+                                            <?php foreach ($tiposActividad as $t): ?>
+                                                <option value="<?= htmlspecialchars($t['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($t['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </fieldset>
+
+                                    <fieldset>
+                                        <legend>Responsable</legend>
+                                        <label for="plan-responsable">Nombre</label>
+                                        <select name="id_empleado" id="plan-responsable">
+                                            <option value="">Seleccione un responsable</option>
+                                            <?php foreach ($empleados as $e): ?>
+                                                <?php $nombreCompleto = trim($e['nombre'].' '.$e['apellido']); ?>
+                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <label for="plan-telefono">Teléfono responsable</label>
+                                        <input type="tel" id="plan-telefono" maxlength="15" inputmode="tel" placeholder="Teléfono del empleado" readonly>
+                                    </fieldset>
+                                </fieldset>
+                            </fieldset>
+                        </div>
+
+                        <button type="submit" class="btn-ingresar-planificacion">Ingresar planificación</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const selectResponsable = document.getElementById('plan-responsable');
+        const inputTelefono = document.getElementById('plan-telefono');
+        if (selectResponsable && inputTelefono) {
+            selectResponsable.addEventListener('change', () => {
+                inputTelefono.value = (selectResponsable.selectedOptions[0] && selectResponsable.selectedOptions[0].dataset.telefono) || '';
+            });
+        }
+
+        const selectMunicipio = document.getElementById('planificacion-municipios');
+        const selectParroquia = document.getElementById('plan-parroquia');
+        const selectComuna = document.getElementById('planificacion-comunas');
+        const selectBiblioteca = document.getElementById('plan-biblioteca');
+        const selectEspacio = document.getElementById('plan-espacio');
+
+        if (selectMunicipio && selectParroquia && selectComuna) {
+            const opcionesParroquias = Array.from(selectParroquia.options).slice(1);
+            const opcionesComunas = Array.from(selectComuna.options).slice(1);
+            const opcionesBibliotecas = Array.from(selectBiblioteca.options).slice(1);
+            const opcionesEspacios = Array.from(selectEspacio.options).slice(1);
+            const bibliotecaSeleccionadaInicial = selectBiblioteca.value;
+
+            const filtrarUbicaciones = () => {
+                const municipioId = selectMunicipio.value;
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
+                const bibliotecaSeleccionada = selectBiblioteca.value || bibliotecaSeleccionadaInicial;
+
+                selectBiblioteca.replaceChildren(new Option('Seleccione una biblioteca', ''));
+                opcionesBibliotecas.forEach((opcion) => {
+                    const coincideUbicacion = municipioId !== '' && parroquiaId !== ''
+                        ? opcion.dataset.municipio === municipioId && opcion.dataset.parroquia === parroquiaId
+                        : municipioId === '' && parroquiaId === '' && opcion.value === bibliotecaSeleccionadaInicial;
+                    if (coincideUbicacion) {
+                        selectBiblioteca.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                if (Array.from(selectBiblioteca.options).some(opcion => opcion.value === bibliotecaSeleccionada)) {
+                    selectBiblioteca.value = bibliotecaSeleccionada;
+                }
+
+                // El espacio cultural no tiene parroquia propia: se asocia a la parroquia/comuna
+                // elegidas arriba al guardar la actividad (actividad -> comuna -> parroquia).
+                // Por eso se listan todos los espacios.
+                const espacioSeleccionado = selectEspacio.value;
+                selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
+                opcionesEspacios.forEach((opcion) => selectEspacio.appendChild(opcion.cloneNode(true)));
+                if (espacioSeleccionado !== '') {
+                    selectEspacio.value = espacioSeleccionado;
+                }
+            };
+
+            const filtrarParroquias = () => {
+                const municipioId = selectMunicipio.value;
+                selectParroquia.replaceChildren(new Option('Seleccione una parroquia', ''));
+                opcionesParroquias.forEach((opcion) => {
+                    if (opcion.dataset.municipio === municipioId) {
+                        selectParroquia.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectParroquia.disabled = municipioId === '';
+            };
+
+            const filtrarComunas = () => {
+                const parroquiaId = (selectParroquia.selectedOptions[0] && selectParroquia.selectedOptions[0].dataset.id) || '';
+                selectComuna.replaceChildren(new Option('Seleccione una comuna', ''));
+                opcionesComunas.forEach((opcion) => {
+                    if (opcion.dataset.parroquia === parroquiaId) {
+                        selectComuna.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                selectComuna.disabled = parroquiaId === '';
+            };
+
+            selectMunicipio.addEventListener('change', () => {
+                selectParroquia.value = '';
+                selectComuna.value = '';
+                filtrarParroquias();
+                filtrarComunas();
+                filtrarUbicaciones();
+            });
+            selectParroquia.addEventListener('change', () => {
+                selectComuna.value = '';
+                filtrarComunas();
+                filtrarUbicaciones();
+            });
+            selectComuna.addEventListener('change', filtrarUbicaciones);
+            filtrarParroquias();
+            filtrarComunas();
+            filtrarUbicaciones();
+        }
+    })();
+</script>

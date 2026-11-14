@@ -1,0 +1,54 @@
+<?php
+
+require_once __DIR__ . '/../include/guardian.php';
+
+
+if (isset($_GET['accion']) && $_GET['accion'] === 'obtener_actividades') {
+    require_once __DIR__ . '/../modelos/actividad.php';
+
+    header('Content-Type: application/json; charset=utf-8');
+
+    try {
+        $actividadModel = new Actividad();
+        $actividades = $actividadModel->mostrarActividades(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
+
+        
+        foreach ($actividades as &$act) {
+            if (!empty($act['fecha'])) {
+                $act['fecha'] = date('Y-m-d', strtotime($act['fecha']));
+            }
+        }
+
+        echo json_encode($actividades);
+
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+
+    exit; 
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Red de Bibliotecas</title>
+    <link rel="stylesheet" href="./css/main2.css?v=13">
+    <link rel="icon" type="image/png" href="./assets/icon__icey.png">
+    <link rel="stylesheet" href="./css/fontawesome-all.min.css">
+</head>
+<body>
+    <?php include '../include/header.php'; ?>
+    <?php include '../include/metrics.php'; ?>
+    <?php include '../include/modal.php'; ?>
+    <?php include '../include/calendario.php'; ?>
+    <script src="./js/utilidades.js?v=<?= filemtime(__DIR__ . '/js/utilidades.js') ?>"></script>
+    <script src="./js/validaciones.js?v=<?= filemtime(__DIR__ . '/js/validaciones.js') ?>"></script>
+    <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
+    <script src="./js/main2.js?v=<?= filemtime(__DIR__ . '/js/main2.js') ?>"></script>
+    <script src="./js/reportes.js?v=<?= filemtime(__DIR__ . '/js/reportes.js') ?>"></script>
+    <script src="./js/script.js?v=<?= filemtime(__DIR__ . '/js/script.js') ?>"></script>
+</body>
+</html>

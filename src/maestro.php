@@ -1,0 +1,1084 @@
+<?php
+require_once __DIR__ . '/../include/guardian.php';
+
+
+
+
+$maestros = [
+    'municipio' => 'Municipios',
+    'parroquia' => 'Parroquias',
+    'comuna' => 'Comunas',
+    'biblioteca' => 'Bibliotecas',
+    'institucion' => 'Instituciones',
+    'cargo' => 'Cargos',
+    'empleado' => 'Empleados',
+    'nv_act' => 'Niveles de impacto',
+    'espacio' => 'Espacios culturales',
+    'tipo_actividad' => 'Tipos de actividad',
+  
+];
+
+
+$camposPorMaestro = [
+    'municipio'  => [
+        'nombre' => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30, 'noNumeros' => true],
+    ],
+    'parroquia'  => [
+        'id_municipio' => [
+            'label'       => 'Municipio',
+            'type'        => 'select',
+            'fuente'      => '../controladores/municipio_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        ],
+        'nombre'       => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30, 'noNumeros' => true],
+    ],
+    'comuna'     => [
+        'id_municipio' => [
+            'label'       => 'Municipio',
+            'type'        => 'select',
+            'fuente'      => '../controladores/municipio_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        
+            'soloFiltro'  => true,
+        ],
+        'id_parroquia' => [
+            'label'       => 'Parroquia',
+            'type'        => 'select',
+            'fuente'      => '../controladores/parroquia_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+            'filtradoPor' => 'id_municipio',
+        ],
+        'nombre'       => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30, 'noNumeros' => true],
+    ],
+    'biblioteca' => [
+        'id_parroquia' => [
+            'label'       => 'Parroquia',
+            'type'        => 'select',
+            'fuente'      => '../controladores/parroquia_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        ],
+        'nombre' => [
+            'label' => 'Nombre',
+            'type' => 'text',
+            'maxLength' => 50,
+            'noNumeros' => true
+        ],
+        'correo' => [
+            'label' => 'Correo',
+            'type' => 'email',
+            'maxLength' => 30,
+            'opcional' => true,
+            'esCorreo' => true
+        ],
+        'redes_sociales' => [
+            'label' => 'Redes sociales',
+            'type' => 'text',
+            'maxLength' => 30,
+            'opcional' => true
+        ],
+        'direccion' => [
+            'label' => 'Dirección',
+            'type' => 'text',
+            'maxLength' => 30,
+            'opcional' => true
+        ],
+    ],
+    'institucion' => [
+        'id_municipio' => [
+            'label'       => 'Municipio',
+            'type'        => 'select',
+            'fuente'      => '../controladores/municipio_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        ],
+        'nombre' => [
+            'label' => 'Nombre',
+            'type' => 'text',
+            'maxLength' => 40,
+            'noNumeros' => true,
+        ],
+        'rif' => [
+            'label' => 'RIF',
+            'type' => 'text',
+            'maxLength' => 12,
+            'esRif' => true,
+        ],
+        'correo' => [
+            'label' => 'Correo',
+            'type' => 'email',
+            'maxLength' => 50,
+            'opcional' => true,
+            'esCorreo' => true,
+        ],
+        'direccion' => [
+            'label' => 'Dirección',
+            'type' => 'text',
+            'maxLength' => 100,
+            'opcional' => true,
+        ],
+    ],
+    
+    'cargo'      => [
+        'nombre'      => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 36, 'noNumeros' => true],
+        'descripcion' => ['label' => 'Descripción', 'type' => 'text', 'maxLength' => 40, 'opcional' => true],
+    ],
+    'empleado'   => [
+        'cedula'   => ['label' => 'Cédula', 'type' => 'text', 'inputmode' => 'numeric', 'soloNumeros' => true, 'minLength' => 6, 'maxLength' => 8],
+        'nombre'   => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 40, 'noNumeros' => true],
+        'apellido' => ['label' => 'Apellido', 'type' => 'text', 'maxLength' => 20, 'noNumeros' => true],
+        'telefono' => ['label' => 'Teléfono', 'type' => 'text', 'maxLength' => 11, 'formatoVenezolano' => true],
+
+        'genero'   => ['label' => 'Género', 'type' => 'select', 'options' => ['M' => 'Masculino', 'F' => 'Femenino']],
+        'edad'     => ['label' => 'Edad', 'type' => 'number', 'min' => 17, 'edadMinima' => 17],
+        'id_cargo' => [ 'label'       => 'Cargo', 'type'        => 'select','fuente'      => '../controladores/cargo_contr.php','optionValue' => 'id','optionLabel' => 'nombre', ],
+        'id_biblioteca' => [
+            'label'       => 'Biblioteca donde trabaja',
+            'type'        => 'select',
+            'fuente'      => '../controladores/biblioteca_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        ],
+        // Los años de servicio se calculan entre el inicio y el fin, o hasta hoy si el cargo sigue vigente.
+        'fecha_inicio_cargo' => ['label' => 'Fecha de ingreso (inicio del cargo)', 'type' => 'date', 'esFechaIngreso' => true],
+        'anios_servicio' => ['label' => 'Años de servicio', 'type' => 'number', 'min' => 0, 'soloLectura' => true, 'calculaDesde' => 'fecha_inicio_cargo', 'calculaHasta' => 'fecha_fin_cargo'],
+        // Sin fecha final = el cargo sigue vigente.
+        'fecha_fin_cargo'    => ['label' => 'Fin del cargo', 'type' => 'date', 'opcional' => true, 'noAnteriorA' => 'fecha_inicio_cargo'],
+    ],
+    'nv_act'     => [
+        'nombre_impacto' => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 20, 'noNumeros' => true],
+    ],
+    'espacio'    => [
+        'nombre'    => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30],
+        'capacidad' => ['label' => 'Capacidad', 'type' => 'number'],
+        'direccion' => ['label' => 'Dirección', 'type' => 'text', 'maxLength' => 30],
+        'metodo_contactar' => ['label' => 'Método de contacto', 'type' => 'text', 'maxLength' => 40, 'opcional' => true],
+    ],
+    'tipo_actividad' => [
+        'nombre'      => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30, 'noNumeros' => true],
+        'descripcion' => ['label' => 'Descripción', 'type' => 'text', 'maxLength' => 40, 'opcional' => true],
+    ],
+];
+   
+
+$controladorPorMaestro = [
+    'municipio'  => '../controladores/municipio_contr.php',
+    'parroquia'  => '../controladores/parroquia_contr.php',
+    'comuna'     => '../controladores/comuna_contr.php',
+    'biblioteca' => '../controladores/biblioteca_contr.php',
+    'institucion' => '../controladores/institucion_contr.php',
+    'cargo'      => '../controladores/cargo_contr.php',
+    'empleado'   => '../controladores/empleado_contr.php',
+    'nv_act'     => '../controladores/nv_act_contr.php',
+    'espacio'    => '../controladores/espacio_contr.php',
+    'tipo_actividad' => '../controladores/tipo_actividad_contr.php',
+ 
+];
+
+$tabla = $_GET['tabla'] ?? '';
+$titulo = $maestros[$tabla] ?? 'Maestro no encontrado';
+$tablaValida = !empty($tabla) && isset($maestros[$tabla]);
+
+$esAdmin = esAdministrador();
+$esCoordinador = esCoordinador();
+$soloEdicion = !$esAdmin && in_array($tabla, [
+    'biblioteca',
+    'municipio',
+    'parroquia',
+    'nv_act',
+    'tipo_actividad',
+    'empleado',
+    'cargo',
+], true) && !($esCoordinador && $tabla === 'empleado');
+$mostrarNuevo = !$soloEdicion && !($esCoordinador && $tabla === 'biblioteca');
+
+
+
+if ($tablaValida && $tabla === 'cargo' && !$esAdmin) {
+    guardian_requerirAdmin('vista');
+}
+
+
+$maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => true]);
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></title>
+    <link rel="stylesheet" href="./css/main.css?v=3">
+    <link rel="stylesheet" href="./css/maestro.css?v=2">
+    <link rel="icon" type="image/png" href="./assets/icon__icey.png">
+    <link rel="stylesheet" href="./css/fontawesome-all.min.css">
+</head>
+<body>
+    <?php include '../include/header.php'; ?>
+
+    <div class="page-layout">
+        <aside class="sidebar-menu">
+            <h2>Panel</h2>
+            <nav class="sidebar-nav">
+                <ul>
+                    <?php foreach ($maestrosMenu as $key => $label): ?>
+                        <li><a href="./maestro.php?tabla=<?php echo urlencode($key); ?>"<?php echo $key === $tabla ? ' class="active"' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="page-content">
+            <div class="tabla__container">
+                <?php if (!$tablaValida): ?>
+                    <h1 class="planificacion__title"><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></h1>
+                    <p>Selecciona un maestro válido desde el menú lateral para comenzar.</p>
+                <?php else: ?>
+
+                    <div class="maestro__header">
+                        <h1 class="planificacion__title"><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></h1>
+                        <div class="maestro__acciones">
+                            <button type="button" class="btn-primary btn-exportar" id="btnExportar">
+                                <i class="fas fa-file-pdf"></i> Exportar PDF
+                            </button>
+                            <?php if ($mostrarNuevo): ?>
+                                <button type="button" class="btn-primary" id="btnNuevo">
+                                    <i class="fas fa-plus"></i> Nuevo
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div id="alertBox" class="maestro__alert maestro__alert--oculto" style="min-height: 2.75em; margin: 0 0 12px; box-sizing: border-box; visibility: hidden;"></div>
+
+                    <form class="tabla-buscador" id="buscarMaestroForm" role="search">
+                        <label class="sr-only" for="buscarMaestro">Buscar registro</label>
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input type="search"
+                               id="buscarMaestro"
+                               placeholder="Buscar registro..."
+                               autocomplete="off">
+                        <button type="button" class="tabla-buscador__limpiar" id="limpiarBusquedaMaestro" title="Limpiar búsqueda" aria-label="Limpiar búsqueda" hidden>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+
+                    <table class="tabla-planificacion" id="tablaMaestro">
+                        <thead>
+                            <tr id="tablaHead">
+                                
+                            </tr>
+                        </thead>
+                        <tbody id="tablaBody">
+                            <tr><td>Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                    <nav class="paginacion" id="maestroPagination" aria-label="Páginas de registros"></nav>
+                <?php endif; ?>
+            </div>
+        </main>
+    </div>
+
+    <?php if ($tablaValida): ?>
+    
+    <div class="maestro-modal" id="maestroModal" hidden>
+        <div class="maestro-modal__backdrop" id="modalBackdrop"></div>
+        <div class="maestro-modal__dialog">
+            <div class="maestro-modal__header">
+                <h2 id="modalTitulo">Nuevo registro</h2>
+                <button type="button" class="maestro-modal__close" id="modalClose" aria-label="Cerrar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="maestroForm" novalidate>
+                <input type="hidden" id="formId" value="">
+                <div id="modalError" class="maestro__alert maestro__alert--error" hidden></div>
+                <div id="formCampos">
+                
+                </div>
+                <div class="maestro-modal__actions">
+                    <button type="button" class="btn-secondary" id="btnCancelar">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <div class="maestro-modal" id="confirmModal" hidden>
+        <div class="maestro-modal__backdrop" id="confirmBackdrop"></div>
+        <div class="maestro-modal__dialog maestro-modal__dialog--small">
+            <div class="maestro-modal__header">
+                <h2>Confirmar eliminación</h2>
+            </div>
+            <p class="maestro-modal__text">¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.</p>
+            <div class="maestro-modal__actions">
+                <button type="button" class="btn-secondary" id="btnCancelarEliminar">Cancelar</button>
+                <button type="button" class="btn-danger" id="btnConfirmarEliminar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <script src="./js/header.js?v=<?= filemtime(__DIR__ . '/js/header.js') ?>"></script>
+    <script src="./js/reportes.js"></script>
+    <?php if ($tablaValida): ?>
+    <script src="./js/anios_servicio.js?v=<?= filemtime(__DIR__ . '/js/anios_servicio.js') ?>"></script>
+    <script>
+    (function () {
+        const tablaActual = <?php echo json_encode($tabla); ?>;
+        const puedeEditarRegistro = tablaActual !== 'empleado' || <?php echo json_encode($esAdmin || $esCoordinador); ?>;
+        const soloEdicion = <?php echo json_encode($soloEdicion); ?>;
+        const endpoint = <?php echo json_encode($controladorPorMaestro[$tabla]); ?>;
+        const campos = <?php echo json_encode($camposPorMaestro[$tabla], JSON_UNESCAPED_UNICODE); ?>;
+        const camposKeys = Object.keys(campos);
+
+        const tablaHead = document.getElementById('tablaHead');
+        const tablaBody = document.getElementById('tablaBody');
+        const paginacion = document.getElementById('maestroPagination');
+        const buscarMaestroForm = document.getElementById('buscarMaestroForm');
+        const buscarMaestro = document.getElementById('buscarMaestro');
+        const limpiarBusquedaMaestro = document.getElementById('limpiarBusquedaMaestro');
+        const alertBox = document.getElementById('alertBox');
+
+        const modal = document.getElementById('maestroModal');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+        const modalTitulo = document.getElementById('modalTitulo');
+        const modalClose = document.getElementById('modalClose');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const formCampos = document.getElementById('formCampos');
+        const maestroForm = document.getElementById('maestroForm');
+        const formId = document.getElementById('formId');
+        const modalErrorBox = document.getElementById('modalError');
+        const btnNuevo = document.getElementById('btnNuevo');
+        const btnExportar = document.getElementById('btnExportar');
+
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmBackdrop = document.getElementById('confirmBackdrop');
+        const btnCancelarEliminar = document.getElementById('btnCancelarEliminar');
+        const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+        let idAEliminar = null;
+
+        let alertTimeoutId = null;
+        const filasPorPagina = 10;
+        let paginaActual = 1;
+        let filasCargadas = [];
+        let temporizadorCedula = null;
+        let solicitudCedula = 0;
+
+        function mostrarAlerta(mensaje, tipo) {
+            if (alertTimeoutId) clearTimeout(alertTimeoutId);
+            alertBox.textContent = mensaje;
+            alertBox.className = 'maestro__alert maestro__alert--' + tipo;
+            alertBox.style.visibility = 'visible';
+            alertTimeoutId = setTimeout(() => {
+                alertBox.style.visibility = 'hidden';
+            }, 4000);
+        }
+
+        function mostrarErrorModal(mensaje) {
+            modalErrorBox.textContent = mensaje;
+            modalErrorBox.hidden = false;
+        }
+
+        function ocultarErrorModal() {
+            modalErrorBox.textContent = '';
+            modalErrorBox.hidden = true;
+        }
+
+        function normalizarTexto(valor) {
+            return String(valor == null ? '' : valor)
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
+        }
+
+        function filasFiltradas() {
+            const termino = normalizarTexto(buscarMaestro.value.trim());
+            if (!termino) return filasCargadas;
+            return filasCargadas.filter(fila =>
+                normalizarTexto(Object.values(fila).join(' ')).includes(termino)
+            );
+        }
+
+        function mostrarEstadoCedula(mensaje, tipo) {
+            const estadoCedula = document.getElementById('estado_cedula');
+            const inputCedula = document.getElementById('campo_cedula');
+            if (!estadoCedula || !inputCedula) return;
+            estadoCedula.textContent = mensaje;
+            estadoCedula.className = 'maestro__field-status' + (tipo ? ' maestro__field-status--' + tipo : '');
+            inputCedula.setAttribute('aria-invalid', tipo === 'error' ? 'true' : 'false');
+        }
+
+        async function consultarCedula(valor) {
+            const solicitudActual = ++solicitudCedula;
+            const inputCedula = document.getElementById('campo_cedula');
+            const body = new URLSearchParams();
+            body.append('action', 'validar_cedula');
+            body.append('cedula', valor);
+            if (formId.value !== '') body.append('id', formId.value);
+
+            mostrarEstadoCedula('Verificando cédula...', 'pendiente');
+
+            try {
+                const resp = await fetch(endpoint, { method: 'POST', body });
+                const json = await resp.json();
+                if (solicitudActual !== solicitudCedula || inputCedula.value.trim() !== valor) return false;
+                if (!resp.ok || !json.success) {
+                    throw new Error(json.message || 'No se pudo validar la cédula.');
+                }
+                if (!json.disponible) {
+                    mostrarEstadoCedula(json.message, 'error');
+                    return false;
+                }
+                mostrarEstadoCedula(json.message, 'correcto');
+                return true;
+            } catch (error) {
+                if (solicitudActual === solicitudCedula && inputCedula.value.trim() === valor) {
+                    mostrarEstadoCedula(error.message || 'No se pudo validar la cédula. Intente nuevamente.', 'error');
+                }
+                return false;
+            }
+        }
+
+        function validarCedulaAlEscribir() {
+            if (temporizadorCedula) clearTimeout(temporizadorCedula);
+            solicitudCedula++;
+            const inputCedula = document.getElementById('campo_cedula');
+            const valor = inputCedula.value.trim();
+
+            if (valor === '') {
+                mostrarEstadoCedula('', '');
+                return;
+            }
+            if (!/^\d{6,8}$/.test(valor)) {
+                mostrarEstadoCedula('La cédula debe contener solo números y tener entre 6 y 8 dígitos.', 'error');
+                return;
+            }
+
+            temporizadorCedula = setTimeout(() => consultarCedula(valor), 250);
+        }
+
+        
+        function esVacio(valor) {
+            return valor === null || valor === undefined || valor.trim() === '';
+        }
+
+        
+        function esRepetitivo(valor) {
+            const v = valor.trim();
+            if (v.length < 2) return false;
+
+            
+            if (/(.)\1{2,}/.test(v)) return true;
+
+            
+            if (/^(.)\1+$/.test(v)) return true;
+
+            for (let len = 1; len <= Math.floor(v.length / 2); len++) {
+                if (v.length % len !== 0) continue;
+                const chunk = v.substring(0, len);
+                if (chunk.repeat(v.length / len) === v) return true;
+            }
+
+            return false;
+        }
+
+        
+        const CAMPOS_SIN_CHEQUEO_REPETICION = ['telefono', 'capacidad', 'rif', 'cedula'];
+
+       
+        const REGEX_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü '\-]+$/u;
+
+     
+        const REGEX_TELEFONO_VENEZUELA = /^0(4(12|14|16|22|24|26)|2\d{2})\d{7}$/;
+
+        // Formato de correo electrónico (para campos con esCorreo: true)
+        const REGEX_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // RIF venezolano (para campos con esRif: true): letra + 8 dígitos + dígito verificador, con o sin guiones
+        const REGEX_RIF = /^[JGVEPCjgvepc]-?\d{8}-?\d$/;
+
+  
+        function validarCampoMaestro(key, campo, valorCrudo, esOpcional) {
+            const valor = (valorCrudo || '').trim();
+
+            if (!esOpcional && esVacio(valor)) {
+                return 'El campo "' + campo.label + '" no puede quedar vacío.';
+            }
+
+            if (esVacio(valor)) {
+                return null; 
+            }
+
+            if (campo.maxLength && valor.length > campo.maxLength) {
+                return 'El campo "' + campo.label + '" no puede tener más de ' + campo.maxLength + ' caracteres.';
+            }
+
+            if (campo.minLength && valor.length < campo.minLength) {
+                return 'El campo "' + campo.label + '" debe tener al menos ' + campo.minLength + ' caracteres.';
+            }
+
+            if (campo.soloNumeros && !/^\d+$/.test(valor)) {
+                return 'El campo "' + campo.label + '" solo puede contener números.';
+            }
+
+            if (campo.noNumeros && !REGEX_SOLO_LETRAS.test(valor)) {
+                return 'El campo "' + campo.label + '" solo puede contener letras y espacios (sin números).';
+            }
+
+            if (campo.formatoVenezolano && !REGEX_TELEFONO_VENEZUELA.test(valor)) {
+                return 'El campo "' + campo.label + '" debe tener el formato venezolano: empieza en 0, solo números, 11 dígitos en total (ej. 04141234567).';
+            }
+
+            if (campo.edadMinima) {
+                if (!/^\d+$/.test(valor)) {
+                    return 'El campo "' + campo.label + '" debe ser un número entero.';
+                }
+                if (Number(valor) < campo.edadMinima) {
+                    return 'El empleado debe tener una edad mínima de ' + campo.edadMinima + ' años.';
+                }
+            }
+
+            if (campo.esFechaIngreso) {
+                const campoFin = document.getElementById('campo_fecha_fin_cargo');
+                const errorFecha = validarFechaIngreso(valor, campoFin ? campoFin.value : '');
+                if (errorFecha) return errorFecha;
+            }
+
+            if (campo.esRif && !REGEX_RIF.test(valor)) {
+                return 'El campo "' + campo.label + '" debe tener el formato J-12345678-9 (letra J, G, V, E, P o C, 8 dígitos y un dígito verificador).';
+            }
+
+            if (campo.esCorreo && !REGEX_CORREO.test(valor)) {
+                return 'El campo "' + campo.label + '" debe ser un correo electrónico válido (ej. nombre@dominio.com).';
+            }
+
+            const aplicaChequeoRepeticion = campo.type === 'text' && !campo.opcional && !CAMPOS_SIN_CHEQUEO_REPETICION.includes(key);
+            if (aplicaChequeoRepeticion && esRepetitivo(valor)) {
+                return 'El campo "' + campo.label + '" no puede ser un mismo carácter ni una cadena repetida (ej. "aaa", "abab").';
+            }
+
+            return null;
+        }
+
+        function renderHead() {
+            let html = '<th>ID</th>';
+            camposKeys.forEach(key => {
+                if (campos[key].type === 'password') return; // nunca se lista la clave
+                if (campos[key].soloFiltro) return; // campo virtual, no es columna real
+                html += '<th>' + campos[key].label + '</th>';
+            });
+            html += '<th class="col-acciones">Acciones</th>';
+            tablaHead.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // Caché de opciones para los campos tipo "select" (FK), para no
+        // volver a pedirlas al servidor cada vez que se abre el modal.
+        const cacheOpciones = {};
+
+        async function obtenerOpciones(fuente) {
+            if (cacheOpciones[fuente]) return cacheOpciones[fuente];
+            try {
+                const resp = await fetch(fuente + '?action=listar');
+                const json = await resp.json();
+                cacheOpciones[fuente] = (json.success && Array.isArray(json.data)) ? json.data : [];
+            } catch (e) {
+                cacheOpciones[fuente] = [];
+            }
+            return cacheOpciones[fuente];
+        }
+
+        let fetchController = null;
+
+        async function cargarDatos() {
+            
+            if (fetchController) fetchController.abort();
+            fetchController = new AbortController();
+            const miController = fetchController;
+
+            tablaBody.innerHTML = '<tr><td>Cargando...</td></tr>';
+
+            let json;
+            try {
+                const resp = await fetch(endpoint + '?action=listar&_=' + Date.now(), {
+                    signal: miController.signal,
+                    cache: 'no-store'
+                });
+                json = await resp.json();
+            } catch (e) {
+                if (e.name === 'AbortError') return; // Petición cancelada por una más nueva, ignorar
+                tablaBody.innerHTML = '<tr><td>Error de conexión con el servidor.</td></tr>';
+                return;
+            }
+
+            if (miController !== fetchController) return; // Llegó tarde, ya hay una petición más nueva
+
+            if (!json.success) {
+                tablaBody.innerHTML = '<tr><td>No se pudieron cargar los datos.</td></tr>';
+                return;
+            }
+
+            try {
+                filasCargadas = json.data || [];
+                const totalPaginas = Math.max(1, Math.ceil(filasFiltradas().length / filasPorPagina));
+                paginaActual = Math.min(paginaActual, totalPaginas);
+                renderBody();
+            } catch (e) {
+                console.error('Error al pintar la tabla:', e);
+                tablaBody.innerHTML = '<tr><td>Ocurrió un error al mostrar los datos.</td></tr>';
+            }
+        }
+
+        function renderBody() {
+            const resultados = filasFiltradas();
+            const totalPaginas = Math.max(1, Math.ceil(resultados.length / filasPorPagina));
+            const inicio = (paginaActual - 1) * filasPorPagina;
+            const filas = resultados.slice(inicio, inicio + filasPorPagina);
+            if (!filas.length) {
+                const colspan = camposKeys.filter(k => campos[k].type !== 'password' && !campos[k].soloFiltro).length + 2;
+                const mensajeVacio = buscarMaestro.value.trim()
+                    ? 'No se encontraron registros para esa búsqueda.'
+                    : 'No hay registros todavía.';
+                tablaBody.innerHTML = '<tr><td colspan="' + colspan + '">' + mensajeVacio + '</td></tr>';
+                renderPaginacion(totalPaginas);
+                return;
+            }
+
+            let html = '';
+            filas.forEach(fila => {
+                html += '<tr>';
+                html += '<td>' + escapeHtml(fila.id) + '</td>';
+                camposKeys.forEach(key => {
+                    if (campos[key].type === 'password') return;
+                    if (campos[key].soloFiltro) return;
+                    if (campos[key].type === 'select') {
+                        const labelKey = key + '_nombre';
+                        const displayValue = fila[labelKey] !== undefined
+                            ? fila[labelKey]
+                            : (campos[key].options && campos[key].options[fila[key]] !== undefined
+                                ? campos[key].options[fila[key]]
+                                : fila[key]);
+                        html += '<td>' + escapeHtml(displayValue) + '</td>';
+                    } else {
+                        html += '<td>' + escapeHtml(fila[key]) + '</td>';
+                    }
+                });
+                html += '<td class="col-acciones">';
+                if (puedeEditarRegistro) {
+                    html += '<button type="button" class="btn-icon btn-edit" data-id="' + fila.id + '" title="Editar"><i class="fas fa-pen"></i></button>';
+                }
+                if (!soloEdicion) {
+                    html += '<button type="button" class="btn-icon btn-delete" data-id="' + fila.id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
+                }
+                html += '</td>';
+                html += '</tr>';
+            });
+            tablaBody.innerHTML = html;
+
+            tablaBody.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', () => abrirModalEditar(btn.dataset.id, filas));
+            });
+            tablaBody.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', () => abrirConfirmEliminar(btn.dataset.id));
+            });
+            renderPaginacion(totalPaginas);
+        }
+
+        function renderPaginacion(totalPaginas) {
+            if (!paginacion || totalPaginas <= 1) {
+                if (paginacion) paginacion.innerHTML = '';
+                return;
+            }
+            let html = '';
+            for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+                html += '<button type="button" class="paginacion__pagina' + (pagina === paginaActual ? ' activa' : '') + '"' +
+                    (pagina === paginaActual ? ' aria-current="page"' : '') + ' data-page="' + pagina + '">' + pagina + '</button>';
+            }
+            paginacion.innerHTML = html;
+            paginacion.querySelectorAll('[data-page]').forEach((boton) => {
+                boton.addEventListener('click', () => {
+                    paginaActual = Number(boton.dataset.page);
+                    renderBody();
+                });
+            });
+        }
+
+        async function renderFormCampos(valores) {
+            valores = valores || {};
+            if (tablaActual === 'empleado') {
+                if (temporizadorCedula) clearTimeout(temporizadorCedula);
+                temporizadorCedula = null;
+                solicitudCedula++;
+            }
+
+            
+            const opcionesPorCampo = {};
+            await Promise.all(camposKeys.map(async key => {
+                const campo = campos[key];
+                if (campo.type === 'select') {
+                    if (campo.options) {
+                        opcionesPorCampo[key] = Object.entries(campo.options).map(([value, label]) => ({
+                            value,
+                            label
+                        }));
+                    } else {
+                        opcionesPorCampo[key] = await obtenerOpciones(campo.fuente);
+                    }
+                }
+            }));
+
+           
+            const filtroInicialPorCampo = {};
+            camposKeys.forEach(key => {
+                const campo = campos[key];
+                if (!campo.filtradoPor) return;
+                const valorGuardado = valores[key] !== undefined ? String(valores[key]) : '';
+                if (valorGuardado === '') return;
+                const opciones = opcionesPorCampo[key] || [];
+                const opcionGuardada = opciones.find(op => String(op[campo.optionValue]) === valorGuardado);
+                if (opcionGuardada && opcionGuardada[campo.filtradoPor] !== undefined) {
+                    filtroInicialPorCampo[key] = String(opcionGuardada[campo.filtradoPor]);
+                }
+            });
+
+            let html = '';
+            camposKeys.forEach(key => {
+                const campo = campos[key];
+                if (tablaActual === 'empleado' && key === 'id_cargo') {
+                    html += '<fieldset class="empleado-datos-laborales"><legend>Datos laborales</legend>';
+                }
+                const esOpcionalPorEdicion = campo.optionalOnEdit && formId.value !== '';
+                const esOpcional = esOpcionalPorEdicion || campo.opcional;
+                const valor = valores[key] !== undefined ? valores[key] : '';
+                html += '<div class="config-field">';
+                html += '<label for="campo_' + key + '">' + campo.label + (esOpcionalPorEdicion ? ' (dejar vacío para no cambiar)' : (campo.opcional ? ' (opcional)' : '')) + '</label>';
+
+                if (campo.type === 'select') {
+                    let opciones = opcionesPorCampo[key] || [];
+                    let valorInicialSelect = valor;
+
+                    if (campo.filtradoPor) {
+          
+                        const filtroActual = filtroInicialPorCampo[key] || '';
+                        opciones = filtroActual === '' ? [] : opciones.filter(op => String(op[campo.filtradoPor]) === filtroActual);
+                    }
+
+                    html += '<select id="campo_' + key + '" name="' + key + '"' + (esOpcional ? '' : ' required') + (campo.filtradoPor && opciones.length === 0 ? ' disabled' : '') + '>';
+                    html += '<option value="">' + (campo.filtradoPor && opciones.length === 0 ? 'Seleccione ' + (campos[campo.filtradoPor] ? campos[campo.filtradoPor].label.toLowerCase() : 'una opción') + ' primero' : '-- Seleccione --') + '</option>';
+                    opciones.forEach(op => {
+                        const valOp = campo.options ? op.value : op[campo.optionValue];
+                        const labelOp = campo.options ? op.label : op[campo.optionLabel];
+                        const seleccionado = (valorInicialSelect !== '' && String(valOp) === String(valorInicialSelect)) ? ' selected' : '';
+                        html += '<option value="' + escapeHtml(valOp) + '"' + seleccionado + '>' + escapeHtml(labelOp) + '</option>';
+                    });
+                    html += '</select>';
+                } else {
+                    const maxLengthAttr = campo.maxLength ? ' maxlength="' + campo.maxLength + '"' : '';
+                    const patternAttr = campo.noNumeros
+                        ? ' pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü \'\\-]+" title="Solo letras y espacios, sin números"'
+                        : (campo.soloNumeros ? ' pattern="[0-9]+"' : '');
+                    const inputmodeAttr = campo.inputmode ? ' inputmode="' + campo.inputmode + '"' : '';
+                    const soloLecturaAttr = campo.soloLectura ? ' readonly tabindex="-1"' : '';
+                    const maxHoyAttr = campo.esFechaIngreso ? ' max="' + fechaHoyISO() + '"' : '';
+                    html += '<input id="campo_' + key + '" name="' + key + '" type="' + campo.type + '" value="' + escapeHtml(valor) + '"' + maxLengthAttr + patternAttr + inputmodeAttr + soloLecturaAttr + maxHoyAttr + (esOpcional ? '' : (campo.optionalOnEdit ? '' : ' required')) + ' />';
+                    if (tablaActual === 'empleado' && key === 'cedula') {
+                        html += '<small id="estado_cedula" class="maestro__field-status" aria-live="polite"></small>';
+                    }
+                }
+
+                html += '</div>';
+                if (tablaActual === 'empleado' && key === 'fecha_fin_cargo') {
+                    html += '</fieldset>';
+                }
+            });
+            formCampos.innerHTML = html;
+
+           
+            camposKeys.forEach(filtroKey => {
+                const campoDependiente = Object.keys(campos).find(k => campos[k].filtradoPor === filtroKey);
+                if (!campoDependiente) return;
+
+                const selectFiltro = document.getElementById('campo_' + filtroKey);
+                const selectDependiente = document.getElementById('campo_' + campoDependiente);
+                if (!selectFiltro || !selectDependiente) return;
+
+    
+                const filtroInicial = filtroInicialPorCampo[campoDependiente];
+                if (filtroInicial) {
+                    selectFiltro.value = filtroInicial;
+                }
+
+                selectFiltro.addEventListener('change', () => {
+                    const campoDep = campos[campoDependiente];
+                    const campoFiltro = campos[filtroKey];
+                    const opciones = (opcionesPorCampo[campoDependiente] || []).filter(op => String(op[campoDep.filtradoPor]) === selectFiltro.value);
+                    let html = '<option value="">' + (opciones.length === 0 ? 'Seleccione ' + campoFiltro.label.toLowerCase() + ' primero' : '-- Seleccione --') + '</option>';
+                    opciones.forEach(op => {
+                        const valOp = op[campoDep.optionValue];
+                        const labelOp = op[campoDep.optionLabel];
+                        html += '<option value="' + escapeHtml(valOp) + '">' + escapeHtml(labelOp) + '</option>';
+                    });
+                    selectDependiente.innerHTML = html;
+                    selectDependiente.disabled = opciones.length === 0;
+                });
+            });
+
+            // Campos calculados (años de servicio a partir de la fecha de ingreso).
+            camposKeys.forEach(key => {
+                const campo = campos[key];
+                if (!campo.calculaDesde) return;
+                const origen = document.getElementById('campo_' + campo.calculaDesde);
+                const fin = campo.calculaHasta ? document.getElementById('campo_' + campo.calculaHasta) : null;
+                const destino = document.getElementById('campo_' + key);
+                if (!origen || !destino) return;
+
+                const actualizar = () => {
+                    const anios = calcularAniosServicio(origen.value, fin ? fin.value : '');
+                    destino.value = anios === null ? '' : anios;
+                };
+                origen.addEventListener('input', actualizar);
+                origen.addEventListener('change', actualizar);
+                origen.addEventListener('blur', actualizar);
+                if (fin) {
+                    fin.addEventListener('input', actualizar);
+                    fin.addEventListener('change', actualizar);
+                    fin.addEventListener('blur', actualizar);
+                }
+                actualizar();
+            });
+
+            if (tablaActual === 'empleado') {
+                const inputCedula = document.getElementById('campo_cedula');
+                inputCedula.addEventListener('input', validarCedulaAlEscribir);
+                if (inputCedula.value.trim() !== '') validarCedulaAlEscribir();
+            }
+        }
+
+        async function abrirModalNuevo() {
+            formId.value = '';
+            modalTitulo.textContent = 'Nuevo registro';
+            formCampos.innerHTML = '<p>Cargando formulario...</p>';
+            ocultarErrorModal();
+            modal.hidden = false;
+            await renderFormCampos({});
+        }
+
+        async function abrirModalEditar(id, filas) {
+            const fila = filas.find(f => String(f.id) === String(id));
+            if (!fila) return;
+            formId.value = id;
+            modalTitulo.textContent = 'Editar registro';
+            formCampos.innerHTML = '<p>Cargando formulario...</p>';
+            ocultarErrorModal();
+            modal.hidden = false;
+            await renderFormCampos(fila);
+        }
+
+        function cerrarModal() {
+            modal.hidden = true;
+        }
+
+        function abrirConfirmEliminar(id) {
+            idAEliminar = id;
+            confirmModal.hidden = false;
+        }
+
+        function cerrarConfirmEliminar() {
+            idAEliminar = null;
+            confirmModal.hidden = true;
+        }
+
+        async function eliminarRegistro(id) {
+            try {
+                const body = new URLSearchParams();
+                body.append('action', 'eliminar');
+                body.append('id', id);
+                const resp = await fetch(endpoint, { method: 'POST', body });
+                const json = await resp.json();
+                mostrarAlerta(json.message, json.success ? 'success' : 'error');
+                if (json.success) cargarDatos();
+            } catch (e) {
+                mostrarAlerta('Error de conexión con el servidor.', 'error');
+            }
+        }
+
+        maestroForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            ocultarErrorModal();
+
+            const esEdicion = formId.value !== '';
+            const body = new URLSearchParams();
+            body.append('action', esEdicion ? 'actualizar' : 'crear');
+            if (esEdicion) body.append('id', formId.value);
+
+            for (const key of camposKeys) {
+                const campo = campos[key];
+                if (campo.soloFiltro) continue; // campo virtual (ej. municipio para filtrar parroquia), no se envía
+
+                const input = document.getElementById('campo_' + key);
+                const valor = input ? input.value : '';
+                const esOpcional = (campo.optionalOnEdit && esEdicion) || campo.opcional;
+
+                const errorCampo = validarCampoMaestro(key, campo, valor, esOpcional);
+                if (errorCampo) {
+                    mostrarErrorModal(errorCampo);
+                    if (input) input.focus();
+                    return;
+                }
+
+                // Validación cruzada: ej. "confirmar_clave" debe coincidir
+                // con el valor de "clave".
+                if (campo.confirmaCampo) {
+                    const otroInput = document.getElementById('campo_' + campo.confirmaCampo);
+                    const otroValor = otroInput ? otroInput.value : '';
+                    if (valor !== otroValor) {
+                        mostrarErrorModal('El campo "' + campo.label + '" no coincide con "' + campos[campo.confirmaCampo].label + '".');
+                        if (input) input.focus();
+                        return;
+                    }
+                }
+
+                // Validación cruzada de fechas: ej. el fin del cargo no puede ser
+                // anterior al inicio.
+                if (campo.noAnteriorA && valor.trim() !== '') {
+                    const inputInicio = document.getElementById('campo_' + campo.noAnteriorA);
+                    const valorInicio = inputInicio ? inputInicio.value.trim() : '';
+                    if (valorInicio === '') {
+                        mostrarErrorModal('Para indicar "' + campo.label + '" debe indicar también "' + campos[campo.noAnteriorA].label + '".');
+                        if (inputInicio) inputInicio.focus();
+                        return;
+                    }
+                    if (valor.trim() < valorInicio) {
+                        mostrarErrorModal('El campo "' + campo.label + '" no puede ser anterior a "' + campos[campo.noAnteriorA].label + '".');
+                        if (input) input.focus();
+                        return;
+                    }
+                }
+
+                // Campos virtuales que solo existen para validar en el
+                // navegador (ej. confirmar_clave) no se envían al servidor.
+                if (campo.noEnviar) continue;
+
+                body.append(key, valor.trim());
+            }
+
+            if (tablaActual === 'empleado') {
+                const edad = Number(document.getElementById('campo_edad').value);
+                const aniosServicio = Number(document.getElementById('campo_anios_servicio').value);
+                if (aniosServicio > edad) {
+                    mostrarErrorModal('Los años de servicio (' + aniosServicio + ') no pueden ser mayores que la edad del empleado (' + edad + ').');
+                    document.getElementById('campo_edad').focus();
+                    return;
+                }
+            }
+
+            if (tablaActual === 'empleado') {
+                const inputCedula = document.getElementById('campo_cedula');
+                const cedula = inputCedula.value.trim();
+                if (temporizadorCedula) clearTimeout(temporizadorCedula);
+                temporizadorCedula = null;
+                const disponible = await consultarCedula(cedula);
+                if (!disponible) {
+                    inputCedula.focus();
+                    return;
+                }
+            }
+
+            try {
+                const resp = await fetch(endpoint, { method: 'POST', body });
+                const respuesta = (await resp.text()).replace(/^\uFEFF/, '').trim();
+                let json;
+                try {
+                    json = JSON.parse(respuesta);
+                } catch (error) {
+                    throw new Error('Respuesta inválida del servidor');
+                }
+                if (json.success) {
+                    delete cacheOpciones[endpoint]; // por si este maestro es fuente de un select en otro maestro
+                    cerrarModal();
+                    await cargarDatos();
+                    mostrarAlerta(json.message, 'success');
+                } else {
+                    mostrarErrorModal(json.message);
+                }
+            } catch (e) {
+                mostrarErrorModal(e.message || 'Error de conexión con el servidor.');
+            }
+        });
+
+        if (btnNuevo) {
+            btnNuevo.addEventListener('click', abrirModalNuevo);
+        }
+        buscarMaestroForm.addEventListener('submit', (event) => event.preventDefault());
+        buscarMaestro.addEventListener('input', () => {
+            paginaActual = 1;
+            limpiarBusquedaMaestro.hidden = !buscarMaestro.value.trim();
+            renderBody();
+        });
+        limpiarBusquedaMaestro.addEventListener('click', () => {
+            buscarMaestro.value = '';
+            limpiarBusquedaMaestro.hidden = true;
+            paginaActual = 1;
+            buscarMaestro.focus();
+            renderBody();
+        });
+        if (btnExportar) {
+            btnExportar.addEventListener('click', () => {
+                let urlReporte;
+                if (tablaActual === 'cargo') {
+                    urlReporte = '../reportes/exportar_cargos.php';
+                } else if (tablaActual === 'empleado') {
+                    urlReporte = '../reportes/exportar_empleados.php';
+                } else {
+                    const reportesMaestros = {
+                        municipio: 'exportar_municipios.php',
+                        parroquia: 'exportar_parroquias.php',
+                        comuna: 'exportar_comunas.php',
+                        biblioteca: 'exportar_bibliotecas.php',
+                        institucion: 'exportar_instituciones.php',
+                        nv_act: 'exportar_niveles_impacto.php',
+                        espacio: 'exportar_espacios.php',
+                        tipo_actividad: 'exportar_tipos_actividad.php'
+                    };
+                    urlReporte = '../reportes/' + reportesMaestros[tablaActual];
+                }
+                const termino = buscarMaestro.value.trim();
+                if (termino) {
+                    urlReporte += (urlReporte.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(termino);
+                }
+                abrirReportePdf(urlReporte, 'Reporte de ' + tablaActual, btnExportar, mostrarAlerta);
+            });
+        }
+        modalClose.addEventListener('click', cerrarModal);
+        btnCancelar.addEventListener('click', cerrarModal);
+        modalBackdrop.addEventListener('click', cerrarModal);
+
+        btnCancelarEliminar.addEventListener('click', cerrarConfirmEliminar);
+        confirmBackdrop.addEventListener('click', cerrarConfirmEliminar);
+        btnConfirmarEliminar.addEventListener('click', () => {
+            if (idAEliminar !== null) {
+                eliminarRegistro(idAEliminar);
+            }
+            cerrarConfirmEliminar();
+        });
+
+        renderHead();
+        cargarDatos();
+    })();
+    </script>
+    <?php endif; ?>
+</body>
+</html>
