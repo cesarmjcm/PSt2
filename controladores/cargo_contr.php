@@ -67,8 +67,8 @@ class CargoController
             $this->error('El nombre no puede tener caracteres o patrones repetidos.');
             return;
         }
-        if ($descripcion !== '' && !Validador::esDescripcionValida($descripcion, 0, 30)) {
-            $this->error('La descripción tiene un formato o longitud inválida (máx. 30 caracteres).');
+        if ($descripcion !== '' && !Validador::esDescripcionValida($descripcion, 0, 50)) {
+            $this->error('La descripción tiene un formato o longitud inválida (máx. 50 caracteres).');
             return;
         }
         if ($descripcion !== '' && Validador::tieneRepeticionSospechosa($descripcion)) {

@@ -54,21 +54,12 @@ $camposPorMaestro = [
         'nombre'       => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30, 'noNumeros' => true],
     ],
     'biblioteca' => [
-        'id_municipio' => [
-            'label'       => 'Municipio',
-            'type'        => 'select',
-            'fuente'      => '../controladores/municipio_contr.php',
-            'optionValue' => 'id',
-            'optionLabel' => 'nombre',
-            'soloFiltro'  => true,
-        ],
         'id_parroquia' => [
             'label'       => 'Parroquia',
             'type'        => 'select',
             'fuente'      => '../controladores/parroquia_contr.php',
             'optionValue' => 'id',
             'optionLabel' => 'nombre',
-            'filtradoPor' => 'id_municipio',
         ],
         'nombre' => [
             'label' => 'Nombre',
