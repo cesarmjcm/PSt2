@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 10-11-2026 a las 22:04:31
+-- Tiempo de generación: 14-11-2026 a las 14:27:12
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -29,7 +29,6 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
-  `id_solicitud` int(10) DEFAULT NULL,
   `id_biblioteca` int(11) DEFAULT NULL,
   `id_espacio_cultural` int(11) DEFAULT NULL,
   `nombre` varchar(30) NOT NULL,
@@ -50,22 +49,21 @@ CREATE TABLE `actividad` (
 -- Volcado de datos para la tabla `actividad`
 --
 
-INSERT INTO `actividad` (`id`, `id_solicitud`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `id_nivel_impacto`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `id_comuna`) VALUES
-(23, NULL, 15, 5, 'Biblioteca 1', 4, NULL, 'Solicitud 1', 'Responsable 1', 20, '2026-08-09', NULL, 'Domingo', 'confirmada', 13, NULL),
-(27, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 15, NULL),
-(28, NULL, 15, NULL, 'Arístides Bastidas', 5, 3, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 15, NULL),
-(30, NULL, 15, NULL, 'juego de ajedrez', 5, 3, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 13, NULL),
-(31, NULL, 15, NULL, 'Arístides Bastidas', 5, NULL, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 13, NULL),
-(32, NULL, 15, NULL, 'Juego de Ajedrez', 5, 3, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 13, NULL),
-(33, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 13, NULL),
-(34, NULL, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 13, NULL),
-(35, NULL, 15, NULL, 'juego de mesa', 4, 3, 'cosas', 'formal', 21, '2026-09-05', '19:55:00', 'Sábado', 'cancelada', 15, NULL),
-(36, NULL, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, NULL),
-(37, NULL, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, NULL),
-(38, NULL, NULL, 6, 'Felix Pifano', 5, 3, 'felix', 'No definido', 2, '2026-10-04', '18:12:00', 'Domingo', 'confirmada', 28, 53),
-(39, NULL, NULL, 5, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, 105),
-(40, NULL, 15, NULL, 'juego de metras', 5, NULL, 'cosas', 'No definido', 0, '2026-11-03', '10:00:00', 'Martes', 'confirmada', 28, 8),
-(41, NULL, NULL, 6, 'juego', 5, 3, 'cosas', 'No definido', 0, '2026-11-18', '16:12:00', 'Miércoles', 'pendiente', 29, 53);
+INSERT INTO `actividad` (`id`, `id_biblioteca`, `id_espacio_cultural`, `nombre`, `id_tipo_actividad`, `id_nivel_impacto`, `descripcion`, `objetivo`, `participantes`, `fecha`, `hora`, `dia_semana`, `estado`, `responsable`, `id_comuna`) VALUES
+(27, 15, NULL, 'Arístides Bastidas', 5, 3, 'hola', 'hola', 10, '2026-08-26', '12:53:00', 'Miércoles', 'confirmada', 15, NULL),
+(28, 15, NULL, 'Arístides Bastidas', 5, 3, 'holi', 'formativa', 21, '2026-08-05', '18:58:00', 'Miércoles', 'confirmada', 15, NULL),
+(30, 15, NULL, 'juego de ajedrez', 5, 3, 'hola', 'Formativa', 20, '2026-08-05', '13:38:00', 'Miércoles', 'confirmada', 13, NULL),
+(31, 15, NULL, 'Arístides Bastidas', 5, NULL, 'cosas', 'No definido', 0, '2026-08-20', '17:41:00', 'Jueves', 'confirmada', 13, NULL),
+(32, 15, NULL, 'Juego de Ajedrez', 5, 3, 'Actividad de jugar ajedrez realizada en Biblioteca', 'Formativa', 2, '2026-08-27', '13:04:00', 'Jueves', 'confirmada', 13, NULL),
+(33, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-08-27', '16:33:00', 'Jueves', 'confirmada', 13, NULL),
+(34, 15, NULL, 'Juego de Ajedrez', 5, NULL, 'hola', 'No definido', 0, '2026-07-17', '16:39:00', 'Viernes', 'confirmada', 13, NULL),
+(36, 15, NULL, 'biblioteca', 5, NULL, 'a', 'jesus serrano', 1, '2026-08-13', '21:24:00', 'Jueves', 'confirmada', 13, NULL),
+(37, 15, NULL, 'juego de mesa', 5, NULL, 'cosas', 'No definido', 0, '2026-10-03', '16:55:00', 'Sábado', 'pendiente', 28, NULL),
+(38, NULL, 6, 'Felix Pifano', 5, 3, 'felix', 'No definido', 2, '2026-10-04', '18:12:00', 'Domingo', 'confirmada', 28, 53),
+(39, NULL, 5, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, 105),
+(40, 15, NULL, 'juego de metras', 5, NULL, 'cosas', 'No definido', 0, '2026-11-03', '10:00:00', 'Martes', 'confirmada', 28, 8),
+(41, NULL, 4, 'juego', 5, 3, 'cosas', 'No definido', 0, '2026-11-18', '16:12:00', 'Miércoles', 'pendiente', 29, 24),
+(42, 19, NULL, 'cena navideña', 5, 4, 'van hacer una cena navideña en chivacoa', 'No definido', 65, '2026-12-20', '20:00:00', 'Domingo', 'confirmada', 27, 22);
 
 -- --------------------------------------------------------
 
@@ -81,6 +79,16 @@ CREATE TABLE `asignacion` (
   `fecha_desde` date DEFAULT NULL,
   `fecha_hasta` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `asignacion`
+--
+
+INSERT INTO `asignacion` (`id`, `id_cargo`, `id_biblioteca`, `id_empleado`, `fecha_desde`, `fecha_hasta`) VALUES
+(1, 6, 21, 30, '2026-09-01', NULL),
+(2, 5, 17, 31, '2009-03-30', '2024-09-30'),
+(3, 1, 18, 27, '2026-10-03', NULL),
+(4, 4, 19, 32, '2024-01-10', NULL);
 
 -- --------------------------------------------------------
 
@@ -107,7 +115,8 @@ INSERT INTO `biblioteca` (`id`, `nombre`, `id_parroquia`, `Correo`, `redes_socia
 (17, 'Oswaldo Méndez', 64, '', '', ''),
 (18, 'Rómulo Gallegos', 62, '', '', ''),
 (19, 'Rubén Suárez Moreno', 49, '', '', ''),
-(20, 'Domingo Oviedo Parada', 67, '', '', '');
+(20, 'Domingo Oviedo Parada', 67, '', '', ''),
+(21, 'Josefa Marín de Narváez', 68, '', '', '');
 
 -- --------------------------------------------------------
 
@@ -284,7 +293,57 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (154, 'Martes', '2026-11-10', '13:19:27', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
 (155, 'Martes', '2026-11-10', '13:20:29', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
 (156, 'Martes', '2026-11-10', '13:20:55', 14, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
-(157, 'Martes', '2026-11-10', '16:53:45', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar');
+(157, 'Martes', '2026-11-10', '16:53:45', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(158, 'Martes', '2026-11-10', '17:21:33', 11, 'Editar', 'Actividad', 'Actividad #41 actualizada: juego'),
+(159, 'Martes', '2026-11-10', '17:21:58', 11, 'Editar', 'Espacio cultural', 'Espacio cultural #6 actualizado: casa de tu tio'),
+(160, 'Martes', '2026-11-10', '17:35:02', 11, 'Crear', 'Actividad', 'Actividad registrada: cena navideña'),
+(161, 'Martes', '2026-11-10', '17:35:49', 11, 'Editar', 'Actividad', 'Actividad #42 actualizada: cena navideña'),
+(162, 'Martes', '2026-11-10', '17:36:26', 11, 'Editar', 'Actividad', 'Actividad #42 actualizada: cena navideña'),
+(163, 'Martes', '2026-11-10', '17:42:06', 11, 'Editar', 'Actividad', 'Actividad #42 actualizada: cena navideña'),
+(164, 'Jueves', '2026-11-12', '09:33:02', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(165, 'Viernes', '2026-11-13', '21:13:20', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(166, 'Sabado', '2026-11-14', '07:59:49', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(167, 'Sabado', '2026-11-14', '08:02:04', 11, 'Crear', 'Institución', 'Institución registrada: martin tovar y tovar'),
+(168, 'Sabado', '2026-11-14', '08:05:15', 11, 'Crear', 'Institución', 'Institución registrada: Liceo Parque Leonor Bernabó'),
+(169, 'Sabado', '2026-11-14', '08:06:28', 11, 'Crear', 'Institución', 'Institución registrada: colegio Manuel cedeño'),
+(170, 'Sabado', '2026-11-14', '08:07:28', 11, 'Crear', 'Institución', 'Institución registrada: Complejo Educativo Trinidad Figuera'),
+(171, 'Sabado', '2026-11-14', '08:08:21', 11, 'Eliminar', 'Institución', 'Institución #2 eliminada'),
+(172, 'Sabado', '2026-11-14', '08:09:54', 11, 'Crear', 'Institución', 'Institución registrada: Colegio Santa Maria'),
+(173, 'Sabado', '2026-11-14', '08:11:16', 11, 'Crear', 'Institución', 'Institución registrada: Liceo Bolivariano Sabanita'),
+(174, 'Sabado', '2026-11-14', '08:13:37', 11, 'Crear', 'Institución', 'Institución registrada: Liceo Doctor Heriberto Núñez Oliveros'),
+(175, 'Sabado', '2026-11-14', '08:16:50', 11, 'Crear', 'Institución', 'Institución registrada: UPTYAB'),
+(176, 'Sabado', '2026-11-14', '08:19:19', 11, 'Crear', 'Institución', 'Institución registrada: Liceo Julio Urrutia'),
+(177, 'Sabado', '2026-11-14', '08:22:07', 11, 'Crear', 'Cargo', 'Cargo registrado: secretaria'),
+(178, 'Sabado', '2026-11-14', '08:22:52', 11, 'Crear', 'Cargo', 'Cargo registrado: Recepcionista'),
+(179, 'Sabado', '2026-11-14', '08:24:03', 11, 'Crear', 'Cargo', 'Cargo registrado: promotor de cultura'),
+(180, 'Sabado', '2026-11-14', '08:26:00', 11, 'Crear', 'Cargo', 'Cargo registrado: Asistente de sala'),
+(181, 'Sabado', '2026-11-14', '08:27:27', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PST2-main/controladores/parroquia_contr.php?action=listar'),
+(182, 'Sabado', '2026-11-14', '08:46:27', 11, 'Crear', 'Nivel de impacto', 'Nivel de impacto registrado: Escolar'),
+(183, 'Sabado', '2026-11-14', '08:46:37', 11, 'Crear', 'Nivel de impacto', 'Nivel de impacto registrado: Laboral'),
+(184, 'Sabado', '2026-11-14', '08:47:05', 11, 'Eliminar', 'Tipo de actividad', 'Tipo de actividad #8 eliminado'),
+(185, 'Sabado', '2026-11-14', '08:47:18', 11, 'Editar', 'Tipo de actividad', 'Tipo de actividad #4 actualizado: hola'),
+(186, 'Sabado', '2026-11-14', '08:48:15', 11, 'Eliminar', 'Actividad', 'Actividad #35 eliminada'),
+(187, 'Sabado', '2026-11-14', '08:48:37', 11, 'Eliminar', 'Actividad', 'Actividad #23 eliminada'),
+(188, 'Sabado', '2026-11-14', '08:48:46', 11, 'Eliminar', 'Tipo de actividad', 'Tipo de actividad #4 eliminado'),
+(189, 'Sabado', '2026-11-14', '08:57:06', 11, 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: Folklórica'),
+(190, 'Sabado', '2026-11-14', '08:57:20', 11, 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: Gastronómicas'),
+(191, 'Sabado', '2026-11-14', '08:57:44', 11, 'Editar', 'Tipo de actividad', 'Tipo de actividad #9 actualizado: Folklórica'),
+(192, 'Sabado', '2026-11-14', '08:58:53', 11, 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: Formativa'),
+(193, 'Sabado', '2026-11-14', '09:00:10', 11, 'Crear', 'Tipo de actividad', 'Tipo de actividad registrado: Artísticas'),
+(194, 'Sabado', '2026-11-14', '09:03:28', 11, 'Crear', 'Parroquia', 'Parroquia registrada: Aroa'),
+(195, 'Sabado', '2026-11-14', '09:03:42', 11, 'Crear', 'Biblioteca', 'Biblioteca registrada: Josefa Marín de Narváez'),
+(196, 'Sabado', '2026-11-14', '09:07:02', 11, 'Crear', 'Empleado', 'Empleado registrado: jesus bonilla'),
+(197, 'Sabado', '2026-11-14', '09:09:01', 11, 'Crear', 'Empleado', 'Empleado registrado: isaias Morales'),
+(198, 'Sabado', '2026-11-14', '09:09:27', 11, 'Editar', 'Empleado', 'Empleado #27 actualizado: freddy espinoza'),
+(199, 'Sabado', '2026-11-14', '09:11:01', 11, 'Crear', 'Empleado', 'Empleado registrado: manuela suarez'),
+(200, 'Sabado', '2026-11-14', '09:16:58', 11, 'Editar', 'Usuario', 'Usuario #12 actualizado: jesus'),
+(201, 'Sabado', '2026-11-14', '09:17:54', 11, 'Crear', 'Usuario', 'Usuario registrado: isaias'),
+(202, 'Sabado', '2026-11-14', '09:18:48', 11, 'Crear', 'Usuario', 'Usuario registrado: freddy'),
+(203, 'Sabado', '2026-11-14', '09:20:50', 11, 'Crear', 'Espacio cultural', 'Espacio cultural registrado: hola mundo'),
+(204, 'Sabado', '2026-11-14', '09:20:54', 11, 'Eliminar', 'Espacio cultural', 'Espacio cultural #7 eliminado'),
+(205, 'Sabado', '2026-11-14', '09:21:10', 11, 'Editar', 'Espacio cultural', 'Espacio cultural #5 actualizado: hola'),
+(206, 'Sabado', '2026-11-14', '09:24:34', 11, 'Crear', 'Espacio cultural', 'Espacio cultural registrado: Museo Carmelo Fernández'),
+(207, 'Sabado', '2026-11-14', '09:26:48', 11, 'Crear', 'Espacio cultural', 'Espacio cultural registrado: Parque Recreacional Leonor');
 
 -- --------------------------------------------------------
 
@@ -303,7 +362,11 @@ CREATE TABLE `cargo` (
 --
 
 INSERT INTO `cargo` (`id`, `nombre`, `Descripcion`) VALUES
-(1, 'coordinador', '2');
+(1, 'coordinador', '2'),
+(4, 'secretaria', 'es la secretaria del coordinador'),
+(5, 'Recepcionista', 'Es la recepcionista de una biblioteca'),
+(6, 'promotor de cultura', ''),
+(7, 'Asistente de sala', 'Apoya en la atención directa al usuario');
 
 -- --------------------------------------------------------
 
@@ -464,9 +527,12 @@ CREATE TABLE `empleado` (
 INSERT INTO `empleado` (`id`, `nombre`, `apellido`, `cedula`, `telefono`, `genero`, `edad`, `anios_de_servicio`, `id_cargo`, `id_biblioteca`, `fecha_inicio_cargo`, `fecha_fin_cargo`) VALUES
 (13, 'jesus', 'serrano', 31982637, '04125240489', 'M', 1, 0, 1, 15, NULL, NULL),
 (15, 'jesus', 'soto', 32435607, '04125240489', '', 0, 0, 1, 15, NULL, NULL),
-(27, 'freddy', 'espinoza', 32626427, '04145058143', 'M', 20, 1, 1, 15, '2026-10-03', '2026-10-03'),
+(27, 'freddy', 'espinoza', 32626427, '04145058143', 'M', 20, 0, 1, 18, '2026-10-03', NULL),
 (28, 'cesar', 'ontreras', 31982333, '04127168235', 'M', 20, 18, 1, 16, '2026-10-04', NULL),
-(29, 'maria', 'narvaez', 15964066, '04261181304', 'M', 30, 7, 1, 16, '2019-02-10', NULL);
+(29, 'maria', 'narvaez', 15964066, '04261181304', 'M', 30, 7, 1, 16, '2019-02-10', NULL),
+(30, 'jesus', 'bonilla', 33027723, '04245669023', 'M', 19, 0, 6, 21, '2026-09-01', NULL),
+(31, 'isaias', 'Morales', 32546391, '04245543020', 'M', 39, 15, 5, 17, '2009-03-30', '2024-09-30'),
+(32, 'manuela', 'suarez', 20435609, '04223220114', 'F', 28, 2, 4, 19, '2024-01-10', NULL);
 
 -- --------------------------------------------------------
 
@@ -488,8 +554,10 @@ CREATE TABLE `espacio_cultural` (
 
 INSERT INTO `espacio_cultural` (`id`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`) VALUES
 (4, 'tu casa', 6, 'independencia', ''),
-(5, 'mi casa', 10, 'independencia', ''),
-(6, 'juego de metras', 100, 'calle 4', '');
+(5, 'hola', 10, 'independencia', ''),
+(6, 'casa de tu tio', 100, 'calle 4', ''),
+(8, 'Museo Carmelo Fernández', 100, '2 Av, entre Calles 13 y 14', ''),
+(9, 'Parque Recreacional Leonor', 500, 'Final de la Av. Yurubí', '');
 
 -- --------------------------------------------------------
 
@@ -512,7 +580,15 @@ CREATE TABLE `institucion` (
 
 INSERT INTO `institucion` (`id`, `id_municipio`, `nombre`, `rif`, `correo`, `direccion`) VALUES
 (1, 4, 'Institucion 1', NULL, NULL, NULL),
-(2, 8, 'escuela', NULL, NULL, NULL);
+(3, 6, 'martin tovar y tovar', 'J-20014532-8', NULL, NULL),
+(4, 6, 'Liceo Parque Leonor Bernabó', 'J-01349009-2', NULL, NULL),
+(5, 2, 'colegio Manuel cedeño', 'J-30151643-5', NULL, NULL),
+(6, 2, 'Complejo Educativo Trinidad Figuera', 'J-56882144-7', NULL, NULL),
+(7, 5, 'Colegio Santa Maria', 'J-32435609-1', NULL, NULL),
+(8, 12, 'Liceo Bolivariano Sabanita', 'J-40001030-6', NULL, NULL),
+(9, 9, 'Liceo Doctor Heriberto Núñez Oliveros', 'J-15964066-3', NULL, NULL),
+(10, 4, 'UPTYAB', 'G-20012118-1', 'rectoriauptyaaracuy@gmail.com', 'Av. Alberto Ravell con Av. José Antonio Páez, frente a la Plaza de las Banderas'),
+(11, 21, 'Liceo Julio Urrutia', 'J-54608443-4', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -562,7 +638,9 @@ CREATE TABLE `nivel_impacto` (
 
 INSERT INTO `nivel_impacto` (`id`, `nombre_impacto`) VALUES
 (3, 'Comunal'),
+(7, 'Escolar'),
 (4, 'estadal'),
+(8, 'Laboral'),
 (5, 'municipal'),
 (6, 'nacional');
 
@@ -586,6 +664,7 @@ INSERT INTO `parroquia` (`id`, `nombre`, `id_municipio`) VALUES
 (17, 'Albarico', 0),
 (3, 'Albarico', 2),
 (54, 'Arístides Bastidas', 21),
+(68, 'Aroa', 10),
 (55, 'Bolivar', 13),
 (5, 'Campo Elías', 0),
 (56, 'Campo Elias', 5),
@@ -670,9 +749,11 @@ CREATE TABLE `tipo_actividad` (
 --
 
 INSERT INTO `tipo_actividad` (`id`, `nombre`, `Descripcion`) VALUES
-(4, 'eduativa', '0004'),
 (5, 'educativa', ''),
-(8, 'hola', '');
+(9, 'Folklórica', 'Festivales de danza regionales etc'),
+(10, 'Gastronómicas', ''),
+(11, 'Formativa', 'Talleres de cerámica, pintura, etc'),
+(12, 'Artísticas', 'Obras de teatro, entre otros');
 
 -- --------------------------------------------------------
 
@@ -695,9 +776,11 @@ CREATE TABLE `usuario` (
 
 INSERT INTO `usuario` (`id`, `nombre`, `clave`, `telefono`, `id_empleado`, `rol`) VALUES
 (11, 'cheddar', '$2y$10$gDEMnG9XXqwiKvUQNP95BOzYUQ/KcRkmZcCqfzHi.WvkowTeqRjwq', '04125240489', 15, 'administrador'),
-(12, 'jesus', '$2y$10$A/oi0oFJTyOERvUGmZTbReSn6CeDT.kUzbpwx5TkBRRShSp14658a', '04125240489', 13, 'usuario'),
+(12, 'jesus', '$2y$10$22hr1NEq6GUFaPoOsnYmm.PeC.kGmRxsLQD.zgr265rZfhU54qqKG', '04125240489', 13, 'coordinador'),
 (14, 'coord', '$2y$10$LAxF.VhNlb1CndPOQo.L0un5WUiloc5MBYeQXd0e/oVQQcJiUNlrG', '04261181304', 29, 'coordinador'),
-(15, 'cesar', '$2y$10$bPRPSAtGXGSk404EfnbmmeNUk0HhRYEWAmV4EjyNvps62HReC3zme', '04127168235', 28, 'usuario');
+(15, 'cesar', '$2y$10$bPRPSAtGXGSk404EfnbmmeNUk0HhRYEWAmV4EjyNvps62HReC3zme', '04127168235', 28, 'usuario'),
+(16, 'isaias', '$2y$10$DKiwxbX8h.XUnAjxGlSRne3ZqJsXU4dCIlZm9BxPz4N20AKCqjefu', '04245543020', 31, 'usuario'),
+(17, 'freddy', '$2y$10$i0Fjj3gvLB1fWQKyggpMu.rO0Hub4oSI.yAKzYoPv8vxoimRLZ2Ya', '04145058143', 27, 'administrador');
 
 --
 -- Índices para tablas volcadas
@@ -708,7 +791,6 @@ INSERT INTO `usuario` (`id`, `nombre`, `clave`, `telefono`, `id_empleado`, `rol`
 --
 ALTER TABLE `actividad`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_solicitud` (`id_solicitud`),
   ADD KEY `id_biblioteca` (`id_biblioteca`),
   ADD KEY `id_espacio_cultural` (`id_espacio_cultural`),
   ADD KEY `id_tipo_actividad` (`id_tipo_actividad`),
@@ -833,31 +915,31 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT de la tabla `asignacion`
 --
 ALTER TABLE `asignacion`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `biblioteca`
 --
 ALTER TABLE `biblioteca`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=158;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=208;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
 --
 ALTER TABLE `cargo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `comuna`
@@ -869,19 +951,19 @@ ALTER TABLE `comuna`
 -- AUTO_INCREMENT de la tabla `empleado`
 --
 ALTER TABLE `empleado`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT de la tabla `espacio_cultural`
 --
 ALTER TABLE `espacio_cultural`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `institucion`
 --
 ALTER TABLE `institucion`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `municipio`
@@ -893,13 +975,13 @@ ALTER TABLE `municipio`
 -- AUTO_INCREMENT de la tabla `nivel_impacto`
 --
 ALTER TABLE `nivel_impacto`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `parroquia`
 --
 ALTER TABLE `parroquia`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT de la tabla `solicitud`
@@ -911,13 +993,13 @@ ALTER TABLE `solicitud`
 -- AUTO_INCREMENT de la tabla `tipo_actividad`
 --
 ALTER TABLE `tipo_actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restricciones para tablas volcadas
@@ -932,8 +1014,7 @@ ALTER TABLE `actividad`
   ADD CONSTRAINT `actividad_ibfk_3` FOREIGN KEY (`id_tipo_actividad`) REFERENCES `tipo_actividad` (`id`),
   ADD CONSTRAINT `actividad_ibfk_comuna` FOREIGN KEY (`id_comuna`) REFERENCES `comuna` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `actividad_ibfk_nivel` FOREIGN KEY (`id_nivel_impacto`) REFERENCES `nivel_impacto` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `actividad_ibfk_responsable` FOREIGN KEY (`responsable`) REFERENCES `empleado` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `actividad_ibfk_solicitud` FOREIGN KEY (`id_solicitud`) REFERENCES `solicitud` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `actividad_ibfk_responsable` FOREIGN KEY (`responsable`) REFERENCES `empleado` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `asignacion`
