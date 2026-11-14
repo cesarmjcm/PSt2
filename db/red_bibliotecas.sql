@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-11-2026 a las 14:27:12
+-- Tiempo de generación: 14-11-2026 a las 18:04:08
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -343,7 +343,13 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (204, 'Sabado', '2026-11-14', '09:20:54', 11, 'Eliminar', 'Espacio cultural', 'Espacio cultural #7 eliminado'),
 (205, 'Sabado', '2026-11-14', '09:21:10', 11, 'Editar', 'Espacio cultural', 'Espacio cultural #5 actualizado: hola'),
 (206, 'Sabado', '2026-11-14', '09:24:34', 11, 'Crear', 'Espacio cultural', 'Espacio cultural registrado: Museo Carmelo Fernández'),
-(207, 'Sabado', '2026-11-14', '09:26:48', 11, 'Crear', 'Espacio cultural', 'Espacio cultural registrado: Parque Recreacional Leonor');
+(207, 'Sabado', '2026-11-14', '09:26:48', 11, 'Crear', 'Espacio cultural', 'Espacio cultural registrado: Parque Recreacional Leonor'),
+(208, 'Sabado', '2026-11-14', '09:30:29', 16, 'Login', 'Usuario', 'Inicio de sesión: isaias'),
+(209, 'Sabado', '2026-11-14', '09:31:01', 16, 'Editar', 'Tipo de actividad', 'Tipo de actividad #12 actualizado: Artísticas'),
+(210, 'Sabado', '2026-11-14', '11:10:33', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(211, 'Sabado', '2026-11-14', '12:58:27', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(212, 'Sabado', '2026-11-14', '12:58:47', 11, 'Editar', 'Parroquia', 'Parroquia #56 actualizada: Campo Elias'),
+(213, 'Sabado', '2026-11-14', '12:59:31', 11, 'Editar', 'Parroquia', 'Parroquia #3 actualizada: Albarico');
 
 -- --------------------------------------------------------
 
@@ -661,46 +667,28 @@ CREATE TABLE `parroquia` (
 --
 
 INSERT INTO `parroquia` (`id`, `nombre`, `id_municipio`) VALUES
-(17, 'Albarico', 0),
 (3, 'Albarico', 2),
 (54, 'Arístides Bastidas', 21),
 (68, 'Aroa', 10),
 (55, 'Bolivar', 13),
-(5, 'Campo Elías', 0),
 (56, 'Campo Elias', 5),
-(4, 'Chivacoa', 0),
 (49, 'Chivacoa', 5),
-(6, 'Cocorote', 0),
 (46, 'Cocorote', 6),
-(21, 'El Guayabo', 0),
 (52, 'El Guayabo', 8),
-(22, 'Farriar', 0),
 (53, 'Farriar', 8),
-(7, 'Independencia', 0),
 (57, 'Independencia', 4),
 (58, 'José Antonio Paez', 15),
-(9, 'La Trinidad', 0),
 (59, 'La Trinidad', 11),
-(10, 'Manuel Monge', 0),
 (60, 'Manuel Monge', 10),
-(13, 'Nirgua', 0),
 (62, 'Nirgua', 9),
-(11, 'Salóm', 0),
 (61, 'Salom', 9),
-(14, 'San Andrés', 0),
 (65, 'San Andres', 12),
 (51, 'San Andres', 13),
-(18, 'San Felipe', 0),
 (47, 'San Felipe', 2),
-(16, 'San Javier', 0),
 (48, 'San Javier', 2),
-(19, 'Sucre', 0),
 (66, 'Sucre', 3),
 (63, 'Temeria', 9),
-(12, 'Temerla', 0),
-(20, 'Urachiche', 0),
 (67, 'Urachiche', 7),
-(15, 'Yaritagua', 0),
 (64, 'Yaritagua', 12);
 
 -- --------------------------------------------------------
@@ -933,7 +921,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=208;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -1054,6 +1042,12 @@ ALTER TABLE `empleado`
 --
 ALTER TABLE `institucion`
   ADD CONSTRAINT `institucion_ibfk_1` FOREIGN KEY (`id_municipio`) REFERENCES `municipio` (`id`);
+
+--
+-- Filtros para la tabla `parroquia`
+--
+ALTER TABLE `parroquia`
+  ADD CONSTRAINT `parroquia_ibfk_1` FOREIGN KEY (`id_municipio`) REFERENCES `municipio` (`id`);
 
 --
 -- Filtros para la tabla `solicitud`
