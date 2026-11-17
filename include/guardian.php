@@ -46,7 +46,7 @@ if (!defined('GUARDIAN_TIEMPO_INACTIVIDAD_MIN')) {
 }
 
 
-function guardian_redirigirALogin(string $motivo = ''): void
+function guardian_redirigirALogin(string $motivo = '')
 {
     $urlActual = $_SERVER['REQUEST_URI'] ?? null;
 
@@ -97,7 +97,7 @@ function esCoordinador(): bool
     return $rol === 'coordinador';
 }
 
-function guardian_idBibliotecaSesion(): ?int
+function guardian_idBibliotecaSesion()
 {
     if (esAdministrador()) {
         return null;
@@ -137,7 +137,7 @@ function guardian_idBibliotecaSesion(): ?int
 }
 
 
-function guardian_requerirAdmin(string $modo = 'vista'): void
+function guardian_requerirAdmin(string $modo = 'vista')
 {
     if (esAdministrador()) {
         return;

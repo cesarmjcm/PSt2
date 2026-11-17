@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Institucion
 {
-    public function mostrarInstituciones(?int $idBiblioteca = null)
+    public function mostrarInstituciones($idBiblioteca = null)
     {
         $sql = "SELECT i.id, i.nombre, i.rif, i.correo, i.direccion, i.id_municipio, m.nombre AS id_municipio_nombre
                 FROM institucion i

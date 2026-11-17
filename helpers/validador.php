@@ -191,7 +191,7 @@ class Validador
     /**
      * Fecha de ingreso: formato Y-m-d, fecha real, no futura y no más antigua que $maxAnios años.
      */
-    public static function esFechaIngresoValida(string $valor, int $maxAnios = 70, ?string $fechaFin = null): bool
+    public static function esFechaIngresoValida(string $valor, int $maxAnios = 70, $fechaFin = null): bool
     {
         if (!self::esFechaValida($valor)) {
             return false;
@@ -204,7 +204,7 @@ class Validador
      * Años COMPLETOS entre la fecha de ingreso y la fecha final, o hoy si sigue vigente.
      * Devuelve -1 si alguna fecha no es válida o la fecha de inicio es futura.
      */
-    public static function calcularAniosServicio(string $fechaIngreso, ?string $fechaFin = null): int
+    public static function calcularAniosServicio(string $fechaIngreso, $fechaFin = null): int
     {
         $ingreso = DateTime::createFromFormat('!Y-m-d', $fechaIngreso);
         if ($ingreso === false || $ingreso->format('Y-m-d') !== $fechaIngreso) {

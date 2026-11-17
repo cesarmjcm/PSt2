@@ -1,9 +1,5 @@
 <?php
-/**
- * @package dompdf
- * @link    https://github.com/dompdf/dompdf
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
- */
+
 namespace Dompdf\Frame;
 
 use DOMDocument;
@@ -13,7 +9,13 @@ use DOMXPath;
 
 use Dompdf\Exception;
 use Dompdf\Frame;
-use IteratorAggregate;
+
+/**
+ * @package dompdf
+ * @link    http://dompdf.github.com/
+ * @author  Benj Carson <benjcarson@digitaljunkies.ca>
+ * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ */
 
 /**
  * Represents an entire document as a tree of frames
@@ -25,14 +27,14 @@ use IteratorAggregate;
  *
  * @package dompdf
  */
-class FrameTree implements IteratorAggregate
+class FrameTree
 {
     /**
      * Tags to ignore while parsing the tree
      *
      * @var array
      */
-    protected static $HIDDEN_TAGS = [
+    protected static $HIDDEN_TAGS = array(
         "area",
         "base",
         "basefont",
@@ -44,7 +46,7 @@ class FrameTree implements IteratorAggregate
         "noembed",
         "param",
         "#comment"
-    ];
+    );
 
     /**
      * The main DomDocument
@@ -84,7 +86,7 @@ class FrameTree implements IteratorAggregate
     {
         $this->_dom = $dom;
         $this->_root = null;
-        $this->_registry = [];
+        $this->_registry = array();
     }
 
     /**
@@ -122,22 +124,11 @@ class FrameTree implements IteratorAggregate
     /**
      * Returns a post-order iterator for all frames in the tree
      *
-     * @deprecated Iterate the tree directly instead
-     * @return FrameTreeIterator
+     * @return FrameTreeList|Frame[]
      */
-    public function get_frames(): FrameTreeIterator
+    public function get_frames()
     {
-        return new FrameTreeIterator($this->_root);
-    }
-
-    /**
-     * Returns a post-order iterator for all frames in the tree
-     *
-     * @return FrameTreeIterator
-     */
-    public function getIterator(): FrameTreeIterator
-    {
-        return new FrameTreeIterator($this->_root);
+        return new FrameTreeList($this->_root);
     }
 
     /**
@@ -248,7 +239,7 @@ class FrameTree implements IteratorAggregate
         }
 
         // Store the children in an array so that the tree can be modified
-        $children = [];
+        $children = array();
         $length = $node->childNodes->length;
         for ($i = 0; $i < $length; $i++) {
             $children[] = $node->childNodes->item($i);

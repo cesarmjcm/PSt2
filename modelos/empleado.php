@@ -127,7 +127,7 @@ class Empleado {
         }
     }
 
-    private function insertarAsignacion(PDO $conexion, int $idEmpleado, int $idCargo, int $idBiblioteca, ?string $fechaDesde, ?string $fechaHasta): void
+    private function insertarAsignacion(PDO $conexion, int $idEmpleado, int $idCargo, int $idBiblioteca, $fechaDesde, $fechaHasta)
     {
         $stmt = $conexion->prepare(
             'INSERT INTO asignacion (id_empleado, id_cargo, id_biblioteca, fecha_desde, fecha_hasta)

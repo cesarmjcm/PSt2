@@ -1,13 +1,14 @@
 <?php
 /**
  * @package dompdf
- * @link    https://github.com/dompdf/dompdf
+ * @link    http://dompdf.github.com/
+ * @author  Benj Carson <benjcarson@digitaljunkies.ca>
+ * @author  Fabien Ménager <fabien.menager@gmail.com>
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
 namespace Dompdf\Css;
 
 use Dompdf\Frame;
-use Dompdf\Helpers;
 
 /**
  * Translates HTML 4.0 attributes into CSS rules
@@ -21,33 +22,33 @@ class AttributeTranslator
     // Munged data originally from
     // http://www.w3.org/TR/REC-html40/index/attributes.html
     // http://www.cs.tut.fi/~jkorpela/html2css.html
-    private static $__ATTRIBUTE_LOOKUP = [
+    static private $__ATTRIBUTE_LOOKUP = array(
         //'caption' => array ( 'align' => '', ),
-        'img' => [
-            'align' => [
+        'img' => array(
+            'align' => array(
                 'bottom' => 'vertical-align: baseline;',
                 'middle' => 'vertical-align: middle;',
                 'top' => 'vertical-align: top;',
                 'left' => 'float: left;',
                 'right' => 'float: right;'
-            ],
+            ),
             'border' => 'border: %0.2Fpx solid;',
-            'height' => '_set_px_height',
+            'height' => 'height: %spx;',
             'hspace' => 'padding-left: %1$0.2Fpx; padding-right: %1$0.2Fpx;',
             'vspace' => 'padding-top: %1$0.2Fpx; padding-bottom: %1$0.2Fpx;',
-            'width' => '_set_px_width',
-        ],
-        'table' => [
-            'align' => [
+            'width' => 'width: %spx;',
+        ),
+        'table' => array(
+            'align' => array(
                 'left' => 'margin-left: 0; margin-right: auto;',
                 'center' => 'margin-left: auto; margin-right: auto;',
                 'right' => 'margin-left: auto; margin-right: 0;'
-            ],
+            ),
             'bgcolor' => 'background-color: %s;',
-            'border' => '_set_table_border',
-            'cellpadding' => '_set_table_cellpadding', //'border-spacing: %0.2F; border-collapse: separate;',
-            'cellspacing' => '_set_table_cellspacing',
-            'frame' => [
+            'border' => '!set_table_border',
+            'cellpadding' => '!set_table_cellpadding', //'border-spacing: %0.2F; border-collapse: separate;',
+            'cellspacing' => '!set_table_cellspacing',
+            'frame' => array(
                 'void' => 'border-style: none;',
                 'above' => 'border-top-style: solid;',
                 'below' => 'border-bottom-style: solid;',
@@ -57,44 +58,44 @@ class AttributeTranslator
                 'rhs' => 'border-right-style: solid;',
                 'box' => 'border-style: solid;',
                 'border' => 'border-style: solid;'
-            ],
-            'rules' => '_set_table_rules',
+            ),
+            'rules' => '!set_table_rules',
             'width' => 'width: %s;',
-        ],
-        'hr' => [
-            'align' => '_set_hr_align', // Need to grab width to set 'left' & 'right' correctly
+        ),
+        'hr' => array(
+            'align' => '!set_hr_align', // Need to grab width to set 'left' & 'right' correctly
             'noshade' => 'border-style: solid;',
-            'size' => '_set_hr_size', //'border-width: %0.2F px;',
+            'size' => '!set_hr_size', //'border-width: %0.2F px;',
             'width' => 'width: %s;',
-        ],
-        'div' => [
+        ),
+        'div' => array(
             'align' => 'text-align: %s;',
-        ],
-        'h1' => [
+        ),
+        'h1' => array(
             'align' => 'text-align: %s;',
-        ],
-        'h2' => [
+        ),
+        'h2' => array(
             'align' => 'text-align: %s;',
-        ],
-        'h3' => [
+        ),
+        'h3' => array(
             'align' => 'text-align: %s;',
-        ],
-        'h4' => [
+        ),
+        'h4' => array(
             'align' => 'text-align: %s;',
-        ],
-        'h5' => [
+        ),
+        'h5' => array(
             'align' => 'text-align: %s;',
-        ],
-        'h6' => [
+        ),
+        'h6' => array(
             'align' => 'text-align: %s;',
-        ],
+        ),
         //TODO: translate more form element attributes
-        'input' => [
-            'size' => '_set_input_width'
-        ],
-        'p' => [
+        'input' => array(
+            'size' => '!set_input_width'
+        ),
+        'p' => array(
             'align' => 'text-align: %s;',
-        ],
+        ),
 //    'col' => array(
 //      'align'  => '',
 //      'valign' => '',
@@ -103,87 +104,87 @@ class AttributeTranslator
 //      'align'  => '',
 //      'valign' => '',
 //    ),
-        'tbody' => [
-            'align' => '_set_table_row_align',
-            'valign' => '_set_table_row_valign',
-        ],
-        'td' => [
+        'tbody' => array(
+            'align' => '!set_table_row_align',
+            'valign' => '!set_table_row_valign',
+        ),
+        'td' => array(
             'align' => 'text-align: %s;',
-            'bgcolor' => '_set_background_color',
+            'bgcolor' => '!set_background_color',
             'height' => 'height: %s;',
             'nowrap' => 'white-space: nowrap;',
             'valign' => 'vertical-align: %s;',
             'width' => 'width: %s;',
-        ],
-        'tfoot' => [
-            'align' => '_set_table_row_align',
-            'valign' => '_set_table_row_valign',
-        ],
-        'th' => [
+        ),
+        'tfoot' => array(
+            'align' => '!set_table_row_align',
+            'valign' => '!set_table_row_valign',
+        ),
+        'th' => array(
             'align' => 'text-align: %s;',
-            'bgcolor' => '_set_background_color',
+            'bgcolor' => '!set_background_color',
             'height' => 'height: %s;',
             'nowrap' => 'white-space: nowrap;',
             'valign' => 'vertical-align: %s;',
             'width' => 'width: %s;',
-        ],
-        'thead' => [
-            'align' => '_set_table_row_align',
-            'valign' => '_set_table_row_valign',
-        ],
-        'tr' => [
-            'align' => '_set_table_row_align',
-            'bgcolor' => '_set_table_row_bgcolor',
-            'valign' => '_set_table_row_valign',
-        ],
-        'body' => [
+        ),
+        'thead' => array(
+            'align' => '!set_table_row_align',
+            'valign' => '!set_table_row_valign',
+        ),
+        'tr' => array(
+            'align' => '!set_table_row_align',
+            'bgcolor' => '!set_table_row_bgcolor',
+            'valign' => '!set_table_row_valign',
+        ),
+        'body' => array(
             'background' => 'background-image: url(%s);',
-            'bgcolor' => '_set_background_color',
-            'link' => '_set_body_link',
-            'text' => '_set_color',
-        ],
-        'br' => [
+            'bgcolor' => '!set_background_color',
+            'link' => '!set_body_link',
+            'text' => '!set_color',
+        ),
+        'br' => array(
             'clear' => 'clear: %s;',
-        ],
-        'basefont' => [
-            'color' => '_set_color',
+        ),
+        'basefont' => array(
+            'color' => '!set_color',
             'face' => 'font-family: %s;',
-            'size' => '_set_basefont_size',
-        ],
-        'font' => [
-            'color' => '_set_color',
+            'size' => '!set_basefont_size',
+        ),
+        'font' => array(
+            'color' => '!set_color',
             'face' => 'font-family: %s;',
-            'size' => '_set_font_size',
-        ],
-        'dir' => [
+            'size' => '!set_font_size',
+        ),
+        'dir' => array(
             'compact' => 'margin: 0.5em 0;',
-        ],
-        'dl' => [
+        ),
+        'dl' => array(
             'compact' => 'margin: 0.5em 0;',
-        ],
-        'menu' => [
+        ),
+        'menu' => array(
             'compact' => 'margin: 0.5em 0;',
-        ],
-        'ol' => [
+        ),
+        'ol' => array(
             'compact' => 'margin: 0.5em 0;',
             'start' => 'counter-reset: -dompdf-default-counter %d;',
-            'type' => '_set_list_style_type',
-        ],
-        'ul' => [
+            'type' => 'list-style-type: %s;',
+        ),
+        'ul' => array(
             'compact' => 'margin: 0.5em 0;',
-            'type' => '_set_list_style_type',
-        ],
-        'li' => [
-            'type' => '_set_list_style_type',
+            'type' => 'list-style-type: %s;',
+        ),
+        'li' => array(
+            'type' => 'list-style-type: %s;',
             'value' => 'counter-reset: -dompdf-default-counter %d;',
-        ],
-        'pre' => [
+        ),
+        'pre' => array(
             'width' => 'width: %s;',
-        ],
-    ];
+        ),
+    );
 
-    protected static $_last_basefont_size = 3;
-    protected static $_font_size_lookup = [
+    static protected $_last_basefont_size = 3;
+    static protected $_font_size_lookup = array(
         // For basefont support
         -3 => "4pt",
         -2 => "5pt",
@@ -203,7 +204,7 @@ class AttributeTranslator
         9 => "44pt",
         10 => "52pt",
         11 => "60pt",
-    ];
+    );
 
     /**
      * @param Frame $frame
@@ -248,6 +249,7 @@ class AttributeTranslator
             $style = ltrim($style);
             $node->setAttribute(self::$_style_attr, $style);
         }
+
     }
 
     /**
@@ -257,10 +259,13 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _resolve_target(\DOMNode $node, $target, $value)
+    static protected function _resolve_target(\DOMNode $node, $target, $value)
     {
-        if ($target[0] === "_") {
-            return self::$target($node, $value);
+        if ($target[0] === "!") {
+            // Function call
+            $func = "_" . mb_substr($target, 1);
+
+            return self::$func($node, $value);
         }
 
         return $value ? sprintf($target, $value) : "";
@@ -283,7 +288,7 @@ class AttributeTranslator
      *
      * @return \DOMNodeList|\DOMElement[]
      */
-    protected static function get_cell_list(\DOMNode $node)
+    static protected function get_cell_list(\DOMNode $node)
     {
         $xpath = new \DOMXpath($node->ownerDocument);
 
@@ -312,7 +317,7 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _get_valid_color($value)
+    static protected function _get_valid_color($value)
     {
         if (preg_match('/^#?([0-9A-F]{6})$/i', $value, $matches)) {
             $value = "#$matches[1]";
@@ -327,7 +332,7 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _set_color(\DOMElement $node, $value)
+    static protected function _set_color(\DOMElement $node, $value)
     {
         $value = self::_get_valid_color($value);
 
@@ -340,41 +345,11 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _set_background_color(\DOMElement $node, $value)
+    static protected function _set_background_color(\DOMElement $node, $value)
     {
         $value = self::_get_valid_color($value);
 
         return "background-color: $value;";
-    }
-
-    protected static function _set_px_width(\DOMElement $node, string $value): string
-    {
-        $v = trim($value);
-
-        if (Helpers::is_percent($v)) {
-            return sprintf("width: %s;", $v);
-        }
-
-        if (is_numeric(mb_substr($v, 0, 1))) {
-            return sprintf("width: %spx;", (float) $v);
-        }
-
-        return "";
-    }
-
-    protected static function _set_px_height(\DOMElement $node, string $value): string
-    {
-        $v = trim($value);
-
-        if (Helpers::is_percent($v)) {
-            return sprintf("height: %s;", $v);
-        }
-
-        if (is_numeric(mb_substr($v, 0, 1))) {
-            return sprintf("height: %spx;", (float) $v);
-        }
-
-        return "";
     }
 
     /**
@@ -383,7 +358,7 @@ class AttributeTranslator
      *
      * @return null
      */
-    protected static function _set_table_cellpadding(\DOMElement $node, $value)
+    static protected function _set_table_cellpadding(\DOMElement $node, $value)
     {
         $cell_list = self::get_cell_list($node);
 
@@ -400,9 +375,21 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _set_table_border(\DOMElement $node, $value)
+    static protected function _set_table_border(\DOMElement $node, $value)
     {
-        return "border-width: $value" . "px;";
+        $cell_list = self::get_cell_list($node);
+
+        foreach ($cell_list as $cell) {
+            $style = rtrim($cell->getAttribute(self::$_style_attr));
+            $style .= "; border-width: " . ($value > 0 ? 1 : 0) . "pt; border-style: inset;";
+            $style = ltrim($style, ";");
+            $cell->setAttribute(self::$_style_attr, $style);
+        }
+
+        $style = rtrim($node->getAttribute(self::$_style_attr), ";");
+        $style .= "; border-width: $value" . "px; ";
+
+        return ltrim($style, "; ");
     }
 
     /**
@@ -411,7 +398,7 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _set_table_cellspacing(\DOMElement $node, $value)
+    static protected function _set_table_cellspacing(\DOMElement $node, $value)
     {
         $style = rtrim($node->getAttribute(self::$_style_attr), ";");
 
@@ -430,7 +417,7 @@ class AttributeTranslator
      *
      * @return null|string
      */
-    protected static function _set_table_rules(\DOMElement $node, $value)
+    static protected function _set_table_rules(\DOMElement $node, $value)
     {
         $new_style = "; border-collapse: collapse;";
 
@@ -480,7 +467,7 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _set_hr_size(\DOMElement $node, $value)
+    static protected function _set_hr_size(\DOMElement $node, $value)
     {
         $style = rtrim($node->getAttribute(self::$_style_attr), ";");
         $style .= "; border-width: " . max(0, $value - 2) . "; ";
@@ -494,7 +481,7 @@ class AttributeTranslator
      *
      * @return null|string
      */
-    protected static function _set_hr_align(\DOMElement $node, $value)
+    static protected function _set_hr_align(\DOMElement $node, $value)
     {
         $style = rtrim($node->getAttribute(self::$_style_attr), ";");
         $width = $node->getAttribute("width");
@@ -503,7 +490,7 @@ class AttributeTranslator
             $width = "100%";
         }
 
-        $remainder = 100 - (float)rtrim($width, "% ");
+        $remainder = 100 - (double)rtrim($width, "% ");
 
         switch ($value) {
             case "left":
@@ -531,11 +518,11 @@ class AttributeTranslator
      *
      * @return null|string
      */
-    protected static function _set_input_width(\DOMElement $node, $value)
+    static protected function _set_input_width(\DOMElement $node, $value)
     {
         if (empty($value)) { return null; }
 
-        if ($node->hasAttribute("type") && in_array(strtolower($node->getAttribute("type")), ["text","password"])) {
+        if ($node->hasAttribute("type") && in_array(strtolower($node->getAttribute("type")), array("text","password"))) {
             return sprintf("width: %Fem", (((int)$value * .65)+2));
         } else {
             return sprintf("width: %upx;", (int)$value);
@@ -548,7 +535,7 @@ class AttributeTranslator
      *
      * @return null
      */
-    protected static function _set_table_row_align(\DOMElement $node, $value)
+    static protected function _set_table_row_align(\DOMElement $node, $value)
     {
         $cell_list = self::get_cell_list($node);
 
@@ -565,7 +552,7 @@ class AttributeTranslator
      *
      * @return null
      */
-    protected static function _set_table_row_valign(\DOMElement $node, $value)
+    static protected function _set_table_row_valign(\DOMElement $node, $value)
     {
         $cell_list = self::get_cell_list($node);
 
@@ -582,7 +569,7 @@ class AttributeTranslator
      *
      * @return null
      */
-    protected static function _set_table_row_bgcolor(\DOMElement $node, $value)
+    static protected function _set_table_row_bgcolor(\DOMElement $node, $value)
     {
         $cell_list = self::get_cell_list($node);
         $value = self::_get_valid_color($value);
@@ -600,7 +587,7 @@ class AttributeTranslator
      *
      * @return null
      */
-    protected static function _set_body_link(\DOMElement $node, $value)
+    static protected function _set_body_link(\DOMElement $node, $value)
     {
         $a_list = $node->getElementsByTagName("a");
         $value = self::_get_valid_color($value);
@@ -618,7 +605,7 @@ class AttributeTranslator
      *
      * @return null
      */
-    protected static function _set_basefont_size(\DOMElement $node, $value)
+    static protected function _set_basefont_size(\DOMElement $node, $value)
     {
         // FIXME: ? we don't actually set the font size of anything here, just
         // the base size for later modification by <font> tags.
@@ -633,7 +620,7 @@ class AttributeTranslator
      *
      * @return string
      */
-    protected static function _set_font_size(\DOMElement $node, $value)
+    static protected function _set_font_size(\DOMElement $node, $value)
     {
         $style = $node->getAttribute(self::$_style_attr);
 
@@ -648,33 +635,5 @@ class AttributeTranslator
         }
 
         return ltrim($style, "; ");
-    }
-
-    protected static function _set_list_style_type(\DOMElement $node, string $value): string
-    {
-        $v = trim($value);
-
-        switch ($v) {
-            case "1":
-                $type = "decimal";
-                break;
-            case "a":
-                $type = "lower-alpha";
-                break;
-            case "A":
-                $type = "upper-alpha";
-                break;
-            case "i":
-                $type = "lower-roman";
-                break;
-            case "I":
-                $type = "upper-roman";
-                break;
-            default:
-                $type = $v;
-                break;
-        }
-
-        return "list-style-type: $type;";
     }
 }
