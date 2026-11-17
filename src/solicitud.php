@@ -29,6 +29,9 @@ $puedeEditarSolicitudes = $esAdmin || esCoordinador();
                         <button type="button" class="btn-primary btn-exportar" id="btnExportarSolicitudes">
                             <i class="fas fa-file-pdf"></i> Exportar PDF
                         </button>
+                        <button type="button" class="btn-primary btn-exportar" id="btnExportarExcelSolicitudes">
+                            <i class="fas fa-file-excel"></i> Exportar Excel
+                        </button>
                         <button type="button" class="btn-primary" id="btnNuevaSolicitud">
                             <i class="fas fa-plus"></i> Nueva Solicitud
                         </button>
@@ -170,6 +173,7 @@ $puedeEditarSolicitudes = $esAdmin || esCoordinador();
         const modalErrorBox = document.getElementById('modalError');
         const btnNuevaSolicitud = document.getElementById('btnNuevaSolicitud');
         const btnExportarSolicitudes = document.getElementById('btnExportarSolicitudes');
+        const btnExportarExcelSolicitudes = document.getElementById('btnExportarExcelSolicitudes');
         const buscarSolicitudesForm = document.getElementById('buscarSolicitudesForm');
         const buscarSolicitudes = document.getElementById('buscarSolicitudes');
         const limpiarBusquedaSolicitud = document.getElementById('limpiarBusquedaSolicitud');
@@ -577,6 +581,12 @@ $puedeEditarSolicitudes = $esAdmin || esCoordinador();
                 btnExportarSolicitudes,
                 mostrarAlerta
             );
+        });
+        btnExportarExcelSolicitudes.addEventListener('click', () => {
+            const termino = buscarSolicitudes.value.trim();
+            const urlReporte = '../reportes/exportar_excel.php?reporte=solicitud' +
+                (termino ? '&q=' + encodeURIComponent(termino) : '');
+            abrirReporteExcel(urlReporte, 'Reporte de solicitudes', btnExportarExcelSolicitudes, mostrarAlerta);
         });
         modalClose.addEventListener('click', cerrarModal);
         btnCancelar.addEventListener('click', cerrarModal);

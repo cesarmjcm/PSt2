@@ -51,10 +51,11 @@ require_once __DIR__ . '/../include/guardian.php';
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const botonExportar = document.getElementById('btnExportarActividades');
+            const botonExportarExcel = document.getElementById('btnExportarExcelActividades');
             const buscador = document.getElementById('buscarActividad');
-            if (!botonExportar || !buscador) return;
+            if (!buscador) return;
 
-            botonExportar.addEventListener('click', () => {
+            if (botonExportar) botonExportar.addEventListener('click', () => {
                 const termino = buscador.value.trim();
                 const urlReporte = '../reportes/exportar_actividades.php' +
                     (termino ? '?q=' + encodeURIComponent(termino) : '');
@@ -62,6 +63,17 @@ require_once __DIR__ . '/../include/guardian.php';
                     urlReporte,
                     'Reporte de actividades',
                     botonExportar,
+                    (mensaje) => window.alert(mensaje)
+                );
+            });
+            if (botonExportarExcel) botonExportarExcel.addEventListener('click', () => {
+                const termino = buscador.value.trim();
+                const urlReporte = '../reportes/exportar_excel.php?reporte=actividad' +
+                    (termino ? '&q=' + encodeURIComponent(termino) : '');
+                abrirReporteExcel(
+                    urlReporte,
+                    'Reporte de actividades',
+                    botonExportarExcel,
                     (mensaje) => window.alert(mensaje)
                 );
             });

@@ -83,6 +83,9 @@ try {
                     <button type="button" class="btn-primary btn-exportar" id="btnExportarActividades">
                         <i class="fas fa-file-pdf"></i> Exportar PDF
                     </button>
+                    <button type="button" class="btn-primary btn-exportar" id="btnExportarExcelActividades">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
                 </div>
                 <table class="tabla-planificacion">
                     <thead>

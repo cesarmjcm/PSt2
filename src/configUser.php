@@ -373,6 +373,9 @@ try {
     <button type="button" class="btn-primary btn-exportar" id="btnExportarUsuarios">
         <i class="fas fa-file-pdf"></i> Exportar PDF
     </button>
+    <button type="button" class="btn-primary btn-exportar" id="btnExportarExcelUsuarios">
+        <i class="fas fa-file-excel"></i> Exportar Excel
+    </button>
     <?php endif; ?>
 </div>
 <div id="alertBox" class="config-note" style="display:none; margin-top:12px;"></div>
@@ -492,7 +495,8 @@ try {
                     window.location.href = 'logout.php';
                 });
             }
-                          const btnExportarUsuarios = document.getElementById('btnExportarUsuarios');
+            const btnExportarUsuarios = document.getElementById('btnExportarUsuarios');
+            const btnExportarExcelUsuarios = document.getElementById('btnExportarExcelUsuarios');
             const alertBox = document.getElementById('alertBox');
             const buscarUsuarios = document.getElementById('buscarUsuarios');
             let alertTimeoutId = null;
@@ -516,6 +520,14 @@ try {
                     const urlReporte = '../reportes/exportar_usuarios.php' +
                         (termino ? '?q=' + encodeURIComponent(termino) : '');
                     abrirReportePdf(urlReporte, 'Reporte de usuarios', btnExportarUsuarios, mostrarAlerta);
+                });
+            }
+            if (btnExportarExcelUsuarios) {
+                btnExportarExcelUsuarios.addEventListener('click', () => {
+                    const termino = buscarUsuarios ? buscarUsuarios.value.trim() : '';
+                    const urlReporte = '../reportes/exportar_excel.php?reporte=usuario' +
+                        (termino ? '&q=' + encodeURIComponent(termino) : '');
+                    abrirReporteExcel(urlReporte, 'Reporte de usuarios', btnExportarExcelUsuarios, mostrarAlerta);
                 });
             }
             

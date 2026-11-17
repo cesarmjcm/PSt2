@@ -244,6 +244,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                             <button type="button" class="btn-primary btn-exportar" id="btnExportar">
                                 <i class="fas fa-file-pdf"></i> Exportar PDF
                             </button>
+                            <button type="button" class="btn-primary btn-exportar" id="btnExportarExcel">
+                                <i class="fas fa-file-excel"></i> Exportar Excel
+                            </button>
                             <?php if ($mostrarNuevo): ?>
                                 <button type="button" class="btn-primary" id="btnNuevo">
                                     <i class="fas fa-plus"></i> Nuevo
@@ -355,6 +358,7 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
         const modalErrorBox = document.getElementById('modalError');
         const btnNuevo = document.getElementById('btnNuevo');
         const btnExportar = document.getElementById('btnExportar');
+        const btnExportarExcel = document.getElementById('btnExportarExcel');
 
         const confirmModal = document.getElementById('confirmModal');
         const confirmBackdrop = document.getElementById('confirmBackdrop');
@@ -1060,6 +1064,15 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     urlReporte += (urlReporte.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(termino);
                 }
                 abrirReportePdf(urlReporte, 'Reporte de ' + tablaActual, btnExportar, mostrarAlerta);
+            });
+        }
+        if (btnExportarExcel) {
+            btnExportarExcel.addEventListener('click', () => {
+                const termino = buscarMaestro.value.trim();
+                const urlReporte = '../reportes/exportar_excel.php?reporte=' +
+                    encodeURIComponent(tablaActual) +
+                    (termino ? '&q=' + encodeURIComponent(termino) : '');
+                abrirReporteExcel(urlReporte, 'Reporte de ' + tablaActual, btnExportarExcel, mostrarAlerta);
             });
         }
         modalClose.addEventListener('click', cerrarModal);

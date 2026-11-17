@@ -13,6 +13,8 @@ Requisitos para los reportes PDF:
 - Extensiones PHP `dom`, `iconv` y `mbstring` habilitadas para Dompdf.
 - `composer.json` configura PHP 7.3.2 como plataforma para mantener las dependencias compatibles.
 
+Los botones **Exportar Excel** descargan archivos CSV con codificación UTF-8 y separador punto y coma, compatibles con Excel en Windows y sin dependencias adicionales. Están disponibles en los maestros, actividades, solicitudes y usuarios; respetan las búsquedas y permisos de cada pantalla.
+
 `version.php` muestra la versión y arquitectura de PHP atendidas por el servidor web. Elimínalo del servidor público después de comprobar la instalación.
 
 ### Rol Coordinador
