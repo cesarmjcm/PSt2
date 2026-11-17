@@ -15,6 +15,8 @@ Requisitos para los reportes PDF:
 
 Los botones **Exportar Excel** descargan archivos CSV con codificación UTF-8 y separador punto y coma, compatibles con Excel en Windows y sin dependencias adicionales. Están disponibles en los maestros, actividades, solicitudes y usuarios; respetan las búsquedas y permisos de cada pantalla.
 
+Para asignar cada espacio cultural a una parroquia, respalda la base de datos y ejecuta una sola vez `db/migrations/20261116_add_parish_to_cultural_spaces.sql` sobre una base existente. La migración usa la parroquia de la actividad más reciente asociada a cada espacio; los espacios sin actividades deben asignarse desde el maestro **Espacios culturales**.
+
 `version.php` muestra la versión y arquitectura de PHP atendidas por el servidor web. Elimínalo del servidor público después de comprobar la instalación.
 
 ### Rol Coordinador

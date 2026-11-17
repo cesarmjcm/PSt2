@@ -194,7 +194,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                                 <select name="id_espacio_cultural" id="plan-espacio">
                                                     <option value="">Seleccione un espacio cultural</option>
                                                     <?php foreach ($espacios as $e): ?>
-                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) ($e['id_parroquia'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -277,13 +277,14 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                     selectBiblioteca.value = bibliotecaSeleccionada;
                 }
 
-                // El espacio cultural no tiene parroquia propia: se asocia a la parroquia/comuna
-                // elegidas arriba al guardar la actividad (actividad -> comuna -> parroquia).
-                // Por eso se listan todos los espacios.
                 const espacioSeleccionado = selectEspacio.value;
                 selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
-                opcionesEspacios.forEach((opcion) => selectEspacio.appendChild(opcion.cloneNode(true)));
-                if (espacioSeleccionado !== '') {
+                opcionesEspacios.forEach((opcion) => {
+                    if (parroquiaId !== '' && opcion.dataset.parroquia === parroquiaId) {
+                        selectEspacio.appendChild(opcion.cloneNode(true));
+                    }
+                });
+                if (Array.from(selectEspacio.options).some(opcion => opcion.value === espacioSeleccionado)) {
                     selectEspacio.value = espacioSeleccionado;
                 }
             };

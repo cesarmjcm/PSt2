@@ -170,7 +170,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                                 <select name="id_espacio_cultural" id="editar-espacio">
                                                     <option value="">Seleccione un espacio cultural</option>
                                                     <?php foreach ($espacios as $e): ?>
-                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) ($e['id_parroquia'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -226,6 +226,10 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
             const esEspacio = radioEspacio !== null && radioEspacio.checked;
             ubicacionBiblioteca.classList.toggle('hidden', esEspacio);
             ubicacionEspacio.classList.toggle('hidden', !esEspacio);
+            if (selectBiblioteca && selectEspacio) {
+                selectBiblioteca.disabled = esEspacio;
+                selectEspacio.disabled = !esEspacio;
+            }
             filtrarUbicaciones();
         }
 
@@ -247,15 +251,9 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
             const opcionesEspacios = Array.from(selectEspacio.options).slice(1);
             seleccionarEspacioGuardado = id => {
                 const idEspacio = String(id || '');
-                const opcion = opcionesEspacios.find(item => item.value === idEspacio);
-                if (!opcion) {
-                    selectEspacio.value = '';
-                    return;
-                }
-                if (!Array.from(selectEspacio.options).some(item => item.value === idEspacio)) {
-                    selectEspacio.add(opcion.cloneNode(true));
-                }
-                selectEspacio.value = idEspacio;
+                selectEspacio.value = Array.from(selectEspacio.options).some(item => item.value === idEspacio)
+                    ? idEspacio
+                    : '';
             };
 
             filtrarUbicaciones = () => {
@@ -274,11 +272,12 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                     selectBiblioteca.value = bibliotecaSeleccionada;
                 }
 
-                // El espacio cultural no tiene parroquia propia: se asocia a la parroquia/comuna
-                // elegidas arriba al guardar la actividad (actividad -> comuna -> parroquia).
-                // Por eso se listan todos los espacios.
                 selectEspacio.replaceChildren(new Option('Seleccione un espacio cultural', ''));
-                opcionesEspacios.forEach((opcion) => selectEspacio.appendChild(opcion.cloneNode(true)));
+                opcionesEspacios.forEach((opcion) => {
+                    if (parroquiaId !== '' && opcion.dataset.parroquia === parroquiaId) {
+                        selectEspacio.appendChild(opcion.cloneNode(true));
+                    }
+                });
                 if (Array.from(selectEspacio.options).some(opcion => opcion.value === espacioSeleccionado)) {
                     selectEspacio.value = espacioSeleccionado;
                 }

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-11-2026 a las 18:04:08
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Tiempo de generación: 17-11-2026 a las 03:36:20
+-- Versión del servidor: 10.11.16-MariaDB
+-- Versión de PHP: 8.5.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -26,8 +26,7 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-create database red_bibliotecas;
-use red_bibliotecas;
+
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_biblioteca` int(11) DEFAULT NULL,
@@ -44,7 +43,7 @@ CREATE TABLE `actividad` (
   `estado` enum('pendiente','confirmada','ejecutada','cancelada') NOT NULL DEFAULT 'pendiente',
   `responsable` int(10) DEFAULT NULL,
   `id_comuna` int(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `actividad`
@@ -64,7 +63,8 @@ INSERT INTO `actividad` (`id`, `id_biblioteca`, `id_espacio_cultural`, `nombre`,
 (39, NULL, 5, 'juego de metras', 5, 3, 'van a jugar metras para entender como era este juego tradicional', 'para que vean los juegos tradicionales', 150, '2026-11-03', '10:00:00', 'Martes', 'pendiente', 13, 105),
 (40, 15, NULL, 'juego de metras', 5, NULL, 'cosas', 'No definido', 0, '2026-11-03', '10:00:00', 'Martes', 'confirmada', 28, 8),
 (41, NULL, 4, 'juego', 5, 3, 'cosas', 'No definido', 0, '2026-11-18', '16:12:00', 'Miércoles', 'pendiente', 29, 24),
-(42, 19, NULL, 'cena navideña', 5, 4, 'van hacer una cena navideña en chivacoa', 'No definido', 65, '2026-12-20', '20:00:00', 'Domingo', 'confirmada', 27, 22);
+(42, 16, NULL, 'cena navideña', 5, 4, 'van hacer una cena navideña en chivacoa', 'No definido', 65, '2026-12-20', '20:00:00', 'Domingo', 'confirmada', 27, 52),
+(43, 15, NULL, 'juego de metras', 12, NULL, 'van a jugar metras para entender como era este juego tradicional', 'No definido', 15, '2026-11-19', '10:00:00', 'Jueves', 'pendiente', 13, NULL);
 
 -- --------------------------------------------------------
 
@@ -104,7 +104,7 @@ CREATE TABLE `biblioteca` (
   `Correo` varchar(30) NOT NULL DEFAULT '',
   `redes_sociales` varchar(30) NOT NULL DEFAULT '',
   `Direccion` varchar(30) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `biblioteca`
@@ -134,7 +134,7 @@ CREATE TABLE `bitacora` (
   `accion` varchar(30) NOT NULL,
   `descripcion` varchar(50) NOT NULL,
   `detalle` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `bitacora`
@@ -350,7 +350,25 @@ INSERT INTO `bitacora` (`id`, `nom_dia`, `fecha`, `hora`, `id_usu`, `accion`, `d
 (210, 'Sabado', '2026-11-14', '11:10:33', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
 (211, 'Sabado', '2026-11-14', '12:58:27', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
 (212, 'Sabado', '2026-11-14', '12:58:47', 11, 'Editar', 'Parroquia', 'Parroquia #56 actualizada: Campo Elias'),
-(213, 'Sabado', '2026-11-14', '12:59:31', 11, 'Editar', 'Parroquia', 'Parroquia #3 actualizada: Albarico');
+(213, 'Sabado', '2026-11-14', '12:59:31', 11, 'Editar', 'Parroquia', 'Parroquia #3 actualizada: Albarico'),
+(214, 'Sabado', '2026-11-14', '18:46:48', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/'),
+(215, 'Sabado', '2026-11-14', '18:46:50', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(216, 'Sabado', '2026-11-14', '18:47:06', 11, 'Editar', 'Espacio cultural', 'Espacio cultural #5 actualizado: teatro'),
+(217, 'Sabado', '2026-11-14', '18:47:19', 11, 'Editar', 'Espacio cultural', 'Espacio cultural #4 actualizado: instalacion publica'),
+(218, 'Sabado', '2026-11-14', '18:47:37', 11, 'Editar', 'Espacio cultural', 'Espacio cultural #6 actualizado: escenario'),
+(219, 'Lunes', '2026-11-16', '21:06:12', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/'),
+(220, 'Lunes', '2026-11-16', '21:06:14', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(221, 'Lunes', '2026-11-16', '22:22:41', 11, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/main2.php'),
+(222, 'Lunes', '2026-11-16', '22:22:43', 11, 'Login', 'Usuario', 'Inicio de sesión: cheddar'),
+(223, 'Lunes', '2026-11-16', '22:23:07', 11, 'Crear', 'Actividad', 'Actividad registrada: juego de metras'),
+(224, 'Lunes', '2026-11-16', '22:23:45', 11, 'Editar', 'Actividad', 'Actividad #42 actualizada: cena navideña'),
+(225, 'Lunes', '2026-11-16', '22:24:02', 11, 'Editar', 'Actividad', 'Actividad #42 actualizada: cena navideña'),
+(226, 'Lunes', '2026-11-16', '22:27:02', 11, 'Crear', 'Parroquia', 'Parroquia registrada: teatro'),
+(227, 'Lunes', '2026-11-16', '22:27:16', 11, 'Eliminar', 'Parroquia', 'Parroquia #69 eliminada'),
+(228, 'Lunes', '2026-11-16', '22:28:18', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/maestro.php?tabla=comuna'),
+(229, 'Lunes', '2026-11-16', '22:33:22', NULL, 'Acceso Denegado', 'Seguridad', 'Intento de acceso sin autenticación a: /PSt2-main/src/index.php'),
+(230, 'Lunes', '2026-11-16', '22:33:41', 11, 'Editar', 'Actividad', 'Actividad #42 actualizada: cena navideña'),
+(231, 'Lunes', '2026-11-16', '22:33:54', 11, 'Editar', 'Actividad', 'Actividad #42 actualizada: cena navideña');
 
 -- --------------------------------------------------------
 
@@ -385,7 +403,7 @@ CREATE TABLE `comuna` (
   `id` int(10) NOT NULL,
   `nombre` varchar(30) NOT NULL,
   `id_parroquia` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `comuna`
@@ -549,22 +567,23 @@ INSERT INTO `empleado` (`id`, `nombre`, `apellido`, `cedula`, `telefono`, `gener
 
 CREATE TABLE `espacio_cultural` (
   `id` int(10) NOT NULL,
+  `id_parroquia` int(10) DEFAULT NULL,
   `nombre` varchar(30) NOT NULL,
   `capacidad` int(10) NOT NULL,
   `direccion` varchar(30) NOT NULL,
   `Metodo_contactar` varchar(40) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `espacio_cultural`
 --
 
-INSERT INTO `espacio_cultural` (`id`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`) VALUES
-(4, 'tu casa', 6, 'independencia', ''),
-(5, 'hola', 10, 'independencia', ''),
-(6, 'casa de tu tio', 100, 'calle 4', ''),
-(8, 'Museo Carmelo Fernández', 100, '2 Av, entre Calles 13 y 14', ''),
-(9, 'Parque Recreacional Leonor', 500, 'Final de la Av. Yurubí', '');
+INSERT INTO `espacio_cultural` (`id`, `id_parroquia`, `nombre`, `capacidad`, `direccion`, `Metodo_contactar`) VALUES
+(4, 49, 'instalacion publica', 6, 'independencia', ''),
+(5, 54, 'teatro', 10, 'independencia', ''),
+(6, 47, 'escenario', 100, 'calle 4', ''),
+(8, 56, 'Museo Carmelo Fernández', 100, '2 Av, entre Calles 13 y 14', ''),
+(9, NULL, 'Parque Recreacional Leonor', 500, 'Final de la Av. Yurubí', '');
 
 -- --------------------------------------------------------
 
@@ -606,7 +625,7 @@ INSERT INTO `institucion` (`id`, `id_municipio`, `nombre`, `rif`, `correo`, `dir
 CREATE TABLE `municipio` (
   `id` int(10) NOT NULL,
   `nombre` varchar(30) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `municipio`
@@ -637,7 +656,7 @@ INSERT INTO `municipio` (`id`, `nombre`) VALUES
 CREATE TABLE `nivel_impacto` (
   `id` int(10) NOT NULL,
   `nombre_impacto` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `nivel_impacto`
@@ -661,7 +680,7 @@ CREATE TABLE `parroquia` (
   `id` int(10) NOT NULL,
   `nombre` varchar(30) NOT NULL,
   `id_municipio` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `parroquia`
@@ -731,7 +750,7 @@ CREATE TABLE `tipo_actividad` (
   `id` int(10) NOT NULL,
   `nombre` varchar(15) NOT NULL,
   `Descripcion` varchar(40) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `tipo_actividad`
@@ -757,7 +776,7 @@ CREATE TABLE `usuario` (
   `telefono` varchar(15) DEFAULT NULL,
   `id_empleado` int(11) DEFAULT NULL,
   `rol` enum('administrador','coordinador','usuario') NOT NULL DEFAULT 'usuario'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
@@ -841,7 +860,8 @@ ALTER TABLE `empleado`
 --
 ALTER TABLE `espacio_cultural`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_espacio_cultural_nombre` (`nombre`);
+  ADD UNIQUE KEY `uq_espacio_cultural_nombre` (`nombre`),
+  ADD KEY `idx_espacio_cultural_parroquia` (`id_parroquia`);
 
 --
 -- Indices de la tabla `institucion`
@@ -904,7 +924,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `actividad`
 --
 ALTER TABLE `actividad`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT de la tabla `asignacion`
@@ -922,7 +942,7 @@ ALTER TABLE `biblioteca`
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=232;
 
 --
 -- AUTO_INCREMENT de la tabla `cargo`
@@ -970,7 +990,7 @@ ALTER TABLE `nivel_impacto`
 -- AUTO_INCREMENT de la tabla `parroquia`
 --
 ALTER TABLE `parroquia`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT de la tabla `solicitud`
@@ -1037,6 +1057,12 @@ ALTER TABLE `comuna`
 ALTER TABLE `empleado`
   ADD CONSTRAINT `empleado_ibfk_1` FOREIGN KEY (`id_cargo`) REFERENCES `cargo` (`id`),
   ADD CONSTRAINT `empleado_ibfk_biblioteca` FOREIGN KEY (`id_biblioteca`) REFERENCES `biblioteca` (`id`);
+
+--
+-- Filtros para la tabla `espacio_cultural`
+--
+ALTER TABLE `espacio_cultural`
+  ADD CONSTRAINT `espacio_cultural_ibfk_parroquia` FOREIGN KEY (`id_parroquia`) REFERENCES `parroquia` (`id`);
 
 --
 -- Filtros para la tabla `institucion`

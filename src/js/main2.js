@@ -97,6 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tipoUbicacionRadios = document.querySelectorAll('input[name="tipo_ubicacion"]');
     const ubicacionBiblioteca = document.getElementById('ubicacion-biblioteca');
     const ubicacionEspacio = document.getElementById('ubicacion-espacio');
+    const selectBiblioteca = document.getElementById('plan-biblioteca');
+    const selectEspacio = document.getElementById('plan-espacio');
 
     const toggleTipoFormulario = () => {
         if (!camposCompleta) return;
@@ -114,6 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (ubicacionEspacio) {
             ubicacionEspacio.classList.toggle('hidden', tipo !== 'espacio');
+        }
+        if (selectBiblioteca) {
+            selectBiblioteca.disabled = tipo !== 'biblioteca';
+        }
+        if (selectEspacio) {
+            selectEspacio.disabled = tipo !== 'espacio';
         }
     };
 

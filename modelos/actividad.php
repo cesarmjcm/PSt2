@@ -56,8 +56,7 @@ class Actividad {
 
     /**
      * Valida con JOINs que la jerarquía municipio -> parroquia -> comuna elegida sea coherente.
-     * Si el espacio cultural es el lugar, exige comuna: así el espacio queda asociado a una
-     * parroquia (espacio_cultural -> actividad -> comuna -> parroquia).
+     * Si el espacio cultural es el lugar, exige que su parroquia coincida con la actividad.
      */
     public function validarUbicacionJerarquica(array $d): array
     {
@@ -73,6 +72,7 @@ class Actividad {
         }
 
         $pdo = Conexion::conectar();
+        $idParroquia = null;
         if ($nombreParroquia !== '') {
             $sql = "SELECT p.id FROM parroquia p
                     JOIN municipio m ON m.id = p.id_municipio
@@ -84,14 +84,17 @@ class Actividad {
             }
             $stmt = $pdo->prepare($sql . " LIMIT 1");
             $stmt->execute($params);
-            if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $parroquia = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$parroquia) {
                 $errors[] = 'La parroquia seleccionada no pertenece al municipio indicado.';
                 return $errors;
             }
+            $idParroquia = (int) $parroquia['id'];
         }
 
+        $idParroquiaComuna = null;
         if ($nombreComuna !== '') {
-            $sql = "SELECT c.id FROM comuna c
+            $sql = "SELECT c.id, c.id_parroquia FROM comuna c
                     JOIN parroquia p ON p.id = c.id_parroquia
                     JOIN municipio m ON m.id = p.id_municipio
                     WHERE c.nombre = ?";
@@ -106,8 +109,26 @@ class Actividad {
             }
             $stmt = $pdo->prepare($sql . " LIMIT 1");
             $stmt->execute($params);
-            if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $comuna = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$comuna) {
                 $errors[] = 'La comuna seleccionada no pertenece a la parroquia indicada.';
+                return $errors;
+            }
+            $idParroquiaComuna = (int) $comuna['id_parroquia'];
+            if ($idParroquia !== null && $idParroquia !== $idParroquiaComuna) {
+                $errors[] = 'La comuna seleccionada no pertenece a la parroquia indicada.';
+                return $errors;
+            }
+        }
+
+        if ($esEspacio) {
+            $idEspacio = (int) ($d['id_espacio_cultural'] ?? 0);
+            $stmt = $pdo->prepare("SELECT id_parroquia FROM espacio_cultural WHERE id = ?");
+            $stmt->execute([$idEspacio]);
+            $espacio = $stmt->fetch(PDO::FETCH_ASSOC);
+            $idParroquiaEsperada = $idParroquiaComuna !== null ? $idParroquiaComuna : $idParroquia;
+            if (!$espacio || $idParroquiaEsperada === null || (int) $espacio['id_parroquia'] !== $idParroquiaEsperada) {
+                $errors[] = 'El espacio cultural debe pertenecer a la parroquia seleccionada.';
             }
         }
 
@@ -191,7 +212,7 @@ class Actividad {
                 er.telefono AS telefono_responsable,
                 er.id_biblioteca AS id_biblioteca_responsable,
                 ta.nombre AS tipo_actividad,
-                b.nombre AS biblioteca,
+                CASE WHEN a.id_espacio_cultural IS NULL THEN b.nombre ELSE NULL END AS biblioteca,
                 ec.nombre AS espacio_cultural,
                 m.id AS municipio_id,
                 m.nombre AS municipio,

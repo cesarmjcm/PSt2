@@ -10,6 +10,7 @@ procesarReportePdf(
     [
         ['etiqueta' => 'ID', 'clave' => 'id'],
         ['etiqueta' => 'Espacio cultural', 'clave' => 'nombre'],
+        ['etiqueta' => 'Parroquia', 'clave' => 'id_parroquia_nombre'],
         ['etiqueta' => 'Capacidad', 'clave' => 'capacidad'],
         ['etiqueta' => 'Dirección', 'clave' => 'direccion'],
         ['etiqueta' => 'Método de contacto', 'clave' => 'metodo_contactar'],

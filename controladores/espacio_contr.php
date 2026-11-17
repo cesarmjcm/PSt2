@@ -53,8 +53,13 @@ class EspacioController
         $capacidadRaw = $_POST['capacidad'] ?? 0;
         $direccion = trim($_POST['direccion'] ?? '');
         $metodo_contactar = trim($_POST['metodo_contactar'] ?? '');
+        $idParroquia = $_POST['id_parroquia'] ?? '';
         if ($nombre === '') {
             $this->error('Nombre es obligatorio.');
+            return;
+        }
+        if (!Validador::esEnteroPositivo($idParroquia) || !$this->model->existeParroquia((int) $idParroquia)) {
+            $this->error('Seleccione una parroquia válida para el espacio cultural.');
             return;
         }
         if (!Validador::esTextoValido($nombre, 2, 30)) {
@@ -79,7 +84,7 @@ class EspacioController
         }
 
         try {
-            $created = $this->model->crearEspacio($nombre, intval($capacidadRaw), $direccion, $metodo_contactar);
+            $created = $this->model->crearEspacio($nombre, intval($capacidadRaw), $direccion, $metodo_contactar, (int) $idParroquia);
             if ($created) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();
@@ -112,8 +117,13 @@ class EspacioController
         $capacidadRaw = $_POST['capacidad'] ?? 0;
         $direccion = trim($_POST['direccion'] ?? '');
         $metodo_contactar = trim($_POST['metodo_contactar'] ?? '');
+        $idParroquia = $_POST['id_parroquia'] ?? '';
         if ($id <= 0 || $nombre === '') {
             $this->error('ID y nombre son obligatorios.');
+            return;
+        }
+        if (!Validador::esEnteroPositivo($idParroquia) || !$this->model->existeParroquia((int) $idParroquia)) {
+            $this->error('Seleccione una parroquia válida para el espacio cultural.');
             return;
         }
         if (!Validador::esTextoValido($nombre, 2, 30)) {
@@ -138,7 +148,7 @@ class EspacioController
         }
 
         try {
-            $updated = $this->model->actualizarEspacio($id, $nombre, intval($capacidadRaw), $direccion, $metodo_contactar);
+            $updated = $this->model->actualizarEspacio($id, $nombre, intval($capacidadRaw), $direccion, $metodo_contactar, (int) $idParroquia);
             if ($updated) {
                 if (!empty($_SESSION['user_id'])) {
                     $conex = Conexion::conectar();

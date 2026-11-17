@@ -152,6 +152,13 @@ $camposPorMaestro = [
         'nombre_impacto' => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 20, 'noNumeros' => true],
     ],
     'espacio'    => [
+        'id_parroquia' => [
+            'label'       => 'Parroquia',
+            'type'        => 'select',
+            'fuente'      => '../controladores/parroquia_contr.php',
+            'optionValue' => 'id',
+            'optionLabel' => 'nombre',
+        ],
         'nombre'    => ['label' => 'Nombre', 'type' => 'text', 'maxLength' => 30],
         'capacidad' => ['label' => 'Capacidad', 'type' => 'number'],
         'direccion' => ['label' => 'Dirección', 'type' => 'text', 'maxLength' => 30],
