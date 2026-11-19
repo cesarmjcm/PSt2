@@ -48,10 +48,7 @@ class ParroquiaController
             $this->error('Método no permitido.');
             return;
         }
-        if (!esAdministrador()) {
-            $this->error('Solo un administrador puede registrar parroquias.');
-            return;
-        }
+        guardian_requerirMaestro('parroquia', 'json');
 
         $nombre = trim($_POST['nombre'] ?? '');
         $id_municipio = intval($_POST['id_municipio'] ?? 0);
@@ -100,6 +97,7 @@ class ParroquiaController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('parroquia', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         $nombre = trim($_POST['nombre'] ?? '');
@@ -145,10 +143,7 @@ class ParroquiaController
             $this->error('Método no permitido.');
             return;
         }
-        if (!esAdministrador()) {
-            $this->error('Solo un administrador puede eliminar parroquias.');
-            return;
-        }
+        guardian_requerirMaestro('parroquia', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {

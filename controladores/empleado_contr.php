@@ -154,6 +154,7 @@ class EmpleadoController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('empleado', 'json');
         if (!esAdministrador() && !esCoordinador()) {
             $this->error('No tienes permisos para gestionar empleados.');
             return;
@@ -214,6 +215,7 @@ class EmpleadoController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('empleado', 'json');
         $id = intval($_POST['id'] ?? 0);
         $nombre = trim($_POST['nombre'] ?? '');
         $apellido = trim($_POST['apellido'] ?? '');
@@ -282,6 +284,7 @@ class EmpleadoController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('empleado', 'json');
         if (!esAdministrador() && !esCoordinador()) {
             $this->error('No tienes permisos para gestionar empleados.');
             return;

@@ -19,18 +19,27 @@ require_once __DIR__ . '/../include/guardian.php';
             <h2>Panel</h2>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="./maestro.php?tabla=municipio">Municipios</a></li>
-                    <li><a href="./maestro.php?tabla=parroquia">Parroquias</a></li>
-                    <li><a href="./maestro.php?tabla=comuna">Comunas</a></li>
-                    <li><a href="./maestro.php?tabla=biblioteca">Bibliotecas</a></li>
-                    <li></li><a href="./maestro.php?tabla=institucion">Instituciones</a></li>
-                    <?php if (esAdministrador()): ?>
-    <li><a href="./maestro.php?tabla=cargo">Cargos</a></li>
-<?php endif; ?>
-                    <li><a href="./maestro.php?tabla=empleado">Empleados</a></li>
-                    <li><a href="./maestro.php?tabla=nv_act">Niveles de impacto</a></li>
-                    <li><a href="./maestro.php?tabla=espacio">Espacios culturales</a></li>
-                    <li><a href="./maestro.php?tabla=tipo_actividad">Tipos de actividad</a></li>
+                    <?php
+                    $menuMaestros = [
+                        'municipio' => 'Municipios',
+                        'parroquia' => 'Parroquias',
+                        'comuna' => 'Comunas',
+                        'biblioteca' => 'Bibliotecas',
+                        'institucion' => 'Instituciones',
+                        'cargo' => 'Cargos',
+                        'empleado' => 'Empleados',
+                        'nv_act' => 'Niveles de impacto',
+                        'espacio' => 'Espacios culturales',
+                        'tipo_actividad' => 'Tipos de actividad',
+                    ];
+                    foreach ($menuMaestros as $maestroKey => $maestroLabel):
+                        if (puedeVisualizarMaestro($maestroKey)):
+                    ?>
+                        <li><a href="./maestro.php?tabla=<?php echo urlencode($maestroKey); ?>"><?php echo htmlspecialchars($maestroLabel, ENT_QUOTES, 'UTF-8'); ?></a></li>
+                    <?php
+                        endif;
+                    endforeach;
+                    ?>
                     
                     
                     

@@ -69,6 +69,7 @@ class InstitucionController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('institucion', 'json');
 
         $nombre = trim($_POST['nombre'] ?? '');
         $id_municipio = intval($_POST['id_municipio'] ?? 0);
@@ -130,6 +131,7 @@ class InstitucionController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('institucion', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         $nombre = trim($_POST['nombre'] ?? '');
@@ -192,6 +194,7 @@ class InstitucionController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('institucion', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {

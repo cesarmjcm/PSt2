@@ -48,6 +48,7 @@ class EspacioController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('espacio', 'json');
 
         $nombre = trim($_POST['nombre'] ?? '');
         $capacidadRaw = $_POST['capacidad'] ?? 0;
@@ -111,6 +112,7 @@ class EspacioController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('espacio', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         $nombre = trim($_POST['nombre'] ?? '');
@@ -175,6 +177,7 @@ class EspacioController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('espacio', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {

@@ -48,7 +48,7 @@ class BibliotecaController
             return;
         }
         if (!esAdministrador()) {
-            $this->error('No tienes permisos para crear bibliotecas.');
+            $this->error('Solo un administrador puede registrar bibliotecas.');
             return;
         }
 
@@ -138,6 +138,7 @@ class BibliotecaController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('biblioteca', 'json');
 
         $id = intval($_POST['id'] ?? 0);
 $nombre = trim($_POST['nombre'] ?? '');
@@ -234,6 +235,10 @@ $direccion = trim($_POST['direccion'] ?? '');
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {
             $this->error('ID inválido.');
+            return;
+        }
+        if (!esAdministrador() && $id !== (int) (guardian_idBibliotecaSesion() ?? 0)) {
+            $this->error('No tienes permisos para eliminar bibliotecas de otra unidad.');
             return;
         }
         try {

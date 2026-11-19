@@ -48,6 +48,7 @@ class ComunaController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('comuna', 'json');
 
         $nombre = trim($_POST['nombre'] ?? '');
         $id_parroquia = intval($_POST['id_parroquia'] ?? 0);
@@ -96,6 +97,7 @@ class ComunaController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('comuna', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         $nombre = trim($_POST['nombre'] ?? '');
@@ -141,6 +143,7 @@ class ComunaController
             $this->error('Método no permitido.');
             return;
         }
+        guardian_requerirMaestro('comuna', 'json');
 
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) {

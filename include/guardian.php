@@ -97,6 +97,83 @@ function esCoordinador(): bool
     return $rol === 'coordinador';
 }
 
+function puedeEditarMaestro(string $maestro): bool
+{
+    if (esAdministrador()) {
+        return true;
+    }
+
+    if (esCoordinador()) {
+        return in_array($maestro, [
+            'parroquia',
+            'comuna',
+            'biblioteca',
+            'empleado',
+            'institucion',
+            'espacio',
+        ], true);
+    }
+
+    $rol = trim(strtolower($_SESSION['user_rol'] ?? 'usuario'));
+    return $rol === 'usuario' && $maestro === 'comuna';
+}
+
+function puedeVisualizarMaestro(string $maestro): bool
+{
+    if (esAdministrador()) {
+        return true;
+    }
+
+    if ($maestro === 'cargo') {
+        return false;
+    }
+
+    return in_array($maestro, [
+        'municipio',
+        'parroquia',
+        'comuna',
+        'biblioteca',
+        'institucion',
+        'empleado',
+        'nv_act',
+        'espacio',
+        'tipo_actividad',
+    ], true);
+}
+
+function guardian_requerirMaestro(string $maestro, string $modo = 'vista')
+{
+    if (puedeEditarMaestro($maestro)) {
+        return;
+    }
+
+    if (!empty($_SESSION['user_id'])) {
+        $recurso = $_SERVER['REQUEST_URI'] ?? ($_SERVER['SCRIPT_NAME'] ?? 'recurso desconocido');
+        registrar_bitacora(
+            Conexion::conectar(),
+            $_SESSION['user_id'],
+            'Acceso Denegado',
+            'Seguridad',
+            'Intento de acceso sin permisos al maestro ' . $maestro . ': ' . $recurso
+        );
+    }
+
+    if ($modo === 'json') {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'No tienes permisos para gestionar este registro.',
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    http_response_code(403);
+    include __DIR__ . '/header.php';
+    echo '<main class="page-content"><p>No tienes permisos para acceder a este maestro.</p></main>';
+    exit;
+}
+
 function guardian_idBibliotecaSesion()
 {
     if (esAdministrador()) {

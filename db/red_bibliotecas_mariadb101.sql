@@ -26,7 +26,8 @@ SET time_zone = "+00:00";
 --
 -- Estructura de tabla para la tabla `actividad`
 --
-
+create database red_bibliotecas;
+use red_bibliotecas;
 CREATE TABLE `actividad` (
   `id` int(10) NOT NULL,
   `id_biblioteca` int(11) DEFAULT NULL,

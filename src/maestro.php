@@ -191,25 +191,28 @@ $tablaValida = !empty($tabla) && isset($maestros[$tabla]);
 
 $esAdmin = esAdministrador();
 $esCoordinador = esCoordinador();
-$soloEdicion = !$esAdmin && in_array($tabla, [
-    'biblioteca',
-    'municipio',
-    'parroquia',
-    'nv_act',
-    'tipo_actividad',
-    'empleado',
-    'cargo',
-], true) && !($esCoordinador && $tabla === 'empleado');
-$mostrarNuevo = !$soloEdicion && !($esCoordinador && $tabla === 'biblioteca');
-
+$puedeEditar = puedeEditarMaestro($tabla);
+$puedeCrear = $puedeEditar && !($esCoordinador && $tabla === 'biblioteca');
+$puedeEliminar = $puedeEditar && !($esCoordinador && $tabla === 'biblioteca');
+$soloEdicion = $esCoordinador && $tabla === 'biblioteca';
+$mostrarNuevo = $puedeCrear;
+$idBibliotecaSesion = (int) ($_SESSION['id_biblioteca'] ?? 0);
 
 
 if ($tablaValida && $tabla === 'cargo' && !$esAdmin) {
     guardian_requerirAdmin('vista');
 }
+if ($tablaValida && !puedeVisualizarMaestro($tabla)) {
+    guardian_requerirAdmin('vista');
+}
 
 
-$maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => true]);
+$maestrosMenu = [];
+foreach ($maestros as $key => $label) {
+    if (puedeVisualizarMaestro($key)) {
+        $maestrosMenu[$key] = $label;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -340,7 +343,9 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
     <script>
     (function () {
         const tablaActual = <?php echo json_encode($tabla); ?>;
-        const puedeEditarRegistro = tablaActual !== 'empleado' || <?php echo json_encode($esAdmin || $esCoordinador); ?>;
+        const puedeEditarRegistro = <?php echo json_encode($puedeEditar); ?>;
+        const puedeEliminarRegistro = <?php echo json_encode($puedeEliminar); ?>;
+        const idBibliotecaSesion = <?php echo json_encode($idBibliotecaSesion); ?>;
         const soloEdicion = <?php echo json_encode($soloEdicion); ?>;
         const endpoint = <?php echo json_encode($controladorPorMaestro[$tabla]); ?>;
         const campos = <?php echo json_encode($camposPorMaestro[$tabla], JSON_UNESCAPED_UNICODE); ?>;
@@ -688,10 +693,12 @@ $maestrosMenu = $esAdmin ? $maestros : array_diff_key($maestros, ['cargo' => tru
                     }
                 });
                 html += '<td class="col-acciones">';
-                if (puedeEditarRegistro) {
+                const puedeEditarFila = puedeEditarRegistro
+                    && (!soloEdicion || tablaActual !== 'biblioteca' || String(fila.id) === String(idBibliotecaSesion));
+                if (puedeEditarFila) {
                     html += '<button type="button" class="btn-icon btn-edit" data-id="' + fila.id + '" title="Editar"><i class="fas fa-pen"></i></button>';
                 }
-                if (!soloEdicion) {
+                if (puedeEliminarRegistro) {
                     html += '<button type="button" class="btn-icon btn-delete" data-id="' + fila.id + '" title="Eliminar"><i class="fas fa-trash"></i></button>';
                 }
                 html += '</td>';
