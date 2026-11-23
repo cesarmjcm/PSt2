@@ -22,7 +22,7 @@ class EmpleadoController
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -52,13 +52,13 @@ class EmpleadoController
             $this->error('Método no permitido.');
             return;
         }
-        $cedulaRaw = trim($_POST['cedula'] ?? '');
+        $cedulaRaw = trim((isset($_POST['cedula']) ? $_POST['cedula'] : ('')));
         if (!Validador::esCedulaValida($cedulaRaw)) {
             $this->error('La cédula debe contener solo números y tener entre 6 y 8 dígitos.');
             return;
         }
 
-        $idExcluirRaw = trim($_POST['id'] ?? '');
+        $idExcluirRaw = trim((isset($_POST['id']) ? $_POST['id'] : ('')));
         $idExcluir = null;
         if ($idExcluirRaw !== '') {
             if (!ctype_digit($idExcluirRaw) || (int) $idExcluirRaw <= 0) {
@@ -88,7 +88,7 @@ class EmpleadoController
         ]);
     }
 
-    private function validarDatos(string $nombre, string $apellido, string $telefono, int $id_cargo, string $cedula, string $genero, int $edad, int $id_biblioteca = 0, string $fecha_inicio = '', string $fecha_fin = '')
+    private function validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $id_biblioteca = 0, $fecha_inicio = '', $fecha_fin = '')
     {
         if ($nombre === '' || $apellido === '' || $telefono === '' || $cedula === '' || $genero === '') {
             return 'Nombre, apellido, teléfono, cédula y género son obligatorios.';
@@ -143,9 +143,9 @@ class EmpleadoController
         return null;
     }
 
-    private function idBibliotecaUsuario(): int
+    private function idBibliotecaUsuario()
     {
-        return (int) (guardian_idBibliotecaSesion() ?? 0);
+        return (int) ((guardian_idBibliotecaSesion()));
     }
 
     private function crear()
@@ -160,16 +160,16 @@ class EmpleadoController
             return;
         }
 
-        $nombre = trim($_POST['nombre'] ?? '');
-        $apellido = trim($_POST['apellido'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
-        $id_cargo = intval($_POST['id_cargo'] ?? 0);
-        $cedulaRaw = trim($_POST['cedula'] ?? '');
-        $genero = trim($_POST['genero'] ?? '');
-        $edad = intval($_POST['edad'] ?? 0);
-        $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
-        $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
-        $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $apellido = trim((isset($_POST['apellido']) ? $_POST['apellido'] : ('')));
+        $telefono = trim((isset($_POST['telefono']) ? $_POST['telefono'] : ('')));
+        $id_cargo = intval((isset($_POST['id_cargo']) ? $_POST['id_cargo'] : (0)));
+        $cedulaRaw = trim((isset($_POST['cedula']) ? $_POST['cedula'] : ('')));
+        $genero = trim((isset($_POST['genero']) ? $_POST['genero'] : ('')));
+        $edad = intval((isset($_POST['edad']) ? $_POST['edad'] : (0)));
+        $id_biblioteca = esAdministrador() ? intval((isset($_POST['id_biblioteca']) ? $_POST['id_biblioteca'] : (0))) : $this->idBibliotecaUsuario();
+        $fecha_inicio = trim((isset($_POST['fecha_inicio_cargo']) ? $_POST['fecha_inicio_cargo'] : ('')));
+        $fecha_fin = trim((isset($_POST['fecha_fin_cargo']) ? $_POST['fecha_fin_cargo'] : ('')));
 
         $errorValidacion = $this->validarDatos($nombre, $apellido, $telefono, $id_cargo, $cedulaRaw, $genero, $edad, $id_biblioteca, $fecha_inicio, $fecha_fin);
         if ($errorValidacion !== null) {
@@ -196,8 +196,8 @@ class EmpleadoController
                 $this->success('Empleado creado correctamente.');
                 return;
             }
-        } catch (Throwable $e) {
-            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ($e->errorInfo[1] ?? 0) === 1062) {
+        } catch (Exception $e) {
+            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ((isset($e->errorInfo[1]) ? $e->errorInfo[1] : (0))) === 1062) {
                 $this->error('Ya existe un empleado con esa cédula.');
                 return;
             }
@@ -216,17 +216,17 @@ class EmpleadoController
             return;
         }
         guardian_requerirMaestro('empleado', 'json');
-        $id = intval($_POST['id'] ?? 0);
-        $nombre = trim($_POST['nombre'] ?? '');
-        $apellido = trim($_POST['apellido'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
-        $id_cargo = intval($_POST['id_cargo'] ?? 0);
-        $cedulaRaw = trim($_POST['cedula'] ?? '');
-        $genero = trim($_POST['genero'] ?? '');
-        $edad = intval($_POST['edad'] ?? 0);
-        $id_biblioteca = esAdministrador() ? intval($_POST['id_biblioteca'] ?? 0) : $this->idBibliotecaUsuario();
-        $fecha_inicio = trim($_POST['fecha_inicio_cargo'] ?? '');
-        $fecha_fin = trim($_POST['fecha_fin_cargo'] ?? '');
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $apellido = trim((isset($_POST['apellido']) ? $_POST['apellido'] : ('')));
+        $telefono = trim((isset($_POST['telefono']) ? $_POST['telefono'] : ('')));
+        $id_cargo = intval((isset($_POST['id_cargo']) ? $_POST['id_cargo'] : (0)));
+        $cedulaRaw = trim((isset($_POST['cedula']) ? $_POST['cedula'] : ('')));
+        $genero = trim((isset($_POST['genero']) ? $_POST['genero'] : ('')));
+        $edad = intval((isset($_POST['edad']) ? $_POST['edad'] : (0)));
+        $id_biblioteca = esAdministrador() ? intval((isset($_POST['id_biblioteca']) ? $_POST['id_biblioteca'] : (0))) : $this->idBibliotecaUsuario();
+        $fecha_inicio = trim((isset($_POST['fecha_inicio_cargo']) ? $_POST['fecha_inicio_cargo'] : ('')));
+        $fecha_fin = trim((isset($_POST['fecha_fin_cargo']) ? $_POST['fecha_fin_cargo'] : ('')));
 
         if ($id <= 0) {
             $this->error('ID inválido.');
@@ -259,14 +259,14 @@ class EmpleadoController
                     $conex = Conexion::conectar();
                     registrar_bitacora($conex, $_SESSION['user_id'], 'Editar', 'Empleado', "Empleado #$id actualizado: " . $nombre . ' ' . $apellido);
                 }
-                if ($id === (int) ($_SESSION['id_empleado'] ?? 0)) {
+                if ($id === (int) ((isset($_SESSION['id_empleado']) ? $_SESSION['id_empleado'] : (0)))) {
                     unset($_SESSION['user_profile']);
                 }
                 $this->success('Empleado actualizado correctamente.');
                 return;
             }
-        } catch (Throwable $e) {
-            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ($e->errorInfo[1] ?? 0) === 1062) {
+        } catch (Exception $e) {
+            if ($e instanceof PDOException && $e->getCode() === '23000' && (int) ((isset($e->errorInfo[1]) ? $e->errorInfo[1] : (0))) === 1062) {
                 $this->error('Ya existe otro empleado con esa cédula.');
                 return;
             }
@@ -290,7 +290,7 @@ class EmpleadoController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
@@ -324,12 +324,12 @@ class EmpleadoController
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }

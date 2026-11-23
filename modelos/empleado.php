@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Empleado {
 
-    public function mostrarEmpleados(int $idBiblioteca = null) {
+    public function mostrarEmpleados($idBiblioteca = null) {
         $sql = "SELECT e.*, e.genero AS genero, e.edad AS edad, IF(e.fecha_inicio_cargo IS NULL, e.`anios_de_servicio`, TIMESTAMPDIFF(YEAR, e.fecha_inicio_cargo, CURDATE())) AS anios_servicio, c.nombre AS id_cargo_nombre,
                        b.nombre AS id_biblioteca_nombre
                 FROM empleado e
@@ -16,7 +16,7 @@ class Empleado {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerEmpleadoPorId(int $id, int $idBiblioteca = null) {
+    public function obtenerEmpleadoPorId($id, $idBiblioteca = null) {
         $sql = "SELECT * FROM empleado WHERE id = ?" . ($idBiblioteca !== null ? " AND id_biblioteca = ?" : "");
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute($idBiblioteca !== null ? [$id, $idBiblioteca] : [$id]);
@@ -24,7 +24,7 @@ class Empleado {
     }
 
     
-    public function existeCedula(int $cedula, int $idExcluir = null): bool {
+    public function existeCedula($cedula, $idExcluir = null) {
         $sql = "SELECT id FROM empleado WHERE cedula = ?";
         $params = [$cedula];
         if ($idExcluir !== null) {
@@ -42,7 +42,7 @@ class Empleado {
      * $fecha_inicio_cargo / $fecha_fin_cargo: formato Y-m-d o '' (se guarda NULL).
      * Una fecha fin vacía significa que el cargo sigue vigente.
      */
-    public function crearEmpleado(string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca, string $fecha_inicio_cargo = '', string $fecha_fin_cargo = '') {
+    public function crearEmpleado($nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio_cargo = '', $fecha_fin_cargo = '') {
         $conexion = Conexion::conectar();
         $sql = "INSERT INTO empleado (nombre, apellido, telefono, id_cargo, cedula, genero, edad, `anios_de_servicio`, id_biblioteca, fecha_inicio_cargo, fecha_fin_cargo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $fechaInicio = $fecha_inicio_cargo !== '' ? $fecha_inicio_cargo : null;
@@ -60,7 +60,7 @@ class Empleado {
             $this->insertarAsignacion($conexion, (int) $conexion->lastInsertId(), $id_cargo, $id_biblioteca, $fechaInicio, $fechaFin);
             $conexion->commit();
             return true;
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             if ($conexion->inTransaction()) {
                 $conexion->rollBack();
             }
@@ -68,7 +68,7 @@ class Empleado {
         }
     }
 
-    public function actualizarEmpleado(int $id, string $nombre, string $apellido, string $telefono, int $id_cargo, int $cedula, string $genero, int $edad, int $anios_servicio, int $id_biblioteca, string $fecha_inicio_cargo = '', string $fecha_fin_cargo = '') {
+    public function actualizarEmpleado($id, $nombre, $apellido, $telefono, $id_cargo, $cedula, $genero, $edad, $anios_servicio, $id_biblioteca, $fecha_inicio_cargo = '', $fecha_fin_cargo = '') {
         $conexion = Conexion::conectar();
         $sql = "UPDATE empleado SET nombre = ?, apellido = ?, telefono = ?, id_cargo = ?, cedula = ?, genero = ?, edad = ?, `anios_de_servicio` = ?, id_biblioteca = ?, fecha_inicio_cargo = ?, fecha_fin_cargo = ? WHERE id = ?";
         $fechaInicio = $fecha_inicio_cargo !== '' ? $fecha_inicio_cargo : null;
@@ -119,7 +119,7 @@ class Empleado {
 
             $conexion->commit();
             return true;
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             if ($conexion->inTransaction()) {
                 $conexion->rollBack();
             }
@@ -127,7 +127,7 @@ class Empleado {
         }
     }
 
-    private function insertarAsignacion(PDO $conexion, int $idEmpleado, int $idCargo, int $idBiblioteca, $fechaDesde, $fechaHasta)
+    private function insertarAsignacion(PDO $conexion, $idEmpleado, $idCargo, $idBiblioteca, $fechaDesde, $fechaHasta)
     {
         $stmt = $conexion->prepare(
             'INSERT INTO asignacion (id_empleado, id_cargo, id_biblioteca, fecha_desde, fecha_hasta)
@@ -136,7 +136,7 @@ class Empleado {
         $stmt->execute([$idEmpleado, $idCargo, $idBiblioteca, $fechaDesde, $fechaHasta]);
     }
 
-    public function eliminarEmpleado(int $id) {
+    public function eliminarEmpleado($id) {
         $conexion = Conexion::conectar();
 
         try {
@@ -153,7 +153,7 @@ class Empleado {
 
             $conexion->commit();
             return true;
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             if ($conexion->inTransaction()) {
                 $conexion->rollBack();
             }

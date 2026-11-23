@@ -13,8 +13,8 @@ $errorUsuarios = '';
 $esAdmin = esAdministrador();
 $esCoordinador = esCoordinador();
 $puedeGestionarUsuarios = $esAdmin || $esCoordinador;
-$idBibliotecaSesion = $esCoordinador ? (int) (guardian_idBibliotecaSesion() ?? 0) : null;
-$idSesion = intval($_SESSION['user_id'] ?? 0);
+$idBibliotecaSesion = $esCoordinador ? (int) ((guardian_idBibliotecaSesion())) : null;
+$idSesion = intval((isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (0)));
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
     } elseif ($usuarioAction === 'eliminar' && !$puedeGestionarUsuarios) {
         $usuarioAction = null;
         $errorUsuarios = 'No tienes permisos para eliminar usuarios.';
-    } elseif ($usuarioAction === 'actualizar' && !$puedeGestionarUsuarios && intval($_POST['id'] ?? 0) !== $idSesion) {
+    } elseif ($usuarioAction === 'actualizar' && !$puedeGestionarUsuarios && intval((isset($_POST['id']) ? $_POST['id'] : (0))) !== $idSesion) {
         $usuarioAction = null;
         $errorUsuarios = 'No tienes permisos para editar este usuario.';
     }
@@ -35,17 +35,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
     if (($usuarioAction === 'crear' || $usuarioAction === 'actualizar') && $errorUsuarios === '') {
         $esActualizacion = ($usuarioAction === 'actualizar');
 
-        $id = intval($_POST['id'] ?? 0);
-        $nombre = trim($_POST['nuevo_nombre'] ?? '');
-        $clave = trim($_POST['nueva_clave'] ?? '');
-        $claveConfirmacion = trim($_POST['nueva_clave_confirmacion'] ?? '');
-        $telefono = trim($_POST['nuevo_telefono'] ?? '');
-        $id_empleado = intval($_POST['nuevo_id_empleado'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
+        $nombre = trim((isset($_POST['nuevo_nombre']) ? $_POST['nuevo_nombre'] : ('')));
+        $clave = trim((isset($_POST['nueva_clave']) ? $_POST['nueva_clave'] : ('')));
+        $claveConfirmacion = trim((isset($_POST['nueva_clave_confirmacion']) ? $_POST['nueva_clave_confirmacion'] : ('')));
+        $telefono = trim((isset($_POST['nuevo_telefono']) ? $_POST['nuevo_telefono'] : ('')));
+        $id_empleado = intval((isset($_POST['nuevo_id_empleado']) ? $_POST['nuevo_id_empleado'] : (0)));
 
         
         $rol = null;
         if ($esAdmin) {
-            $rolEnviado = trim($_POST['nuevo_rol'] ?? '');
+            $rolEnviado = trim((isset($_POST['nuevo_rol']) ? $_POST['nuevo_rol'] : ('')));
             if (in_array($rolEnviado, ['administrador', 'coordinador', 'usuario'], true)) {
                 $rol = $rolEnviado;
             }
@@ -58,13 +58,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
             $esCoordinador
             && $esActualizacion
             && $id !== $idSesion
-            && ($usuarioObjetivo['rol'] ?? '') !== 'usuario'
+            && ((isset($usuarioObjetivo['rol']) ? $usuarioObjetivo['rol'] : (''))) !== 'usuario'
         ) {
             $errorUsuarios = 'Solo puedes gestionar usuarios de tu biblioteca.';
         } elseif (
             $esCoordinador
             && $esActualizacion
-            && !$empleadoModel->obtenerEmpleadoPorId((int) ($usuarioObjetivo['id_empleado'] ?? 0), $idBibliotecaSesion)
+            && !$empleadoModel->obtenerEmpleadoPorId((int) ((isset($usuarioObjetivo['id_empleado']) ? $usuarioObjetivo['id_empleado'] : (0))), $idBibliotecaSesion)
         ) {
             $errorUsuarios = 'El usuario no pertenece a tu biblioteca.';
         }
@@ -84,10 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 $datosValidar['rol'] = $rol;
             }
             $errors = $model->validarUsuario($datosValidar, $esActualizacion);
-            if (!$puedeGestionarUsuarios && $id_empleado !== (int) ($_SESSION['id_empleado'] ?? 0)) {
+            if (!$puedeGestionarUsuarios && $id_empleado !== (int) ((isset($_SESSION['id_empleado']) ? $_SESSION['id_empleado'] : (0)))) {
                 $errors[] = 'No puedes cambiar el empleado vinculado a tu usuario.';
             }
-            if ($esCoordinador && $usuarioObjetivo && ($usuarioObjetivo['rol'] ?? '') !== 'usuario' && $id_empleado !== (int) $usuarioObjetivo['id_empleado']) {
+            if ($esCoordinador && $usuarioObjetivo && ((isset($usuarioObjetivo['rol']) ? $usuarioObjetivo['rol'] : (''))) !== 'usuario' && $id_empleado !== (int) $usuarioObjetivo['id_empleado']) {
                 $errors[] = 'No puedes cambiar el empleado vinculado a un usuario con permisos elevados.';
             }
 
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 $errorUsuarios = 'Ya existe un usuario con ese nombre.';
             } elseif (!$empleadoSeleccionado) {
                 $errorUsuarios = 'El empleado seleccionado no existe.';
-            } elseif (trim((string) ($empleadoSeleccionado['telefono'] ?? '')) !== $telefono) {
+            } elseif (trim((string) ((isset($empleadoSeleccionado['telefono']) ? $empleadoSeleccionado['telefono'] : ('')))) !== $telefono) {
                 $errorUsuarios = 'El teléfono no coincide con el registrado para ese empleado.';
             } elseif ($model->existeUsuarioPorEmpleado($id_empleado, $esActualizacion ? $id : null)) {
                 $errorUsuarios = 'Ese empleado ya tiene un usuario registrado. No se puede crear más de uno por empleado.';
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                     $mensajeExito = 'Usuario actualizado correctamente.';
                     $mensajeFallo = 'No se pudo actualizar el usuario.';
                 } else {
-                    $ok = $model->crearUsuario($nombre, $clave, $telefono, $id_empleado, $rol ?? 'usuario');
+                    $ok = $model->crearUsuario($nombre, $clave, $telefono, $id_empleado, (isset($rol) ? $rol : ('usuario')));
                     $mensajeExito = 'Usuario creado correctamente.';
                     $mensajeFallo = 'No se pudo crear el usuario.';
                 }
@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
             }
         }
     } elseif ($usuarioAction === 'eliminar' && $puedeGestionarUsuarios) {
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $errorUsuarios = 'ID inválido.';
         } elseif ($esCoordinador && $id === $idSesion) {
@@ -155,8 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['usuario_action'])) {
                 $esCoordinador
                 && (
                     !$usuarioObjetivo
-                    || ($usuarioObjetivo['rol'] ?? '') !== 'usuario'
-                    || !$empleadoModel->obtenerEmpleadoPorId((int) ($usuarioObjetivo['id_empleado'] ?? 0), $idBibliotecaSesion)
+                    || ((isset($usuarioObjetivo['rol']) ? $usuarioObjetivo['rol'] : (''))) !== 'usuario'
+                    || !$empleadoModel->obtenerEmpleadoPorId((int) ((isset($usuarioObjetivo['id_empleado']) ? $usuarioObjetivo['id_empleado'] : (0))), $idBibliotecaSesion)
                 )
             ) {
                 $errorUsuarios = 'Solo puedes eliminar usuarios de tu biblioteca.';
@@ -186,7 +186,7 @@ try {
     $usuarios = $model->mostrarUsuarios($idBibliotecaSesion);
     if ($esCoordinador) {
         $usuarios = array_values(array_filter($usuarios, static function ($u) use ($idSesion) {
-            return (int) $u['id'] === $idSesion || ($u['rol'] ?? '') === 'usuario';
+            return (int) $u['id'] === $idSesion || ((isset($u['rol']) ? $u['rol'] : (''))) === 'usuario';
         }));
     } elseif (!$esAdmin) {
         $usuarios = array_values(array_filter($usuarios, function ($u) use ($idSesion) {
@@ -199,24 +199,26 @@ try {
 
 $busquedaUsuarios = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
 $usuariosTabla = $usuarios;
+$etiquetasRoles = [
+    'administrador' => 'Administrador',
+    'coordinador' => 'Coordinador',
+    'usuario' => 'Usuario',
+];
 if ($puedeGestionarUsuarios && $busquedaUsuarios !== '') {
-    $usuariosTabla = array_values(array_filter($usuariosTabla, static function (array $usuario) use ($busquedaUsuarios): bool {
+    $usuariosTabla = array_values(array_filter($usuariosTabla, static function (array $usuario) use ($busquedaUsuarios, $etiquetasRoles) {
+        $rol = isset($usuario['rol']) ? $usuario['rol'] : 'usuario';
         $valoresVisibles = [
-            $usuario['id'] ?? '',
-            $usuario['nombre'] ?? '',
-            $usuario['telefono'] ?? '',
-            $usuario['id_empleado_nombre'] ?? 'Sin empleado',
-            [
-                'administrador' => 'Administrador',
-                'coordinador' => 'Coordinador',
-                'usuario' => 'Usuario',
-            ][$usuario['rol'] ?? 'usuario'] ?? 'Usuario',
+            (isset($usuario['id']) ? $usuario['id'] : ('')),
+            (isset($usuario['nombre']) ? $usuario['nombre'] : ('')),
+            (isset($usuario['telefono']) ? $usuario['telefono'] : ('')),
+            (isset($usuario['id_empleado_nombre']) ? $usuario['id_empleado_nombre'] : ('Sin empleado')),
+            isset($etiquetasRoles[$rol]) ? $etiquetasRoles[$rol] : 'Usuario',
         ];
         return coincideTextoBusqueda($valoresVisibles, $busquedaUsuarios);
     }));
 }
 $usuariosPorPagina = 10;
-$paginaUsuarios = max(1, (int) ($_GET['page'] ?? 1));
+$paginaUsuarios = max(1, (int) ((isset($_GET['page']) ? $_GET['page'] : (1))));
 $totalPaginasUsuarios = max(1, (int) ceil(count($usuariosTabla) / $usuariosPorPagina));
 $paginaUsuarios = min($paginaUsuarios, $totalPaginasUsuarios);
 $usuariosTabla = array_slice($usuariosTabla, ($paginaUsuarios - 1) * $usuariosPorPagina, $usuariosPorPagina);
@@ -229,8 +231,8 @@ try {
         $empleados = $empleadoModel->mostrarEmpleados($idBibliotecaSesion);
     } else {
         $empleado = $empleadoModel->obtenerEmpleadoPorId(
-            (int) ($_SESSION['id_empleado'] ?? 0),
-            (int) (guardian_idBibliotecaSesion() ?? 0)
+            (int) ((isset($_SESSION['id_empleado']) ? $_SESSION['id_empleado'] : (0))),
+            (int) ((guardian_idBibliotecaSesion()))
         );
         $empleados = $empleado ? [$empleado] : [];
     }
@@ -289,18 +291,18 @@ try {
                             <?php
                                 
                                 
-                                $miUsuario = $puedeGestionarUsuarios ? null : ($usuarios[0] ?? null);
+                                $miUsuario = $puedeGestionarUsuarios ? null : ((isset($usuarios[0]) ? $usuarios[0] : (null)));
                             ?>
                             <form method="POST" action="" id="form-usuario" style="margin-top:16px;">
                                 <input type="hidden" name="usuario_action" id="usuario_action"
                                        value="<?php echo $puedeGestionarUsuarios ? 'crear' : 'actualizar'; ?>">
                                 <input type="hidden" name="id" id="usuario_id"
-                                       value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars($miUsuario['id'] ?? ''); ?>">
+                                       value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars((isset($miUsuario['id']) ? $miUsuario['id'] : (''))); ?>">
 
                                 <div class="config-field">
                                     <label for="nuevo_nombre">Nombre</label>
                                     <input id="nuevo_nombre" name="nuevo_nombre" type="text" required
-                                           value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars($miUsuario['nombre'] ?? ''); ?>">
+                                           value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars((isset($miUsuario['nombre']) ? $miUsuario['nombre'] : (''))); ?>">
                                 </div>
 
                                 <div class="config-field">
@@ -309,14 +311,14 @@ try {
                                         <option value="">Seleccione un empleado</option>
                                         <?php foreach ($empleados as $emp): ?>
                                             <option value="<?php echo htmlspecialchars($emp['id']); ?>"
-                                                    data-telefono="<?php echo htmlspecialchars($emp['telefono'] ?? ''); ?>"
-                                                    <?php echo (!$puedeGestionarUsuarios && (string) $emp['id'] === (string) ($miUsuario['id_empleado'] ?? '')) ? 'selected' : ''; ?>>
+                                                    data-telefono="<?php echo htmlspecialchars((isset($emp['telefono']) ? $emp['telefono'] : (''))); ?>"
+                                                    <?php echo (!$puedeGestionarUsuarios && (string) $emp['id'] === (string) ((isset($miUsuario['id_empleado']) ? $miUsuario['id_empleado'] : ('')))) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                     <?php if (!$puedeGestionarUsuarios): ?>
-                                        <input type="hidden" name="nuevo_id_empleado" value="<?php echo htmlspecialchars((string) ($_SESSION['id_empleado'] ?? '')); ?>">
+                                        <input type="hidden" name="nuevo_id_empleado" value="<?php echo htmlspecialchars((string) ((isset($_SESSION['id_empleado']) ? $_SESSION['id_empleado'] : ('')))); ?>">
                                     <?php endif; ?>
                                     <small>Cada empleado solo puede tener un usuario.</small>
                                 </div>
@@ -325,7 +327,7 @@ try {
                                     <label for="nuevo_telefono">Teléfono</label>
                                     <input id="nuevo_telefono" name="nuevo_telefono" type="text"
                                            placeholder="Selecciona primero un empleado" required readonly
-                                           value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars($miUsuario['telefono'] ?? ''); ?>">
+                                           value="<?php echo $puedeGestionarUsuarios ? '' : htmlspecialchars((isset($miUsuario['telefono']) ? $miUsuario['telefono'] : (''))); ?>">
                                     <small>Se autocompleta con el teléfono registrado del empleado; deben coincidir.</small>
                                 </div>
 
@@ -400,30 +402,26 @@ try {
                                         <?php if (!empty($usuariosTabla)): ?>
                                             <?php foreach ($usuariosTabla as $u): ?>
                                                 <?php
-                                                    $empleadoNombre = trim($u['id_empleado_nombre'] ?? '');
+                                                    $empleadoNombre = trim((isset($u['id_empleado_nombre']) ? $u['id_empleado_nombre'] : ('')));
                                                     $empleadoNombre = $empleadoNombre !== '' ? $empleadoNombre : 'Sin empleado';
-                                                    $rolUsuario = $u['rol'] ?? 'usuario';
+                                                    $rolUsuario = (isset($u['rol']) ? $u['rol'] : ('usuario'));
                                                 ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($u['id']); ?></td>
                                                     <td><?php echo htmlspecialchars($u['nombre']); ?></td>
-                                                    <td><?php echo htmlspecialchars($u['telefono'] ?? ''); ?></td>
+                                                    <td><?php echo htmlspecialchars((isset($u['telefono']) ? $u['telefono'] : (''))); ?></td>
                                                     <td><?php echo htmlspecialchars($empleadoNombre); ?></td>
-                                                    <td><?php echo htmlspecialchars([
-                                                        'administrador' => 'Administrador',
-                                                        'coordinador' => 'Coordinador',
-                                                        'usuario' => 'Usuario',
-                                                    ][$rolUsuario] ?? 'Usuario', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td><?php echo htmlspecialchars(isset($etiquetasRoles[$rolUsuario]) ? $etiquetasRoles[$rolUsuario] : 'Usuario', ENT_QUOTES, 'UTF-8'); ?></td>
                                                     <td>
                                                         <button type="button" class="btn-secondary btn-editar-usuario"
                                                                 data-id="<?php echo htmlspecialchars($u['id']); ?>"
                                                                 data-nombre="<?php echo htmlspecialchars($u['nombre']); ?>"
-                                                                data-telefono="<?php echo htmlspecialchars($u['telefono'] ?? ''); ?>"
-                                                                data-id-empleado="<?php echo htmlspecialchars($u['id_empleado'] ?? ''); ?>"
+                                                                data-telefono="<?php echo htmlspecialchars((isset($u['telefono']) ? $u['telefono'] : (''))); ?>"
+                                                                data-id-empleado="<?php echo htmlspecialchars((isset($u['id_empleado']) ? $u['id_empleado'] : (''))); ?>"
                                                                 data-rol="<?php echo htmlspecialchars($rolUsuario); ?>">
                                                             Editar
                                                         </button>
-                                                        <?php if ($esAdmin || ((int) $u['id'] !== $idSesion && ($u['rol'] ?? '') === 'usuario')): ?>
+                                                        <?php if ($esAdmin || ((int) $u['id'] !== $idSesion && ((isset($u['rol']) ? $u['rol'] : (''))) === 'usuario')): ?>
                                                         <form method="POST" action="" style="display:inline;">
                                                             <input type="hidden" name="usuario_action" value="eliminar">
                                                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($u['id']); ?>">

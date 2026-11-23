@@ -21,7 +21,7 @@ class ComunaController
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -50,8 +50,8 @@ class ComunaController
         }
         guardian_requerirMaestro('comuna', 'json');
 
-        $nombre = trim($_POST['nombre'] ?? '');
-        $id_parroquia = intval($_POST['id_parroquia'] ?? 0);
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $id_parroquia = intval((isset($_POST['id_parroquia']) ? $_POST['id_parroquia'] : (0)));
         if ($nombre === '') {
             $this->error('Nombre es obligatorio.');
             return;
@@ -99,9 +99,9 @@ class ComunaController
         }
         guardian_requerirMaestro('comuna', 'json');
 
-        $id = intval($_POST['id'] ?? 0);
-        $nombre = trim($_POST['nombre'] ?? '');
-        $id_parroquia = intval($_POST['id_parroquia'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $id_parroquia = intval((isset($_POST['id_parroquia']) ? $_POST['id_parroquia'] : (0)));
         if ($id <= 0 || $nombre === '' || $id_parroquia <= 0) {
             $this->error('ID, nombre y parroquia son obligatorios.');
             return;
@@ -145,7 +145,7 @@ class ComunaController
         }
         guardian_requerirMaestro('comuna', 'json');
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
@@ -175,12 +175,12 @@ class ComunaController
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }

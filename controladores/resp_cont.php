@@ -9,7 +9,7 @@ header('Location: ../src/respaldos.php');
 }
 
 $modelo = new RespaldoBD();
-$accion = $_POST['accion'] ?? '';
+$accion = (isset($_POST['accion']) ? $_POST['accion'] : (''));
 $idUsuario = $_SESSION['user_id'];
 
 try {
@@ -19,7 +19,7 @@ try {
         $_SESSION['respaldo_msg'] = "Respaldo creado: $archivo";
 
     } elseif ($accion === 'importar') {
-        $archivo = $_POST['archivo'] ?? '';
+        $archivo = (isset($_POST['archivo']) ? $_POST['archivo'] : (''));
         $modelo->importar($archivo);
         registrar_bitacora(Conexion::conectar(), $idUsuario, 'Importar', 'Respaldo BD', "BD restaurada desde: $archivo");
         $_SESSION['respaldo_msg'] = "Base de datos restaurada desde $archivo";

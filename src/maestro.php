@@ -185,8 +185,8 @@ $controladorPorMaestro = [
  
 ];
 
-$tabla = $_GET['tabla'] ?? '';
-$titulo = $maestros[$tabla] ?? 'Maestro no encontrado';
+$tabla = (isset($_GET['tabla']) ? $_GET['tabla'] : (''));
+$titulo = (isset($maestros[$tabla]) ? $maestros[$tabla] : ('Maestro no encontrado'));
 $tablaValida = !empty($tabla) && isset($maestros[$tabla]);
 
 $esAdmin = esAdministrador();
@@ -196,7 +196,7 @@ $puedeCrear = $puedeEditar && !($esCoordinador && $tabla === 'biblioteca');
 $puedeEliminar = $puedeEditar && !($esCoordinador && $tabla === 'biblioteca');
 $soloEdicion = $esCoordinador && $tabla === 'biblioteca';
 $mostrarNuevo = $puedeCrear;
-$idBibliotecaSesion = (int) ($_SESSION['id_biblioteca'] ?? 0);
+$idBibliotecaSesion = (int) ((isset($_SESSION['id_biblioteca']) ? $_SESSION['id_biblioteca'] : (0)));
 
 
 if ($tablaValida && $tabla === 'cargo' && !$esAdmin) {

@@ -3,7 +3,7 @@
 class Validador
 {
  
-    public static function normalizarTexto($valor): string
+    public static function normalizarTexto($valor)
     {
         $valor = (string) $valor;
         
@@ -40,7 +40,7 @@ class Validador
         return $valor;
     }
 
-    private static function longitud(string $valor): int
+    private static function longitud($valor)
     {
         if (function_exists('mb_strlen')) {
             return mb_strlen($valor, 'UTF-8');
@@ -50,7 +50,7 @@ class Validador
     }
 
   
-    public static function tieneCaracterRepetido(string $valor, int $maxSeguidos = 3): bool
+    public static function tieneCaracterRepetido($valor, $maxSeguidos = 3)
     {
         $valor = self::normalizarTexto($valor);
         if ($valor === '') {
@@ -61,11 +61,11 @@ class Validador
 
 
     public static function tieneCadenaRepetida(
-        string $valor,
-        int $minLongitudPatron = 2,
-        int $maxLongitudPatron = 8,
-        int $minRepeticiones = 3
-    ): bool {
+        $valor,
+        $minLongitudPatron = 2,
+        $maxLongitudPatron = 8,
+        $minRepeticiones = 3
+    ) {
         $valor = self::normalizarTexto($valor);
         if ($valor === '') {
             return false;
@@ -77,16 +77,16 @@ class Validador
 
   
     public static function tieneRepeticionSospechosa(
-        string $valor,
-        int $maxCaracterSeguido = 3,
-        int $minRepeticionesCadena = 3
-    ): bool {
+        $valor,
+        $maxCaracterSeguido = 3,
+        $minRepeticionesCadena = 3
+    ) {
         return self::tieneCaracterRepetido($valor, $maxCaracterSeguido)
             || self::tieneCadenaRepetida($valor, 2, 8, $minRepeticionesCadena);
     }
 
   
-    public static function esTextoValido(string $valor, int $min = 2, int $max = 100): bool
+    public static function esTextoValido($valor, $min = 2, $max = 100)
     {
         $valor = self::normalizarTexto($valor);
         $len = self::longitud($valor);
@@ -97,7 +97,7 @@ class Validador
     }
 
   
-    public static function esNombrePropioValido(string $valor, int $min = 2, int $max = 50): bool
+    public static function esNombrePropioValido($valor, $min = 2, $max = 50)
     {
         $valor = self::normalizarTexto($valor);
         $len = self::longitud($valor);
@@ -108,7 +108,7 @@ class Validador
     }
 
 
-    public static function esDescripcionValida(string $valor, int $min = 0, int $max = 250): bool
+    public static function esDescripcionValida($valor, $min = 0, $max = 250)
     {
         $valor = self::normalizarTexto($valor);
         $len = self::longitud($valor);
@@ -122,19 +122,19 @@ class Validador
     }
 
  
-    public static function esTelefonoVenezolano(string $valor): bool
+    public static function esTelefonoVenezolano($valor)
     {
         return (bool) preg_match('/^0(4(12|14|16|22|24|26)|2\d{2})\d{7}$/', $valor);
     }
 
  
-    public static function esTelefonoValido(string $valor, int $max = 15): bool
+    public static function esTelefonoValido($valor, $max = 15)
     {
         return (bool) preg_match('/^[0-9\-\+ ]{7,' . $max . '}$/', $valor);
     }
 
     
-    public static function esCedulaValida(string $valor, int $min = 6, int $max = 8): bool
+    public static function esCedulaValida($valor, $min = 6, $max = 8)
     {
         $valor = trim($valor);
         $len = self::longitud($valor);
@@ -145,7 +145,7 @@ class Validador
     }
 
     
-    public static function esEnteroPositivo($valor, int $max = 2147483647): bool
+    public static function esEnteroPositivo($valor, $max = 2147483647)
     {
         if (!is_numeric($valor)) {
             return false;
@@ -155,7 +155,7 @@ class Validador
     }
 
     
-    public static function esEnteroNoNegativo($valor, int $max = 2147483647): bool
+    public static function esEnteroNoNegativo($valor, $max = 2147483647)
     {
         if (!is_numeric($valor)) {
             return false;
@@ -165,7 +165,7 @@ class Validador
     }
 
 
-    public static function esFechaValida(string $valor): bool
+    public static function esFechaValida($valor)
     {
         $d = DateTime::createFromFormat('Y-m-d', $valor);
         return $d !== false && $d->format('Y-m-d') === $valor;
@@ -174,7 +174,7 @@ class Validador
     /**
      * Edad mínima para ser empleado (17 años por defecto).
      */
-    public static function esEdadMinimaValida(int $edad, int $minimo = 17): bool
+    public static function esEdadMinimaValida($edad, $minimo = 17)
     {
         return $edad >= $minimo;
     }
@@ -183,7 +183,7 @@ class Validador
      * Máximo de años de servicio que puede tener un empleado según su edad:
      * edad - edad mínima para trabajar (17). Con 17 años -> 0, con 18 -> 1, con 30 -> 13...
      */
-    public static function aniosServicioMaximos(int $edad, int $edadMinima = 17): int
+    public static function aniosServicioMaximos($edad, $edadMinima = 17)
     {
         return max(0, $edad - $edadMinima);
     }
@@ -191,7 +191,7 @@ class Validador
     /**
      * Fecha de ingreso: formato Y-m-d, fecha real, no futura y no más antigua que $maxAnios años.
      */
-    public static function esFechaIngresoValida(string $valor, int $maxAnios = 70, $fechaFin = null): bool
+    public static function esFechaIngresoValida($valor, $maxAnios = 70, $fechaFin = null)
     {
         if (!self::esFechaValida($valor)) {
             return false;
@@ -204,7 +204,7 @@ class Validador
      * Años COMPLETOS entre la fecha de ingreso y la fecha final, o hoy si sigue vigente.
      * Devuelve -1 si alguna fecha no es válida o la fecha de inicio es futura.
      */
-    public static function calcularAniosServicio(string $fechaIngreso, $fechaFin = null): int
+    public static function calcularAniosServicio($fechaIngreso, $fechaFin = null)
     {
         $ingreso = DateTime::createFromFormat('!Y-m-d', $fechaIngreso);
         if ($ingreso === false || $ingreso->format('Y-m-d') !== $fechaIngreso) {
@@ -223,12 +223,12 @@ class Validador
         return (int) $ingreso->diff($fin)->y;
     }
 
-    public static function esHoraValida(string $valor): bool
+    public static function esHoraValida($valor)
     {
         return (bool) preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $valor);
     }
 
-    public static function esDiaSemanaValido(string $valor): bool
+    public static function esDiaSemanaValido($valor)
     {
         $dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         return in_array($valor, $dias, true);
@@ -238,7 +238,7 @@ class Validador
      * Normaliza un RIF venezolano al formato J-12345678-9 (mayúscula y guiones).
      * Si el valor no tiene la forma de un RIF, lo devuelve solo en mayúsculas y sin espacios.
      */
-    public static function normalizarRif(string $valor): string
+    public static function normalizarRif($valor)
     {
         $valor = strtoupper(preg_replace('/\s+/', '', self::normalizarTexto($valor)));
         if (preg_match('/^([JGVEPC])-?(\d{8})-?(\d)$/', $valor, $m)) {
@@ -251,19 +251,19 @@ class Validador
      * RIF venezolano: una letra (J, G, V, E, P o C), 8 dígitos y un dígito verificador.
      * Acepta con o sin guiones (J-12345678-9 / J123456789).
      */
-    public static function esRifValido(string $valor): bool
+    public static function esRifValido($valor)
     {
         return (bool) preg_match('/^[JGVEPC]-\d{8}-\d$/', self::normalizarRif($valor));
     }
 
-    public static function esClaveValida(string $valor, int $min = 6, int $max = 100): bool
+    public static function esClaveValida($valor, $min = 6, $max = 100)
     {
         $len = self::longitud($valor);
         return $len >= $min && $len <= $max;
     }
 
     
-    public static function esCorreoValido(string $valor, int $max = 30): bool
+    public static function esCorreoValido($valor, $max = 30)
     {
         $valor = self::normalizarTexto($valor);
         $len = self::longitud($valor);
@@ -277,7 +277,7 @@ class Validador
     }
 
    
-    public static function esContactoValido(string $valor, int $min = 0, int $max = 40): bool
+    public static function esContactoValido($valor, $min = 0, $max = 40)
     {
         $valor = self::normalizarTexto($valor);
         $len = self::longitud($valor);
@@ -290,7 +290,7 @@ class Validador
         return (bool) preg_match('/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü0-9 @\.\/:\-_,()]+$/u', $valor);
     }
 
-    public static function esMetodoContactarValido(string $valor, int $min = 0, int $max = 100): bool
+    public static function esMetodoContactarValido($valor, $min = 0, $max = 100)
     {
         $valor = self::normalizarTexto($valor);
         $len = self::longitud($valor);

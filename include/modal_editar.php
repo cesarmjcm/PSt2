@@ -23,9 +23,9 @@ $comunas = $comunaModel->mostrarComunasConUbicacion();
 $parroquias = $parroquiaModel->mostrarParroquias();
 $parroquiasUnicas = [];
 foreach ($parroquias as $parroquia) {
-    $nombreParroquia = trim((string)($parroquia['nombre'] ?? ''));
-    $idParroquia = (string)($parroquia['id'] ?? '');
-    $municipioParroquia = (string)($parroquia['id_municipio'] ?? '');
+    $nombreParroquia = trim((string)((isset($parroquia['nombre']) ? $parroquia['nombre'] : (''))));
+    $idParroquia = (string)((isset($parroquia['id']) ? $parroquia['id'] : ('')));
+    $municipioParroquia = (string)((isset($parroquia['id_municipio']) ? $parroquia['id_municipio'] : ('')));
     if ($nombreParroquia !== '') {
         $claveParroquia = $municipioParroquia . '|' . mb_strtolower($nombreParroquia, 'UTF-8');
         $parroquiasUnicas[$claveParroquia] = [
@@ -37,7 +37,7 @@ foreach ($parroquias as $parroquia) {
 }
 $parroquias = array_values($parroquiasUnicas);
 $espacios = $espacioModel->mostrarEspacios();
-$idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+$idBibliotecaUsuario = esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion()));
 $empleados = $empleadoModel->mostrarEmpleados($idBibliotecaUsuario);
 $bibliotecas = $bibliotecaModel->mostrarBibliotecas();
 $tiposActividad = $tipoActividadModel->mostrarTipos();
@@ -58,7 +58,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                         <input type="hidden" name="action" value="actualizar">
                         <input type="hidden" name="id" id="editar-id" value="">
                         <input type="hidden" id="editar-dia" name="dia_semana" value="">
-                        <input type="hidden" name="return_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? '../src/index.php', ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="return_url" value="<?php echo htmlspecialchars((isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : ('../src/index.php')), ENT_QUOTES, 'UTF-8'); ?>">
 
                         <input type="hidden" name="tipo_formulario" value="completa">
 
@@ -170,7 +170,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                                 <select name="id_espacio_cultural" id="editar-espacio">
                                                     <option value="">Seleccione un espacio cultural</option>
                                                     <?php foreach ($espacios as $e): ?>
-                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) ($e['id_parroquia'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
+                                                        <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-parroquia="<?= htmlspecialchars((string) ((isset($e['id_parroquia']) ? $e['id_parroquia'] : (''))), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($e['nombre'], ENT_QUOTES, 'UTF-8') ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -194,7 +194,7 @@ $nivelesImpacto = $nivelImpactoModel->mostrarNiveles();
                                             <option value="">Seleccione un responsable</option>
                                             <?php foreach ($empleados as $e): ?>
                                                 <?php $nombreCompleto = trim($e['nombre'].' '.$e['apellido']); ?>
-                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars($e['telefono'] ?? '', ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
+                                                <option value="<?= htmlspecialchars($e['id'], ENT_QUOTES, 'UTF-8') ?>" data-telefono="<?= htmlspecialchars((isset($e['telefono']) ? $e['telefono'] : ('')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($nombreCompleto, ENT_QUOTES, 'UTF-8') ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                         <label for="editar-telefono">Teléfono responsable</label>

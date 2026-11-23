@@ -20,7 +20,7 @@ class RangoActController
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -48,8 +48,8 @@ class RangoActController
             return;
         }
 
-        $nombre = trim($_POST['nombre'] ?? '');
-        $descripcion = trim($_POST['descripcion'] ?? '');
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $descripcion = trim((isset($_POST['descripcion']) ? $_POST['descripcion'] : ('')));
         if ($nombre === '') {
             $this->error('Nombre es obligatorio.');
             return;
@@ -75,9 +75,9 @@ class RangoActController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
-        $nombre = trim($_POST['nombre'] ?? '');
-        $descripcion = trim($_POST['descripcion'] ?? '');
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $descripcion = trim((isset($_POST['descripcion']) ? $_POST['descripcion'] : ('')));
         if ($id <= 0 || $nombre === '') {
             $this->error('ID y nombre son obligatorios.');
             return;
@@ -103,7 +103,7 @@ class RangoActController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
@@ -128,12 +128,12 @@ class RangoActController
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }

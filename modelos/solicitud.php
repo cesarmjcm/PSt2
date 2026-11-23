@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class Solicitud
 {
-    public function mostrarSolicitudes(int $idBiblioteca = null, bool $soloAprobadas = false)
+    public function mostrarSolicitudes($idBiblioteca = null, $soloAprobadas = false)
     {
         $condiciones = [];
         $parametros = [];
@@ -46,12 +46,12 @@ class Solicitud
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function existeConflictoHorario(array $datos, int $idExcluir = null): bool
+    public function existeConflictoHorario(array $datos, $idExcluir = null)
     {
-        $fecha = trim($datos['fecha_solicitud'] ?? '');
-        $hora = trim($datos['hora_solicitud'] ?? '');
-        $idBiblioteca = (int) ($datos['id_biblioteca'] ?? 0);
-        if ($fecha === '' || $hora === '' || $idBiblioteca <= 0 || ($datos['estado'] ?? '') === 'cancelada') {
+        $fecha = trim((isset($datos['fecha_solicitud']) ? $datos['fecha_solicitud'] : ('')));
+        $hora = trim((isset($datos['hora_solicitud']) ? $datos['hora_solicitud'] : ('')));
+        $idBiblioteca = (int) ((isset($datos['id_biblioteca']) ? $datos['id_biblioteca'] : (0)));
+        if ($fecha === '' || $hora === '' || $idBiblioteca <= 0 || ((isset($datos['estado']) ? $datos['estado'] : (''))) === 'cancelada') {
             return false;
         }
 
@@ -70,7 +70,7 @@ class Solicitud
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerSolicitudPorId(int $id, int $idBiblioteca = null)
+    public function obtenerSolicitudPorId($id, $idBiblioteca = null)
     {
         $sql = "SELECT s.*, CONCAT(e.nombre, ' ', e.apellido) AS responsable, s.responsable AS id_empleado, i.nombre AS nombre_institucion
                 FROM solicitud s
@@ -82,7 +82,7 @@ class Solicitud
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearSolicitud(int $id_institucion, int $id_biblioteca, string $fecha_solicitud, string $hora_solicitud, string $lugar, int $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente', string $nombre_actividad = '')
+    public function crearSolicitud($id_institucion, $id_biblioteca, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado = 'Pendiente', $nombre_actividad = '')
     {
         $sql = "INSERT INTO solicitud (id_institucion, id_biblioteca, fecha_solicitud, hora_solicitud, lugar, responsable, participantes, descripcion, estado, nombre_actividad)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -90,14 +90,14 @@ class Solicitud
         return $stmt->execute([$id_institucion, $id_biblioteca, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado, $nombre_actividad]);
     }
 
-    public function actualizarSolicitud(int $id, int $id_institucion, int $id_biblioteca, string $fecha_solicitud, string $hora_solicitud, string $lugar, int $responsable, int $participantes, string $descripcion, string $estado = 'Pendiente', string $nombre_actividad = '')
+    public function actualizarSolicitud($id, $id_institucion, $id_biblioteca, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado = 'Pendiente', $nombre_actividad = '')
     {
         $sql = "UPDATE solicitud SET id_institucion = ?, id_biblioteca = ?, fecha_solicitud = ?, hora_solicitud = ?, lugar = ?, responsable = ?, participantes = ?, descripcion = ?, estado = ?, nombre_actividad = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id_institucion, $id_biblioteca, $fecha_solicitud, $hora_solicitud, $lugar, $responsable, $participantes, $descripcion, $estado, $nombre_actividad, $id]);
     }
 
-    public function eliminarSolicitud(int $id, int $idBiblioteca = null)
+    public function eliminarSolicitud($id, $idBiblioteca = null)
     {
         $sql = "DELETE FROM solicitud WHERE id = ?" . ($idBiblioteca !== null ? " AND id_biblioteca = ?" : "");
         $stmt = Conexion::conectar()->prepare($sql);

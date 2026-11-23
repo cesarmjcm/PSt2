@@ -3,7 +3,7 @@ require_once __DIR__ . '/../include/guardian.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$esAdmin = (($_SESSION['user_rol'] ?? '') === 'administrador');
+$esAdmin = (((isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : (''))) === 'administrador');
 $puedeEditarSolicitudes = $esAdmin || esCoordinador();
 ?>
 <!DOCTYPE html>

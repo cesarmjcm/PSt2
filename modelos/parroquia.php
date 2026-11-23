@@ -13,7 +13,7 @@ class Parroquia {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerParroquiaPorId(int $id) {
+    public function obtenerParroquiaPorId($id) {
         $sql = "SELECT * FROM parroquia WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
@@ -21,7 +21,7 @@ class Parroquia {
     }
 
     
-    public function existeNombre(string $nombre, int $id_municipio, int $idExcluir = null): bool {
+    public function existeNombre($nombre, $id_municipio, $idExcluir = null) {
         $sql = "SELECT id FROM parroquia WHERE LOWER(nombre) = LOWER(?) AND id_municipio = ?";
         $params = [$nombre, $id_municipio];
         if ($idExcluir !== null) {
@@ -34,19 +34,19 @@ class Parroquia {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearParroquia(string $nombre, int $id_municipio) {
+    public function crearParroquia($nombre, $id_municipio) {
         $sql = "INSERT INTO parroquia (nombre, id_municipio) VALUES (?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $id_municipio]);
     }
 
-    public function actualizarParroquia(int $id, string $nombre, int $id_municipio) {
+    public function actualizarParroquia($id, $nombre, $id_municipio) {
         $sql = "UPDATE parroquia SET nombre = ?, id_municipio = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $id_municipio, $id]);
     }
 
-    public function eliminarParroquia(int $id) {
+    public function eliminarParroquia($id) {
         $sql = "DELETE FROM parroquia WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

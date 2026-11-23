@@ -10,14 +10,14 @@ class NivelImpacto {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerNivelPorId(int $id) {
+    public function obtenerNivelPorId($id) {
         $sql = "SELECT * FROM nivel_impacto WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, int $idExcluir = null): bool {
+    public function existeNombre($nombre, $idExcluir = null) {
         $sql = "SELECT id FROM nivel_impacto WHERE LOWER(nombre_impacto) = LOWER(?)";
         $params = [$nombre];
         if ($idExcluir !== null) {
@@ -30,19 +30,19 @@ class NivelImpacto {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearNivel(string $nombre) {
+    public function crearNivel($nombre) {
         $sql = "INSERT INTO nivel_impacto (nombre_impacto) VALUES (?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre]);
     }
 
-    public function actualizarNivel(int $id, string $nombre) {
+    public function actualizarNivel($id, $nombre) {
         $sql = "UPDATE nivel_impacto SET nombre_impacto = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $id]);
     }
 
-    public function eliminarNivel(int $id) {
+    public function eliminarNivel($id) {
         $sql = "DELETE FROM nivel_impacto WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

@@ -19,7 +19,7 @@ if ($username !== '' && $password !== '') {
     $user = $userModel->obtenerUsuarioPorNombre($username);
 
     if ($user) {
-        $storedPassword = $user['clave'] ?? '';
+        $storedPassword = (isset($user['clave']) ? $user['clave'] : (''));
         $passwordInfo = password_get_info($storedPassword);
         $validPassword = false;
 
@@ -34,12 +34,12 @@ if ($username !== '' && $password !== '') {
                 $userModel->actualizarClave((int) $user['id'], $password);
             }
 
-            $rol = trim(strtolower($user['rol'] ?? 'usuario'));
+            $rol = trim(strtolower((isset($user['rol']) ? $user['rol'] : ('usuario'))));
             if (!in_array($rol, ['administrador', 'coordinador', 'usuario'], true)) {
                 $rol = 'usuario';
             }
-            $idBiblioteca = (int) ($user['id_biblioteca'] ?? 0);
-            if ($rol !== 'administrador' && ((int) ($user['id_empleado'] ?? 0) <= 0 || $idBiblioteca <= 0)) {
+            $idBiblioteca = (int) ((isset($user['id_biblioteca']) ? $user['id_biblioteca'] : (0)));
+            if ($rol !== 'administrador' && ((int) ((isset($user['id_empleado']) ? $user['id_empleado'] : (0))) <= 0 || $idBiblioteca <= 0)) {
                 $message = 'El usuario no tiene un empleado vinculado a una biblioteca.';
             } else {
                 session_regenerate_id(true);
@@ -47,7 +47,7 @@ if ($username !== '' && $password !== '') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_rol'] = $rol;
                 unset($_SESSION['user_profile']);
-                $_SESSION['id_empleado'] = (int) ($user['id_empleado'] ?? 0);
+                $_SESSION['id_empleado'] = (int) ((isset($user['id_empleado']) ? $user['id_empleado'] : (0)));
                 $_SESSION['id_biblioteca'] = $idBiblioteca > 0 ? $idBiblioteca : null;
                 $redirectTo = !empty($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'main2.php';
                 unset($_SESSION['redirect_after_login']);

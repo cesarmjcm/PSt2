@@ -38,7 +38,7 @@ class ActividadController
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -68,7 +68,7 @@ class ActividadController
 
         $data = $this->collectInput();
         if (!esAdministrador()) {
-            $idBibliotecaUsuario = (int) (guardian_idBibliotecaSesion() ?? 0);
+            $idBibliotecaUsuario = (int) ((guardian_idBibliotecaSesion()));
             if ($idBibliotecaUsuario <= 0) {
                 $this->error('El usuario no tiene una biblioteca asociada.');
                 return;
@@ -98,8 +98,8 @@ class ActividadController
 
         $hayConflicto = $this->model->existeConflictoHorario($data);
         error_log('[ActividadController::crear] existeConflictoHorario=' . ($hayConflicto ? 'true' : 'false')
-            . ' | fecha=' . ($data['fecha'] ?? '') . ' hora=' . ($data['hora'] ?? '')
-            . ' id_biblioteca=' . ($data['id_biblioteca'] ?? '') . ' id_espacio_cultural=' . ($data['id_espacio_cultural'] ?? ''));
+            . ' | fecha=' . ((isset($data['fecha']) ? $data['fecha'] : (''))) . ' hora=' . ((isset($data['hora']) ? $data['hora'] : ('')))
+            . ' id_biblioteca=' . ((isset($data['id_biblioteca']) ? $data['id_biblioteca'] : (''))) . ' id_espacio_cultural=' . ((isset($data['id_espacio_cultural']) ? $data['id_espacio_cultural'] : (''))));
         if ($hayConflicto) {
             $this->error('Ya existe otra actividad registrada en ese mismo lugar, fecha y hora.');
             return;
@@ -145,13 +145,13 @@ class ActividadController
             $this->error('No tienes permisos para editar actividades.');
             return;
         }
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID de actividad inválido.');
             return;
         }
 
-        $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $idBibliotecaUsuario = esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion()));
         $actual = $this->model->obtenerActividadPorId($id, $idBibliotecaUsuario);
         if (!$actual) {
             $this->error('La actividad no existe o no pertenece a tu biblioteca.');
@@ -171,8 +171,9 @@ class ActividadController
             $this->error('Seleccione un responsable de su biblioteca para una actividad en un espacio cultural.');
             return;
         }
-        $estadoActual = strtolower(Validador::normalizarTexto($actual['estado'] ?? 'pendiente'));
-        $estadosPermitidos = self::TRANSICIONES_ESTADO[$estadoActual] ?? [$estadoActual];
+        $estadoActual = strtolower(Validador::normalizarTexto((isset($actual['estado']) ? $actual['estado'] : ('pendiente'))));
+        $transicionesEstado = self::TRANSICIONES_ESTADO;
+        $estadosPermitidos = isset($transicionesEstado[$estadoActual]) ? $transicionesEstado[$estadoActual] : [$estadoActual];
         if (!in_array($data['estado'], $estadosPermitidos, true)) {
             $this->error("No se puede cambiar una actividad de {$estadoActual} a {$data['estado']}.");
             return;
@@ -188,8 +189,8 @@ class ActividadController
 
         $hayConflicto = $this->model->existeConflictoHorario($data, $id);
         error_log('[ActividadController::actualizar] existeConflictoHorario=' . ($hayConflicto ? 'true' : 'false')
-            . ' | id=' . $id . ' fecha=' . ($data['fecha'] ?? '') . ' hora=' . ($data['hora'] ?? '')
-            . ' id_biblioteca=' . ($data['id_biblioteca'] ?? '') . ' id_espacio_cultural=' . ($data['id_espacio_cultural'] ?? ''));
+            . ' | id=' . $id . ' fecha=' . ((isset($data['fecha']) ? $data['fecha'] : (''))) . ' hora=' . ((isset($data['hora']) ? $data['hora'] : ('')))
+            . ' id_biblioteca=' . ((isset($data['id_biblioteca']) ? $data['id_biblioteca'] : (''))) . ' id_espacio_cultural=' . ((isset($data['id_espacio_cultural']) ? $data['id_espacio_cultural'] : (''))));
         if ($hayConflicto) {
             $this->error('Ya existe otra actividad registrada en ese mismo lugar, fecha y hora.');
             return;
@@ -228,13 +229,13 @@ class ActividadController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID de actividad inválido.');
             return;
         }
 
-        $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $idBibliotecaUsuario = esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion()));
         if (!$this->model->obtenerActividadPorId($id, $idBibliotecaUsuario)) {
             $this->error('No tienes permisos para eliminar actividades de otra biblioteca.');
             return;
@@ -259,11 +260,11 @@ class ActividadController
     {
         
         
-        $actividades = $this->model->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
+        $actividades = $this->model->mostrarActividadesCompletas(esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion())));
         $this->respond(['success' => true, 'data' => $actividades]);
     }
 
-    private function collectInput(): array
+    private function collectInput()
     {
         
         
@@ -271,17 +272,17 @@ class ActividadController
         
         
         
-        $fecha = Validador::normalizarTexto($_POST['fecha'] ?? $_POST['fechaActividad'] ?? '');
-        $hora = Validador::normalizarTexto($_POST['hora'] ?? $_POST['horaActividad'] ?? '');
-        $diaSemana = Validador::normalizarTexto($_POST['dia_semana'] ?? $_POST['diaActividad'] ?? '');
+        $fecha = Validador::normalizarTexto((isset($_POST['fecha']) ? $_POST['fecha'] : ((isset($_POST['fechaActividad']) ? $_POST['fechaActividad'] : ('')))));
+        $hora = Validador::normalizarTexto((isset($_POST['hora']) ? $_POST['hora'] : ((isset($_POST['horaActividad']) ? $_POST['horaActividad'] : ('')))));
+        $diaSemana = Validador::normalizarTexto((isset($_POST['dia_semana']) ? $_POST['dia_semana'] : ((isset($_POST['diaActividad']) ? $_POST['diaActividad'] : ('')))));
 
         if ($diaSemana === '' && $fecha !== '') {
             $diaSemana = $this->calcularDiaSemana($fecha);
         }
 
-        $descripcion = Validador::normalizarTexto($_POST['descripcion'] ?? $_POST['descripcionActividad'] ?? '');
-        $objetivo = Validador::normalizarTexto($_POST['objetivo'] ?? $_POST['objetivoEnfoque'] ?? '');
-        $participantes = intval($_POST['participantes'] ?? $_POST['cantidadParticipantes'] ?? 0);
+        $descripcion = Validador::normalizarTexto((isset($_POST['descripcion']) ? $_POST['descripcion'] : ((isset($_POST['descripcionActividad']) ? $_POST['descripcionActividad'] : ('')))));
+        $objetivo = Validador::normalizarTexto((isset($_POST['objetivo']) ? $_POST['objetivo'] : ((isset($_POST['objetivoEnfoque']) ? $_POST['objetivoEnfoque'] : ('')))));
+        $participantes = intval((isset($_POST['participantes']) ? $_POST['participantes'] : ((isset($_POST['cantidadParticipantes']) ? $_POST['cantidadParticipantes'] : (0)))));
 
         
         
@@ -290,15 +291,15 @@ class ActividadController
         
         
         
-        $tipoUbicacion = Validador::normalizarTexto($_POST['tipo_ubicacion'] ?? '');
+        $tipoUbicacion = Validador::normalizarTexto((isset($_POST['tipo_ubicacion']) ? $_POST['tipo_ubicacion'] : ('')));
         if ($tipoUbicacion === '') {
             
             
-            $tipoUbicacion = intval($_POST['id_espacio_cultural'] ?? 0) > 0 ? 'espacio' : 'biblioteca';
+            $tipoUbicacion = intval((isset($_POST['id_espacio_cultural']) ? $_POST['id_espacio_cultural'] : (0))) > 0 ? 'espacio' : 'biblioteca';
         }
 
-        $idBiblioteca = intval($_POST['id_biblioteca'] ?? 0);
-        $idEspacioCultural = intval($_POST['id_espacio_cultural'] ?? 0);
+        $idBiblioteca = intval((isset($_POST['id_biblioteca']) ? $_POST['id_biblioteca'] : (0)));
+        $idEspacioCultural = intval((isset($_POST['id_espacio_cultural']) ? $_POST['id_espacio_cultural'] : (0)));
         if ($tipoUbicacion === 'biblioteca') {
             $idEspacioCultural = 0;
         } elseif ($tipoUbicacion === 'espacio') {
@@ -306,13 +307,13 @@ class ActividadController
         }
 
         $estadosValidos = ['pendiente', 'confirmada', 'ejecutada', 'cancelada'];
-        $estado = Validador::normalizarTexto($_POST['estado'] ?? '');
+        $estado = Validador::normalizarTexto((isset($_POST['estado']) ? $_POST['estado'] : ('')));
         if (!in_array($estado, $estadosValidos, true)) {
             $estado = 'pendiente';
         }
 
         return [
-            'nombre'               => Validador::normalizarTexto($_POST['nombre'] ?? $_POST['tipoActividad'] ?? ''),
+            'nombre'               => Validador::normalizarTexto((isset($_POST['nombre']) ? $_POST['nombre'] : ((isset($_POST['tipoActividad']) ? $_POST['tipoActividad'] : (''))))),
             'descripcion'          => $descripcion,
             'objetivo'             => $objetivo !== '' ? $objetivo : 'No definido',
             'participantes'        => $participantes,
@@ -320,15 +321,15 @@ class ActividadController
             'hora'                 => $hora,
             'dia_semana'           => $diaSemana,
             'estado'               => $estado,
-            'nivel_impacto'        => Validador::normalizarTexto($_POST['nivel_impacto'] ?? $_POST['nivel__impacto'] ?? ''),
+            'nivel_impacto'        => Validador::normalizarTexto((isset($_POST['nivel_impacto']) ? $_POST['nivel_impacto'] : ((isset($_POST['nivel__impacto']) ? $_POST['nivel__impacto'] : (''))))),
             'tipo_ubicacion'       => $tipoUbicacion,
             'id_biblioteca'        => $idBiblioteca,
-            'municipio_id'         => intval($_POST['municipio_id'] ?? $_POST['Municipio'] ?? 0),
-            'parroquia'            => Validador::normalizarTexto($_POST['parroquia'] ?? ''),
-            'comuna'               => Validador::normalizarTexto($_POST['comuna'] ?? ''),
+            'municipio_id'         => intval((isset($_POST['municipio_id']) ? $_POST['municipio_id'] : ((isset($_POST['Municipio']) ? $_POST['Municipio'] : (0))))),
+            'parroquia'            => Validador::normalizarTexto((isset($_POST['parroquia']) ? $_POST['parroquia'] : (''))),
+            'comuna'               => Validador::normalizarTexto((isset($_POST['comuna']) ? $_POST['comuna'] : (''))),
             'id_espacio_cultural'  => $idEspacioCultural,
-            'id_tipo_actividad'    => intval($_POST['id_tipo_actividad'] ?? 0),
-            'id_empleado'          => trim((string)($_POST['id_empleado'] ?? '')),
+            'id_tipo_actividad'    => intval((isset($_POST['id_tipo_actividad']) ? $_POST['id_tipo_actividad'] : (0))),
+            'id_empleado'          => trim((string)((isset($_POST['id_empleado']) ? $_POST['id_empleado'] : ('')))),
         ];
     }
 
@@ -342,8 +343,8 @@ class ActividadController
         }
 
         if ($idEmpleado === '__actual__' && $actual !== null) {
-            $data['responsable'] = (string)($actual['responsable'] ?? '');
-            $data['telefono_responsable'] = (string)($actual['telefono_responsable'] ?? '');
+            $data['responsable'] = (string)((isset($actual['responsable']) ? $actual['responsable'] : ('')));
+            $data['telefono_responsable'] = (string)((isset($actual['telefono_responsable']) ? $actual['telefono_responsable'] : ('')));
             return null;
         }
 
@@ -351,18 +352,18 @@ class ActividadController
             return 'Seleccione un responsable válido de la lista.';
         }
 
-        $idBibliotecaUsuario = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $idBibliotecaUsuario = esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion()));
         $empleado = $this->empleadoModel->obtenerEmpleadoPorId((int)$idEmpleado, $idBibliotecaUsuario);
         if (!$empleado) {
             return 'El empleado responsable seleccionado ya no existe.';
         }
 
         $data['responsable'] = (string)(int)$idEmpleado; // ahora se guarda el id del empleado
-        $data['telefono_responsable'] = trim((string)($empleado['telefono'] ?? ''));
+        $data['telefono_responsable'] = trim((string)((isset($empleado['telefono']) ? $empleado['telefono'] : (''))));
         return null;
     }
 
-    private function calcularDiaSemana(string $fecha): string
+    private function calcularDiaSemana($fecha)
     {
         try {
             $fechaObj = new DateTime($fecha);
@@ -373,20 +374,20 @@ class ActividadController
         }
     }
 
-    private function getReturnUrl(): string
+    private function getReturnUrl()
     {
-        $returnUrl = trim($_POST['return_url'] ?? '');
+        $returnUrl = trim((isset($_POST['return_url']) ? $_POST['return_url'] : ('')));
         if ($returnUrl === '') {
-            $returnUrl = trim($_SERVER['HTTP_REFERER'] ?? '');
+            $returnUrl = trim((isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : ('')));
         }
 
         if ($returnUrl !== '') {
             $returnUrl = filter_var($returnUrl, FILTER_SANITIZE_URL);
             $parsed = parse_url($returnUrl);
             if ($parsed !== false) {
-                $hostMatches = empty($parsed['host']) || $parsed['host'] === ($_SERVER['HTTP_HOST'] ?? '');
+                $hostMatches = empty($parsed['host']) || $parsed['host'] === ((isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ('')));
                 if ($hostMatches) {
-                    $path = $parsed['path'] ?? $returnUrl;
+                    $path = (isset($parsed['path']) ? $parsed['path'] : ($returnUrl));
                     $query = isset($parsed['query']) ? '?' . $parsed['query'] : '';
                     return $path . $query;
                 }
@@ -396,7 +397,7 @@ class ActividadController
         return '../src/main2.php';
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         if ($this->shouldReturnJson()) {
             $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
@@ -406,7 +407,7 @@ class ActividadController
         exit;
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         if ($this->shouldReturnJson()) {
             $this->respond(['success' => false, 'message' => $message]);
@@ -416,7 +417,7 @@ class ActividadController
         exit;
     }
 
-    private function shouldReturnJson(): bool
+    private function shouldReturnJson()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             return true;

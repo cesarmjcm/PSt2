@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../include/guardian.php';
 require_once __DIR__ . '/../modelos/respaldosbd.php';
 
-$mensaje = $_SESSION['respaldo_msg'] ?? '';
+$mensaje = (isset($_SESSION['respaldo_msg']) ? $_SESSION['respaldo_msg'] : (''));
 unset($_SESSION['respaldo_msg']);
 
 $respaldos = (new RespaldoBD())->listar();

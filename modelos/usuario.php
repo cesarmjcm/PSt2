@@ -4,7 +4,7 @@ require_once __DIR__ . '/../helpers/validador.php';
 
 class Usuario {
 
-public function mostrarUsuarios(int $idBiblioteca = null) {
+public function mostrarUsuarios($idBiblioteca = null) {
 
     $sql = "SELECT
     u.id,
@@ -29,13 +29,13 @@ ORDER BY u.nombre";
 }
 
  
-    public function validarUsuario(array $data, bool $isUpdate = false): array
+    public function validarUsuario(array $data, $isUpdate = false)
     {
         $errors = [];
-        $nombre = trim($data['nombre'] ?? '');
-        $clave = trim($data['clave'] ?? '');
-        $telefono = trim($data['telefono'] ?? '');
-        $id_empleado = $data['id_empleado'] ?? null;
+        $nombre = trim((isset($data['nombre']) ? $data['nombre'] : ('')));
+        $clave = trim((isset($data['clave']) ? $data['clave'] : ('')));
+        $telefono = trim((isset($data['telefono']) ? $data['telefono'] : ('')));
+        $id_empleado = (isset($data['id_empleado']) ? $data['id_empleado'] : (null));
 
         if (!Validador::esTextoValido($nombre, 2, 100)) {
             $errors[] = 'Nombre de usuario inválido.';
@@ -65,14 +65,14 @@ ORDER BY u.nombre";
         return $errors;
     }
 
-    public function obtenerUsuarioPorId(int $id) {
+    public function obtenerUsuarioPorId($id) {
         $sql = "SELECT id, nombre, telefono, id_empleado, rol FROM usuario WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerPerfilUsuario(int $id) {
+    public function obtenerPerfilUsuario($id) {
         $sql = "SELECT
                     u.id AS user_id,
                     TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, ''))) AS empleado,
@@ -86,7 +86,7 @@ ORDER BY u.nombre";
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerUsuarioPorNombre(string $nombre) {
+    public function obtenerUsuarioPorNombre($nombre) {
         $sql = "SELECT u.id, u.nombre, u.clave, u.rol, u.id_empleado, e.id_biblioteca
                 FROM usuario u
                 LEFT JOIN empleado e ON e.id = u.id_empleado
@@ -96,7 +96,7 @@ ORDER BY u.nombre";
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            $rol = trim(strtolower($user['rol'] ?? 'usuario'));
+            $rol = trim(strtolower((isset($user['rol']) ? $user['rol'] : ('usuario'))));
             $user['rol'] = in_array($rol, ['administrador', 'coordinador', 'usuario'], true)
                 ? $rol
                 : 'usuario';
@@ -105,7 +105,7 @@ ORDER BY u.nombre";
         return $user;
     }
 
-    public function actualizarClave(int $id, string $clave): bool
+    public function actualizarClave($id, $clave)
     {
         $hash = password_hash($clave, PASSWORD_DEFAULT);
         $sql = 'UPDATE usuario SET clave = ? WHERE id = ?';
@@ -113,7 +113,7 @@ ORDER BY u.nombre";
         return $stmt->execute([$hash, $id]);
     }
 
-    public function existeUsuario(string $nombre, int $idExcluir = null): bool
+    public function existeUsuario($nombre, $idExcluir = null)
     {
         $sql = "SELECT id FROM usuario WHERE nombre = ?";
         $params = [$nombre];
@@ -128,7 +128,7 @@ ORDER BY u.nombre";
     }
 
     
-    public function existeUsuarioPorEmpleado(int $id_empleado, int $idExcluir = null): bool
+    public function existeUsuarioPorEmpleado($id_empleado, $idExcluir = null)
     {
         $sql = "SELECT id FROM usuario WHERE id_empleado = ?";
         $params = [$id_empleado];
@@ -142,7 +142,7 @@ ORDER BY u.nombre";
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearUsuario(string $nombre, string $clave, string $telefono, int $id_empleado, string $rol = 'usuario')
+    public function crearUsuario($nombre, $clave, $telefono, $id_empleado, $rol = 'usuario')
     {
         try {
             $hash = password_hash($clave, PASSWORD_DEFAULT);
@@ -160,7 +160,7 @@ ORDER BY u.nombre";
 
     
     
-    public function actualizarUsuario(int $id, string $nombre, string $telefono, int $id_empleado, string $clave = null, string $rol = null)
+    public function actualizarUsuario($id, $nombre, $telefono, $id_empleado, $clave = null, $rol = null)
     {
         try {
             $campos = ['nombre = ?', 'telefono = ?', 'id_empleado = ?'];
@@ -188,7 +188,7 @@ ORDER BY u.nombre";
         }
     }
 
-    public function eliminarUsuario(int $id) {
+    public function eliminarUsuario($id) {
         $sql = "DELETE FROM usuario WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

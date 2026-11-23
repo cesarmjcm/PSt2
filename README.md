@@ -9,9 +9,11 @@ Controlador
 Modelo y vista
 
 Requisitos para los reportes PDF:
-- PHP 7.0.33 o superior; la arquitectura de 32 bits es compatible.
+- PHP 5.6.14 o superior; la arquitectura de 32 bits es compatible.
 - Extensiones PHP `dom`, `iconv` y `mbstring` habilitadas para Dompdf.
-- `composer.json` configura PHP 7.0.33 como plataforma para mantener las dependencias compatibles.
+- `composer.json` configura PHP 5.6.14 como plataforma y fija `php-font-lib` 0.5.4, compatible con esa versión.
+
+Advertencia: PHP 5.6 y Dompdf 0.8.3 están fuera de soporte. Composer reporta vulnerabilidades conocidas en Dompdf y php-svg-lib; esta compatibilidad no hace seguro el stack para producción. Se recomienda actualizar a una versión soportada de PHP y Dompdf.
 
 Los botones **Exportar Excel** descargan archivos CSV con codificación UTF-8 y separador punto y coma, compatibles con Excel en Windows y sin dependencias adicionales. Están disponibles en los maestros, actividades, solicitudes y usuarios; respetan las búsquedas y permisos de cada pantalla.
 

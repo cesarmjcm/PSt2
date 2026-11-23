@@ -28,7 +28,7 @@ function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $col
             'message' => 'El término de búsqueda no es válido.',
         ], 400);
     }
-    $busqueda = trim((string) ($_GET['q'] ?? ''));
+    $busqueda = trim((string) ((isset($_GET['q']) ? $_GET['q'] : (''))));
 
     $idBiblioteca = null;
     if ($filtrarBiblioteca && !esAdministrador()) {
@@ -56,7 +56,7 @@ function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $col
             $nombreArchivo,
             $orientacion
         );
-    } catch (Throwable $error) {
+    } catch (Exception $error) {
         error_log('Error al generar el reporte PDF ' . $nombreArchivo . ': ' . $error->getMessage());
         responderReportePdf([
             'success' => false,
@@ -65,7 +65,7 @@ function procesarReportePdf($archivoModelo, $clase, $metodo, $titulo, array $col
     }
 }
 
-function filtrarFilasReportePdf(array $filas, string $busqueda): array
+function filtrarFilasReportePdf(array $filas, $busqueda)
 {
     return filtrarFilasPorBusqueda($filas, $busqueda);
 }

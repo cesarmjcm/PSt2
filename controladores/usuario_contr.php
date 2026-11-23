@@ -23,7 +23,7 @@ class UsuarioController
     }
 
     
-    private function telefonosCoinciden(string $a, string $b): bool
+    private function telefonosCoinciden($a, $b)
     {
         $limpiar = function ($v) {
             return preg_replace('/[^0-9]/', '', (string) $v);
@@ -31,15 +31,15 @@ class UsuarioController
         return $limpiar($a) === $limpiar($b) && $limpiar($a) !== '';
     }
 
-    private function empleadoGestionable(int $idEmpleado)
+    private function empleadoGestionable($idEmpleado)
     {
-        $idBiblioteca = esCoordinador() ? (int) (guardian_idBibliotecaSesion() ?? 0) : null;
+        $idBiblioteca = esCoordinador() ? (int) ((guardian_idBibliotecaSesion())) : null;
         return $this->empleadoModel->obtenerEmpleadoPorId($idEmpleado, $idBiblioteca);
     }
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -73,12 +73,12 @@ class UsuarioController
             return;
         }
 
-        $nombre = trim($_POST['nombre'] ?? '');
-        $clave = trim($_POST['clave'] ?? '');
-        $claveConfirmacion = trim($_POST['clave_confirmacion'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
-        $id_empleado = intval($_POST['id_empleado'] ?? 0);
-        $rol = esAdministrador() ? trim($_POST['rol'] ?? 'usuario') : 'usuario';
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $clave = trim((isset($_POST['clave']) ? $_POST['clave'] : ('')));
+        $claveConfirmacion = trim((isset($_POST['clave_confirmacion']) ? $_POST['clave_confirmacion'] : ('')));
+        $telefono = trim((isset($_POST['telefono']) ? $_POST['telefono'] : ('')));
+        $id_empleado = intval((isset($_POST['id_empleado']) ? $_POST['id_empleado'] : (0)));
+        $rol = esAdministrador() ? trim((isset($_POST['rol']) ? $_POST['rol'] : ('usuario'))) : 'usuario';
         if (!in_array($rol, ['administrador', 'coordinador', 'usuario'], true)) {
             $rol = 'usuario';
         }
@@ -111,7 +111,7 @@ class UsuarioController
             return;
         }
 
-        if (trim((string) ($empleado['telefono'] ?? '')) !== $telefono) {
+        if (trim((string) ((isset($empleado['telefono']) ? $empleado['telefono'] : ('')))) !== $telefono) {
             $this->error('El teléfono no coincide con el registrado para ese empleado.');
             return;
         }
@@ -146,12 +146,12 @@ class UsuarioController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
-        $nombre = trim($_POST['nombre'] ?? '');
-        $clave = trim($_POST['clave'] ?? '');
-        $claveConfirmacion = trim($_POST['clave_confirmacion'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
-        $id_empleado = intval($_POST['id_empleado'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $clave = trim((isset($_POST['clave']) ? $_POST['clave'] : ('')));
+        $claveConfirmacion = trim((isset($_POST['clave_confirmacion']) ? $_POST['clave_confirmacion'] : ('')));
+        $telefono = trim((isset($_POST['telefono']) ? $_POST['telefono'] : ('')));
+        $id_empleado = intval((isset($_POST['id_empleado']) ? $_POST['id_empleado'] : (0)));
 
         if ($id <= 0) {
             $this->error('ID inválido.');
@@ -160,7 +160,7 @@ class UsuarioController
 
         $esAdmin = esAdministrador();
         $esCoordinador = esCoordinador();
-        $idSesion = intval($_SESSION['user_id'] ?? 0);
+        $idSesion = intval((isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (0)));
 
         $usuarioActualizado = $this->model->obtenerUsuarioPorId($id);
         if (!$usuarioActualizado) {
@@ -175,8 +175,8 @@ class UsuarioController
         if (
             $esCoordinador
             && (
-                !$this->empleadoGestionable((int) ($usuarioActualizado['id_empleado'] ?? 0))
-                || ($id !== $idSesion && ($usuarioActualizado['rol'] ?? '') !== 'usuario')
+                !$this->empleadoGestionable((int) ((isset($usuarioActualizado['id_empleado']) ? $usuarioActualizado['id_empleado'] : (0))))
+                || ($id !== $idSesion && ((isset($usuarioActualizado['rol']) ? $usuarioActualizado['rol'] : (''))) !== 'usuario')
             )
         ) {
             $this->error('Solo puedes editar usuarios de tu biblioteca.');
@@ -187,7 +187,7 @@ class UsuarioController
         
         $rol = null;
         if ($esAdmin) {
-            $rolEnviado = trim($_POST['rol'] ?? '');
+            $rolEnviado = trim((isset($_POST['rol']) ? $_POST['rol'] : ('')));
             if ($rolEnviado !== '' && in_array($rolEnviado, ['administrador', 'coordinador', 'usuario'], true)) {
                 $rol = $rolEnviado;
             }
@@ -219,11 +219,11 @@ class UsuarioController
             return;
         }
 
-        if (!$esAdmin && !$esCoordinador && $id_empleado !== (int) ($_SESSION['id_empleado'] ?? 0)) {
+        if (!$esAdmin && !$esCoordinador && $id_empleado !== (int) ((isset($_SESSION['id_empleado']) ? $_SESSION['id_empleado'] : (0)))) {
             $this->error('No puedes cambiar el empleado vinculado a tu usuario.');
             return;
         }
-        if ($esCoordinador && ($usuarioActualizado['rol'] ?? '') !== 'usuario' && $id_empleado !== (int) $usuarioActualizado['id_empleado']) {
+        if ($esCoordinador && ((isset($usuarioActualizado['rol']) ? $usuarioActualizado['rol'] : (''))) !== 'usuario' && $id_empleado !== (int) $usuarioActualizado['id_empleado']) {
             $this->error('No puedes cambiar el empleado vinculado a un usuario con permisos elevados.');
             return;
         }
@@ -234,7 +234,7 @@ class UsuarioController
             return;
         }
 
-        if (trim((string) ($empleado['telefono'] ?? '')) !== $telefono) {
+        if (trim((string) ((isset($empleado['telefono']) ? $empleado['telefono'] : ('')))) !== $telefono) {
             $this->error('El teléfono no coincide con el registrado para ese empleado.');
             return;
         }
@@ -281,7 +281,7 @@ class UsuarioController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
@@ -289,10 +289,10 @@ class UsuarioController
         if (esCoordinador()) {
             $usuario = $this->model->obtenerUsuarioPorId($id);
             if (
-                $id === (int) ($_SESSION['user_id'] ?? 0)
+                $id === (int) ((isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (0)))
                 || !$usuario
-                || ($usuario['rol'] ?? '') !== 'usuario'
-                || !$this->empleadoGestionable((int) ($usuario['id_empleado'] ?? 0))
+                || ((isset($usuario['rol']) ? $usuario['rol'] : (''))) !== 'usuario'
+                || !$this->empleadoGestionable((int) ((isset($usuario['id_empleado']) ? $usuario['id_empleado'] : (0))))
             ) {
                 $this->error('Solo puedes eliminar usuarios de tu biblioteca.');
                 return;
@@ -317,14 +317,14 @@ class UsuarioController
         $data = $this->model->mostrarUsuarios();
 
         if (esCoordinador()) {
-            $idBiblioteca = (int) (guardian_idBibliotecaSesion() ?? 0);
-            $idSesion = (int) ($_SESSION['user_id'] ?? 0);
+            $idBiblioteca = (int) ((guardian_idBibliotecaSesion()));
+            $idSesion = (int) ((isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (0)));
             $data = array_values(array_filter($data, static function ($usuario) use ($idBiblioteca, $idSesion) {
-                return (int) ($usuario['id_biblioteca'] ?? 0) === $idBiblioteca
-                    && ((int) $usuario['id'] === $idSesion || ($usuario['rol'] ?? '') === 'usuario');
+                return (int) ((isset($usuario['id_biblioteca']) ? $usuario['id_biblioteca'] : (0))) === $idBiblioteca
+                    && ((int) $usuario['id'] === $idSesion || ((isset($usuario['rol']) ? $usuario['rol'] : (''))) === 'usuario');
             }));
         } elseif (!esAdministrador()) {
-            $idSesion = intval($_SESSION['user_id'] ?? 0);
+            $idSesion = intval((isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (0)));
             $data = array_values(array_filter($data, function ($u) use ($idSesion) {
                 return (int) $u['id'] === $idSesion;
             }));
@@ -333,12 +333,12 @@ class UsuarioController
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }

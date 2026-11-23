@@ -23,14 +23,14 @@ class Espacio {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerEspacioPorId(int $id) {
+    public function obtenerEspacioPorId($id) {
         $sql = "SELECT * FROM espacio_cultural WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, int $idExcluir = null): bool {
+    public function existeNombre($nombre, $idExcluir = null) {
         $sql = "SELECT id FROM espacio_cultural WHERE LOWER(nombre) = LOWER(?)";
         $params = [$nombre];
         if ($idExcluir !== null) {
@@ -43,25 +43,25 @@ class Espacio {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeParroquia(int $idParroquia): bool {
+    public function existeParroquia($idParroquia) {
         $stmt = Conexion::conectar()->prepare("SELECT id FROM parroquia WHERE id = ? LIMIT 1");
         $stmt->execute([$idParroquia]);
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearEspacio(string $nombre, int $capacidad, string $direccion, string $metodo_contactar, int $idParroquia) {
+    public function crearEspacio($nombre, $capacidad, $direccion, $metodo_contactar, $idParroquia) {
         $sql = "INSERT INTO espacio_cultural (id_parroquia, nombre, capacidad, direccion, Metodo_contactar) VALUES (?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$idParroquia, $nombre, $capacidad, $direccion, $metodo_contactar]);
     }
 
-    public function actualizarEspacio(int $id, string $nombre, int $capacidad, string $direccion, string $metodo_contactar, int $idParroquia) {
+    public function actualizarEspacio($id, $nombre, $capacidad, $direccion, $metodo_contactar, $idParroquia) {
         $sql = "UPDATE espacio_cultural SET id_parroquia = ?, nombre = ?, capacidad = ?, direccion = ?, Metodo_contactar = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$idParroquia, $nombre, $capacidad, $direccion, $metodo_contactar, $id]);
     }
 
-    public function eliminarEspacio(int $id) {
+    public function eliminarEspacio($id) {
         $sql = "DELETE FROM espacio_cultural WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

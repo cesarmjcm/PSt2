@@ -15,14 +15,14 @@ class Cargo {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerCargoPorId(int $id) {
+    public function obtenerCargoPorId($id) {
         $sql = "SELECT * FROM cargo WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, int $idExcluir = null): bool {
+    public function existeNombre($nombre, $idExcluir = null) {
         $sql = "SELECT id FROM cargo WHERE LOWER(nombre) = LOWER(?)";
         $params = [$nombre];
         if ($idExcluir !== null) {
@@ -35,19 +35,19 @@ class Cargo {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearCargo(string $nombre, string $descripcion = '') {
+    public function crearCargo($nombre, $descripcion = '') {
         $sql = "INSERT INTO cargo (nombre, Descripcion) VALUES (?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $descripcion]);
     }
 
-    public function actualizarCargo(int $id, string $nombre, string $descripcion = '') {
+    public function actualizarCargo($id, $nombre, $descripcion = '') {
         $sql = "UPDATE cargo SET nombre = ?, Descripcion = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $descripcion, $id]);
     }
 
-    public function eliminarCargo(int $id) {
+    public function eliminarCargo($id) {
         $sql = "DELETE FROM cargo WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

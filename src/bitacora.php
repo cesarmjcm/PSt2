@@ -21,10 +21,10 @@ guardian_requerirAdmin();
 
 
 $filtros = [
-    'id_usu'      => $_GET['id_usu']      ?? '',
-    'accion'      => $_GET['accion']      ?? '',
-    'fecha_desde' => $_GET['fecha_desde'] ?? '',
-    'fecha_hasta' => $_GET['fecha_hasta'] ?? '',
+    'id_usu'      => (isset($_GET['id_usu']) ? $_GET['id_usu'] : ('')),
+    'accion'      => (isset($_GET['accion']) ? $_GET['accion'] : ('')),
+    'fecha_desde' => (isset($_GET['fecha_desde']) ? $_GET['fecha_desde'] : ('')),
+    'fecha_hasta' => (isset($_GET['fecha_hasta']) ? $_GET['fecha_hasta'] : ('')),
 ];
 $busqueda = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
 
@@ -34,7 +34,7 @@ if ($busqueda !== '') {
     $registros = filtrarFilasPorBusqueda($registros, $busqueda);
 }
 $registrosPorPagina = 10;
-$paginaActual = max(1, intval($_GET['page'] ?? 1));
+$paginaActual = max(1, intval((isset($_GET['page']) ? $_GET['page'] : (1))));
 $totalPaginas = max(1, (int)ceil(count($registros) / $registrosPorPagina));
 $paginaActual = min($paginaActual, $totalPaginas);
 $registros = array_slice($registros, ($paginaActual - 1) * $registrosPorPagina, $registrosPorPagina);

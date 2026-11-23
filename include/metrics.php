@@ -17,11 +17,11 @@ try {
     require_once __DIR__ . '/../modelos/actividad.php';
     $actividadModel = new Actividad();
    
-    $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
+    $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion())));
     $totalActividades = count($actividades);
 
     foreach ($actividades as $actividad) {
-        $totalParticipantes += intval($actividad['participantes'] ?? 0);
+        $totalParticipantes += intval((isset($actividad['participantes']) ? $actividad['participantes'] : (0)));
         if (!empty($actividad['municipio'])) {
             $municipiosActivos[$actividad['municipio']] = true;
         }

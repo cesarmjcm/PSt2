@@ -21,7 +21,7 @@ class InstitucionController
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -46,7 +46,7 @@ class InstitucionController
      * Valida y normaliza rif, correo y dirección (comunes a crear y actualizar).
      * Devuelve [mensajeDeError|null, rifNormalizado].
      */
-    private function validarContacto(string $rif, string $correo, string $direccion): array
+    private function validarContacto($rif, $correo, $direccion)
     {
         if ($rif === '') {
             return ['El RIF de la institución es obligatorio.', ''];
@@ -71,11 +71,11 @@ class InstitucionController
         }
         guardian_requerirMaestro('institucion', 'json');
 
-        $nombre = trim($_POST['nombre'] ?? '');
-        $id_municipio = intval($_POST['id_municipio'] ?? 0);
-        $rifRaw = trim($_POST['rif'] ?? '');
-        $correo = trim($_POST['correo'] ?? '');
-        $direccion = trim($_POST['direccion'] ?? '');
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $id_municipio = intval((isset($_POST['id_municipio']) ? $_POST['id_municipio'] : (0)));
+        $rifRaw = trim((isset($_POST['rif']) ? $_POST['rif'] : ('')));
+        $correo = trim((isset($_POST['correo']) ? $_POST['correo'] : ('')));
+        $direccion = trim((isset($_POST['direccion']) ? $_POST['direccion'] : ('')));
 
         if ($nombre === '') {
             $this->error('Nombre de la institución es obligatorio.');
@@ -133,12 +133,12 @@ class InstitucionController
         }
         guardian_requerirMaestro('institucion', 'json');
 
-        $id = intval($_POST['id'] ?? 0);
-        $nombre = trim($_POST['nombre'] ?? '');
-        $id_municipio = intval($_POST['id_municipio'] ?? 0);
-        $rifRaw = trim($_POST['rif'] ?? '');
-        $correo = trim($_POST['correo'] ?? '');
-        $direccion = trim($_POST['direccion'] ?? '');
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $id_municipio = intval((isset($_POST['id_municipio']) ? $_POST['id_municipio'] : (0)));
+        $rifRaw = trim((isset($_POST['rif']) ? $_POST['rif'] : ('')));
+        $correo = trim((isset($_POST['correo']) ? $_POST['correo'] : ('')));
+        $direccion = trim((isset($_POST['direccion']) ? $_POST['direccion'] : ('')));
 
         if ($id <= 0 || $nombre === '') {
             $this->error('ID y nombre de la institución son obligatorios.');
@@ -196,7 +196,7 @@ class InstitucionController
         }
         guardian_requerirMaestro('institucion', 'json');
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
@@ -227,17 +227,17 @@ class InstitucionController
 
     private function listar()
     {
-        $idBiblioteca = esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0);
+        $idBiblioteca = esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion()));
         $data = $this->model->mostrarInstituciones($idBiblioteca);
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }

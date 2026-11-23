@@ -38,7 +38,7 @@
         
         
         
-        $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) (guardian_idBibliotecaSesion() ?? 0));
+        $actividades = $actividadModel->mostrarActividadesCompletas(esAdministrador() ? null : (int) ((guardian_idBibliotecaSesion())));
         $errorMessage = '';
     } catch (Exception $e) {
         $actividades = [];
@@ -52,7 +52,7 @@
     } else {
         $idx = 1;
         foreach ($actividades as $a) {
-            $fecha = $a['fecha'] ?? '';
+            $fecha = (isset($a['fecha']) ? $a['fecha'] : (''));
             try {
                 $fechaFmt = $fecha ? (new DateTime($fecha))->format('d/m/Y') : '';
             } catch (Exception $ex) {
@@ -61,19 +61,19 @@
 
             echo '<tr>';
             echo '<td>' . $idx++ . '</td>';
-            echo '<td>' . htmlspecialchars($a['nombre'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['dia_semana'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['nombre']) ? $a['nombre'] : ('')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['dia_semana']) ? $a['dia_semana'] : ('')), ENT_QUOTES, 'UTF-8') . '</td>';
             echo '<td>' . htmlspecialchars($fechaFmt, ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['descripcion'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['objetivo'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['nivel_impacto'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['participantes'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['municipio'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['parroquia'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['espacio_cultural'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['comuna'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['responsable'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars($a['telefono_responsable'] ?? 'N/A', ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['descripcion']) ? $a['descripcion'] : ('')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['objetivo']) ? $a['objetivo'] : ('')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['nivel_impacto']) ? $a['nivel_impacto'] : ('N/A')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['participantes']) ? $a['participantes'] : ('')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['municipio']) ? $a['municipio'] : ('N/A')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['parroquia']) ? $a['parroquia'] : ('N/A')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['espacio_cultural']) ? $a['espacio_cultural'] : ('N/A')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['comuna']) ? $a['comuna'] : ('N/A')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['responsable']) ? $a['responsable'] : ('N/A')), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . htmlspecialchars((isset($a['telefono_responsable']) ? $a['telefono_responsable'] : ('N/A')), ENT_QUOTES, 'UTF-8') . '</td>';
             echo '</tr>';
         }
     }

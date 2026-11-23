@@ -28,7 +28,7 @@ class Institucion
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerInstitucionPorId(int $id)
+    public function obtenerInstitucionPorId($id)
     {
         $sql = "SELECT * FROM institucion WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
@@ -36,7 +36,7 @@ class Institucion
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, int $id_municipio, int $idExcluir = null): bool
+    public function existeNombre($nombre, $id_municipio, $idExcluir = null)
     {
         $sql = "SELECT id FROM institucion WHERE LOWER(nombre) = LOWER(?) AND id_municipio = ?";
         $params = [$nombre, $id_municipio];
@@ -50,7 +50,7 @@ class Institucion
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeRif(string $rif, int $idExcluir = null): bool
+    public function existeRif($rif, $idExcluir = null)
     {
         $sql = "SELECT id FROM institucion WHERE rif = ?";
         $params = [$rif];
@@ -64,21 +64,21 @@ class Institucion
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearInstitucion(string $nombre, int $id_municipio, string $rif, string $correo = '', string $direccion = '')
+    public function crearInstitucion($nombre, $id_municipio, $rif, $correo = '', $direccion = '')
     {
         $sql = "INSERT INTO institucion (nombre, id_municipio, rif, correo, direccion) VALUES (?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $id_municipio, $rif !== '' ? $rif : null, $correo !== '' ? $correo : null, $direccion !== '' ? $direccion : null]);
     }
 
-    public function actualizarInstitucion(int $id, string $nombre, int $id_municipio, string $rif, string $correo = '', string $direccion = '')
+    public function actualizarInstitucion($id, $nombre, $id_municipio, $rif, $correo = '', $direccion = '')
     {
         $sql = "UPDATE institucion SET nombre = ?, id_municipio = ?, rif = ?, correo = ?, direccion = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $id_municipio, $rif !== '' ? $rif : null, $correo !== '' ? $correo : null, $direccion !== '' ? $direccion : null, $id]);
     }
 
-    public function tieneSolicitudesAsociadas(int $id): bool
+    public function tieneSolicitudesAsociadas($id)
     {
         $sql = "SELECT id FROM solicitud WHERE id_institucion = ? LIMIT 1";
         $stmt = Conexion::conectar()->prepare($sql);
@@ -86,7 +86,7 @@ class Institucion
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function eliminarInstitucion(int $id)
+    public function eliminarInstitucion($id)
     {
         $sql = "DELETE FROM institucion WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);

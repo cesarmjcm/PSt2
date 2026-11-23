@@ -7,11 +7,11 @@ class Actividad {
     // Convierte los nombres de parroquia y comuna que llegan del formulario en ids.
     // Solo se guarda actividad.id_comuna: la parroquia y el municipio se obtienen
     // con JOINs (actividad -> comuna -> parroquia -> municipio), la comuna hace de "puente".
-    private function resolverUbicacion(PDO $pdo, array $d): array
+    private function resolverUbicacion(PDO $pdo, array $d)
     {
         $idMunicipio = !empty($d['municipio_id']) ? (int) $d['municipio_id'] : 0;
-        $nombreParroquia = trim((string) ($d['parroquia'] ?? ''));
-        $nombreComuna = trim((string) ($d['comuna'] ?? ''));
+        $nombreParroquia = trim((string) ((isset($d['parroquia']) ? $d['parroquia'] : (''))));
+        $nombreComuna = trim((string) ((isset($d['comuna']) ? $d['comuna'] : (''))));
         $idParroquia = null;
         $idComuna = null;
 
@@ -58,13 +58,13 @@ class Actividad {
      * Valida con JOINs que la jerarquía municipio -> parroquia -> comuna elegida sea coherente.
      * Si el espacio cultural es el lugar, exige que su parroquia coincida con la actividad.
      */
-    public function validarUbicacionJerarquica(array $d): array
+    public function validarUbicacionJerarquica(array $d)
     {
         $errors = [];
         $idMunicipio = !empty($d['municipio_id']) ? (int) $d['municipio_id'] : 0;
-        $nombreParroquia = trim((string) ($d['parroquia'] ?? ''));
-        $nombreComuna = trim((string) ($d['comuna'] ?? ''));
-        $esEspacio = trim((string) ($d['tipo_ubicacion'] ?? '')) === 'espacio';
+        $nombreParroquia = trim((string) ((isset($d['parroquia']) ? $d['parroquia'] : (''))));
+        $nombreComuna = trim((string) ((isset($d['comuna']) ? $d['comuna'] : (''))));
+        $esEspacio = trim((string) ((isset($d['tipo_ubicacion']) ? $d['tipo_ubicacion'] : ('')))) === 'espacio';
 
         if ($esEspacio && $nombreComuna === '') {
             $errors[] = 'Seleccione la comuna para asociar el espacio cultural a una parroquia.';
@@ -122,7 +122,7 @@ class Actividad {
         }
 
         if ($esEspacio) {
-            $idEspacio = (int) ($d['id_espacio_cultural'] ?? 0);
+            $idEspacio = (int) ((isset($d['id_espacio_cultural']) ? $d['id_espacio_cultural'] : (0)));
             $stmt = $pdo->prepare("SELECT id_parroquia FROM espacio_cultural WHERE id = ?");
             $stmt->execute([$idEspacio]);
             $espacio = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -135,7 +135,7 @@ class Actividad {
         return $errors;
     }
 
-    private function condicionBiblioteca($idBiblioteca, string $alias = 'a'): string
+    private function condicionBiblioteca($idBiblioteca, $alias = 'a')
     {
         if ($idBiblioteca === null) {
             return '';
@@ -147,7 +147,7 @@ class Actividad {
         )))";
     }
 
-    private function condicionVisibilidad(int $idBiblioteca, string $alias = 'a', string $municipioAlias = 'p'): string
+    private function condicionVisibilidad($idBiblioteca, $alias = 'a', $municipioAlias = 'p')
     {
         return "({$municipioAlias}.id_municipio = (
             SELECT p_usuario.id_municipio
@@ -157,7 +157,7 @@ class Actividad {
         ) OR " . $this->condicionBiblioteca($idBiblioteca, $alias) . ")";
     }
 
-    public function mostrarActividades(int $idBiblioteca = null) {
+    public function mostrarActividades($idBiblioteca = null) {
         $sql = "SELECT a.* FROM actividad a
             LEFT JOIN comuna c ON c.id = a.id_comuna
             LEFT JOIN biblioteca b ON b.id = COALESCE(
@@ -173,7 +173,7 @@ class Actividad {
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
 
-    private function normalizarDiaSemana(array $actividad): array {
+    private function normalizarDiaSemana(array $actividad) {
         if (!empty($actividad['fecha'])) {
             try {
                 $fecha = new DateTime($actividad['fecha']);
@@ -186,7 +186,7 @@ class Actividad {
         return $actividad;
     }
 
-    public function mostrarActividadesCompletas(int $idBiblioteca = null) {
+    public function mostrarActividadesCompletas($idBiblioteca = null) {
         
         
         
@@ -243,15 +243,15 @@ class Actividad {
         return array_map([$this, 'normalizarDiaSemana'], $actividades);
     }
 
-    public function validarActividad(array $d): array
+    public function validarActividad(array $d)
     {
         $errors = [];
 
-        if (!Validador::esTextoValido(trim($d['nombre'] ?? ''), 2, 30)) {
+        if (!Validador::esTextoValido(trim((isset($d['nombre']) ? $d['nombre'] : (''))), 2, 30)) {
             $errors[] = 'Nombre de la actividad inválido.';
         }
 
-        if (!Validador::esDescripcionValida(trim($d['descripcion'] ?? ''), 0, 200)) {
+        if (!Validador::esDescripcionValida(trim((isset($d['descripcion']) ? $d['descripcion'] : (''))), 0, 200)) {
             $errors[] = 'Descripción inválida.';
         }
 
@@ -259,34 +259,34 @@ class Actividad {
         
         
         
-        $objetivo = trim($d['objetivo'] ?? '');
+        $objetivo = trim((isset($d['objetivo']) ? $d['objetivo'] : ('')));
         if ($objetivo !== '' && $objetivo !== 'No definido' && !Validador::esTextoValido($objetivo, 2, 50)) {
             $errors[] = 'Objetivo inválido.';
         }
 
-        if (!Validador::esEnteroNoNegativo($d['participantes'] ?? 0, 99999)) {
+        if (!Validador::esEnteroNoNegativo((isset($d['participantes']) ? $d['participantes'] : (0)), 99999)) {
             $errors[] = 'Cantidad de participantes inválida.';
         }
 
-        $nivelImpacto = trim($d['nivel_impacto'] ?? '');
+        $nivelImpacto = trim((isset($d['nivel_impacto']) ? $d['nivel_impacto'] : ('')));
         if ($nivelImpacto !== '' && !Validador::esTextoValido($nivelImpacto, 2, 20)) {
             $errors[] = 'Nivel de impacto inválido.';
         }
 
-        if (!Validador::esFechaValida(trim($d['fecha'] ?? ''))) {
+        if (!Validador::esFechaValida(trim((isset($d['fecha']) ? $d['fecha'] : (''))))) {
             $errors[] = 'Fecha inválida.';
         }
 
-        $diaSemana = trim($d['dia_semana'] ?? '');
+        $diaSemana = trim((isset($d['dia_semana']) ? $d['dia_semana'] : ('')));
         if ($diaSemana === '') {
-            $diaSemana = $this->calcularDiaSemanaDesdeFecha(trim($d['fecha'] ?? ''));
+            $diaSemana = $this->calcularDiaSemanaDesdeFecha(trim((isset($d['fecha']) ? $d['fecha'] : (''))));
         }
         if ($diaSemana === '' || !Validador::esDiaSemanaValido($diaSemana)) {
             $errors[] = 'Día de la semana inválido.';
         }
 
         $estadosValidos = ['pendiente', 'confirmada', 'ejecutada', 'cancelada'];
-        $estado = trim($d['estado'] ?? '');
+        $estado = trim((isset($d['estado']) ? $d['estado'] : ('')));
         if (!in_array($estado, $estadosValidos, true)) {
             $errors[] = 'Estado de la actividad inválido.';
         }
@@ -298,18 +298,18 @@ class Actividad {
         
         
         
-        $tipoUbicacion = trim($d['tipo_ubicacion'] ?? '');
+        $tipoUbicacion = trim((isset($d['tipo_ubicacion']) ? $d['tipo_ubicacion'] : ('')));
         $esBiblioteca = $tipoUbicacion === 'biblioteca';
         $esEspacio = $tipoUbicacion === 'espacio';
 
         if (!$esBiblioteca && !$esEspacio) {
             $errors[] = 'Debe indicar si la actividad se realiza en una biblioteca o en un espacio cultural.';
         } elseif ($esBiblioteca) {
-            if (!Validador::esEnteroPositivo($d['id_biblioteca'] ?? 0)) {
+            if (!Validador::esEnteroPositivo((isset($d['id_biblioteca']) ? $d['id_biblioteca'] : (0)))) {
                 $errors[] = 'Biblioteca inválida.';
             }
         } elseif ($esEspacio) {
-            if (!Validador::esEnteroPositivo($d['id_espacio_cultural'] ?? 0)) {
+            if (!Validador::esEnteroPositivo((isset($d['id_espacio_cultural']) ? $d['id_espacio_cultural'] : (0)))) {
                 $errors[] = 'Espacio cultural inválido.';
             }
         }
@@ -318,26 +318,26 @@ class Actividad {
             $errors[] = 'Municipio inválido.';
         }
 
-        if (!empty(trim($d['parroquia'] ?? '')) && !Validador::esTextoValido(trim($d['parroquia']), 2, 100)) {
+        if (!empty(trim((isset($d['parroquia']) ? $d['parroquia'] : ('')))) && !Validador::esTextoValido(trim($d['parroquia']), 2, 100)) {
             $errors[] = 'Parroquia inválida.';
         }
 
-        if (!empty(trim($d['comuna'] ?? '')) && !Validador::esTextoValido(trim($d['comuna']), 2, 100)) {
+        if (!empty(trim((isset($d['comuna']) ? $d['comuna'] : ('')))) && !Validador::esTextoValido(trim($d['comuna']), 2, 100)) {
             $errors[] = 'Comuna inválida.';
         }
 
         $errors = array_merge($errors, $this->validarUbicacionJerarquica($d));
 
-        if (!Validador::esEnteroPositivo($d['id_tipo_actividad'] ?? 0)) {
+        if (!Validador::esEnteroPositivo((isset($d['id_tipo_actividad']) ? $d['id_tipo_actividad'] : (0)))) {
             $errors[] = 'Tipo de actividad inválido.';
         }
 
-        $responsable = trim($d['responsable'] ?? '');
+        $responsable = trim((isset($d['responsable']) ? $d['responsable'] : ('')));
         if ($responsable !== '' && !ctype_digit($responsable)) {
             $errors[] = 'El responsable seleccionado no es válido.';
         }
 
-        $telefonoResponsable = trim($d['telefono_responsable'] ?? '');
+        $telefonoResponsable = trim((isset($d['telefono_responsable']) ? $d['telefono_responsable'] : ('')));
         if ($telefonoResponsable !== '' && !preg_match('/^[0-9\-\+ ]{7,15}$/', $telefonoResponsable)) {
             $errors[] = 'El teléfono del responsable debe tener entre 7 y 15 caracteres y solo puede contener números, espacios, guiones o el signo +.';
         }
@@ -345,7 +345,7 @@ class Actividad {
         return $errors;
     }
 
-    private function calcularDiaSemanaDesdeFecha(string $fecha): string
+    private function calcularDiaSemanaDesdeFecha($fecha)
     {
         if (!Validador::esFechaValida($fecha)) {
             return '';
@@ -360,7 +360,7 @@ class Actividad {
         }
     }
 
-    public function obtenerActividadPorId(int $id, int $idBiblioteca = null) {
+    public function obtenerActividadPorId($id, $idBiblioteca = null) {
         $sql = "SELECT a.* FROM actividad a WHERE a.id = ?" .
             ($idBiblioteca !== null ? " AND " . $this->condicionBiblioteca($idBiblioteca) : "");
         $stmt = Conexion::conectar()->prepare($sql);
@@ -379,10 +379,10 @@ class Actividad {
      * @param int|null $idExcluir ID de la actividad actual, para no compararla consigo misma al editar.
      * @return bool True si hay conflicto de horario/lugar.
      */
-    public function existeConflictoHorario(array $d, int $idExcluir = null): bool
+    public function existeConflictoHorario(array $d, $idExcluir = null)
     {
-        $fecha = trim($d['fecha'] ?? '');
-        $hora = trim($d['hora'] ?? '');
+        $fecha = trim((isset($d['fecha']) ? $d['fecha'] : ('')));
+        $hora = trim((isset($d['hora']) ? $d['hora'] : ('')));
         if ($fecha === '' || $hora === '') {
             // Sin hora no hay forma de comparar un choque de horario.
             return false;
@@ -417,12 +417,12 @@ class Actividad {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeConflictoResponsableHorario(array $d, int $idExcluir = null): bool
+    public function existeConflictoResponsableHorario(array $d, $idExcluir = null)
     {
-        $fecha = trim($d['fecha'] ?? '');
-        $hora = trim($d['hora'] ?? '');
-        $responsable = trim($d['responsable'] ?? '');
-        $estado = trim($d['estado'] ?? '');
+        $fecha = trim((isset($d['fecha']) ? $d['fecha'] : ('')));
+        $hora = trim((isset($d['hora']) ? $d['hora'] : ('')));
+        $responsable = trim((isset($d['responsable']) ? $d['responsable'] : ('')));
+        $estado = trim((isset($d['estado']) ? $d['estado'] : ('')));
         if ($fecha === '' || $hora === '' || $responsable === '' || $estado === 'cancelada') {
             return false;
         }
@@ -458,7 +458,7 @@ class Actividad {
         return $stmt->execute([$nombre, $descripcion, $objetivo, $participantes, $fecha, $dia_semana, $id_biblioteca ?: null, $estado, $id]);
     }
 
-    public function eliminarActividad(int $id) {
+    public function eliminarActividad($id) {
         $sql = "DELETE FROM actividad WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);
@@ -472,10 +472,10 @@ class Actividad {
             
             
             
-            $idBiblioteca = ($d['tipo_ubicacion'] ?? '') === 'biblioteca' && !empty($d['id_biblioteca'])
+            $idBiblioteca = ((isset($d['tipo_ubicacion']) ? $d['tipo_ubicacion'] : (''))) === 'biblioteca' && !empty($d['id_biblioteca'])
                 ? (int)$d['id_biblioteca']
                 : null;
-            $idEspacioCultural = ($d['tipo_ubicacion'] ?? '') === 'espacio' && !empty($d['id_espacio_cultural'])
+            $idEspacioCultural = ((isset($d['tipo_ubicacion']) ? $d['tipo_ubicacion'] : (''))) === 'espacio' && !empty($d['id_espacio_cultural'])
                 ? (int)$d['id_espacio_cultural']
                 : null;
             $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
@@ -486,7 +486,7 @@ class Actividad {
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
-                $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
+                $idEspacioCultural, $d['id_tipo_actividad'], (isset($d['estado']) ? $d['estado'] : ('pendiente')),
                 $d['responsable'] ?: null, $idNivel, $idComuna
             ]);
             $idActividad = (int)$pdo->lastInsertId();
@@ -500,16 +500,16 @@ class Actividad {
     }
 
     
-    public function actualizarActividadCompleta(int $id, array $d) {
+    public function actualizarActividadCompleta($id, array $d) {
         $pdo = Conexion::conectar();
         $pdo->beginTransaction();
         try {
             
             
-            $idBiblioteca = ($d['tipo_ubicacion'] ?? '') === 'biblioteca' && !empty($d['id_biblioteca'])
+            $idBiblioteca = ((isset($d['tipo_ubicacion']) ? $d['tipo_ubicacion'] : (''))) === 'biblioteca' && !empty($d['id_biblioteca'])
                 ? (int)$d['id_biblioteca']
                 : null;
-            $idEspacioCultural = ($d['tipo_ubicacion'] ?? '') === 'espacio' && !empty($d['id_espacio_cultural'])
+            $idEspacioCultural = ((isset($d['tipo_ubicacion']) ? $d['tipo_ubicacion'] : (''))) === 'espacio' && !empty($d['id_espacio_cultural'])
                 ? (int)$d['id_espacio_cultural']
                 : null;
             $idNivel = !empty($d['nivel_impacto']) ? $this->buscarOCrearId($pdo, 'nivel_impacto', 'nombre_impacto', $d['nivel_impacto']) : null;
@@ -519,7 +519,7 @@ class Actividad {
             $stmt->execute([
                 $d['nombre'], $d['descripcion'], $d['objetivo'],
                 $d['participantes'], $d['fecha'], $d['hora'] ?: null, $d['dia_semana'], $idBiblioteca,
-                $idEspacioCultural, $d['id_tipo_actividad'], $d['estado'] ?? 'pendiente',
+                $idEspacioCultural, $d['id_tipo_actividad'], (isset($d['estado']) ? $d['estado'] : ('pendiente')),
                 $d['responsable'] ?: null, $idNivel, $idComuna, $id
             ]);
 
@@ -532,7 +532,7 @@ class Actividad {
     }
 
     
-    private function buscarOCrearId(PDO $pdo, string $tabla, string $columnaNombre, string $valor) {
+    private function buscarOCrearId(PDO $pdo, $tabla, $columnaNombre, $valor) {
         $valor = Validador::normalizarTexto($valor);
         if ($valor === '') return null;
 

@@ -15,14 +15,14 @@ class TipoActividad {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerTipoPorId(int $id) {
+    public function obtenerTipoPorId($id) {
         $sql = "SELECT * FROM tipo_actividad WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function existeNombre(string $nombre, int $idExcluir = null): bool {
+    public function existeNombre($nombre, $idExcluir = null) {
         $sql = "SELECT id FROM tipo_actividad WHERE LOWER(nombre) = LOWER(?)";
         $params = [$nombre];
         if ($idExcluir !== null) {
@@ -35,19 +35,19 @@ class TipoActividad {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearTipo(string $nombre, string $descripcion = '') {
+    public function crearTipo($nombre, $descripcion = '') {
         $sql = "INSERT INTO tipo_actividad (nombre, Descripcion) VALUES (?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $descripcion]);
     }
 
-    public function actualizarTipo(int $id, string $nombre, string $descripcion = '') {
+    public function actualizarTipo($id, $nombre, $descripcion = '') {
         $sql = "UPDATE tipo_actividad SET nombre = ?, Descripcion = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $descripcion, $id]);
     }
 
-    public function eliminarTipo(int $id) {
+    public function eliminarTipo($id) {
         $sql = "DELETE FROM tipo_actividad WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

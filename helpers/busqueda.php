@@ -1,6 +1,6 @@
 <?php
 
-function normalizarTextoBusqueda($valor): string
+function normalizarTextoBusqueda($valor)
 {
     $texto = trim((string) $valor);
     if (class_exists('\Normalizer')) {
@@ -23,7 +23,7 @@ function normalizarTextoBusqueda($valor): string
         : strtolower($texto);
 }
 
-function coincideTextoBusqueda(array $valores, string $busqueda): bool
+function coincideTextoBusqueda(array $valores, $busqueda)
 {
     $termino = normalizarTextoBusqueda($busqueda);
     if ($termino === '') {
@@ -33,13 +33,13 @@ function coincideTextoBusqueda(array $valores, string $busqueda): bool
     return strpos(normalizarTextoBusqueda(implode(' ', array_map('strval', $valores))), $termino) !== false;
 }
 
-function filtrarFilasPorBusqueda(array $filas, string $busqueda): array
+function filtrarFilasPorBusqueda(array $filas, $busqueda)
 {
     if (trim($busqueda) === '') {
         return $filas;
     }
 
-    return array_values(array_filter($filas, static function (array $fila) use ($busqueda): bool {
+    return array_values(array_filter($filas, static function (array $fila) use ($busqueda) {
         return coincideTextoBusqueda(array_values($fila), $busqueda);
     }));
 }

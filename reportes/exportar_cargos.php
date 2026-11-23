@@ -7,7 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
-function responderReporte(array $respuesta, int $estado = 200)
+function responderReporte(array $respuesta, $estado = 200)
 {
     http_response_code($estado);
     echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
@@ -56,14 +56,14 @@ try {
             'message' => 'El término de búsqueda no es válido.',
         ], 400);
     }
-    $cargos = filtrarFilasReportePdf($cargos, trim((string) ($_GET['q'] ?? '')));
+    $cargos = filtrarFilasReportePdf($cargos, trim((string) ((isset($_GET['q']) ? $_GET['q'] : ('')))));
     $cssPath = __DIR__ . '/reportes_cargo.css';
     $css = file_get_contents($cssPath);
     if ($css === false) {
         throw new RuntimeException('No se pudo cargar el estilo del reporte.');
     }
 
-    $escapar = static function ($valor): string {
+    $escapar = static function ($valor) {
         return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     };
     $fechaActual = new DateTimeImmutable('now', new DateTimeZone('America/Caracas'));
@@ -105,9 +105,9 @@ try {
                 <?php else: ?>
                     <?php foreach ($cargos as $cargo): ?>
                         <tr>
-                            <td class="col-id"><?php echo $escapar($cargo['id'] ?? ''); ?></td>
-                            <td><?php echo $escapar($cargo['nombre'] ?? ''); ?></td>
-                            <td><?php echo $escapar($cargo['descripcion'] ?? ''); ?></td>
+                            <td class="col-id"><?php echo $escapar((isset($cargo['id']) ? $cargo['id'] : (''))); ?></td>
+                            <td><?php echo $escapar((isset($cargo['nombre']) ? $cargo['nombre'] : (''))); ?></td>
+                            <td><?php echo $escapar((isset($cargo['descripcion']) ? $cargo['descripcion'] : (''))); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -129,7 +129,7 @@ try {
     $dompdf->render();
 
     enviarReportePdf($dompdf, 'reporte_cargos_' . $fechaActual->format('Ymd_His') . '.pdf');
-} catch (Throwable $error) {
+} catch (Exception $error) {
     error_log('Error al generar el reporte PDF de cargos: ' . $error->getMessage());
     responderReporte([
         'success' => false,

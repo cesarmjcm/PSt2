@@ -6,7 +6,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
-function responderReporte(array $respuesta, int $estado = 200)
+function responderReporte(array $respuesta, $estado = 200)
 {
     http_response_code($estado);
     echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
@@ -52,7 +52,7 @@ try {
             'message' => 'El término de búsqueda no es válido.',
         ], 400);
     }
-    $empleados = filtrarFilasReportePdf($empleados, trim((string) ($_GET['q'] ?? '')));
+    $empleados = filtrarFilasReportePdf($empleados, trim((string) ((isset($_GET['q']) ? $_GET['q'] : ('')))));
 
     $css = file_get_contents(__DIR__ . '/reportes_empleado.css');
     if ($css === false) {
@@ -61,10 +61,10 @@ try {
 
     
 
-    $escapar = static function ($valor): string {
+    $escapar = static function ($valor) {
         return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     };
-    $formatearFecha = static function ($fecha): string {
+    $formatearFecha = static function ($fecha) {
         if (empty($fecha)) {
             return '—';
         }
@@ -124,15 +124,15 @@ try {
                 <?php else: ?>
                     <?php foreach ($empleados as $e): ?>
                         <tr>
-                            <td><?php echo $escapar($e['cedula'] ?? ''); ?></td>
-                            <td><?php echo $escapar(trim(($e['nombre'] ?? '') . ' ' . ($e['apellido'] ?? ''))); ?></td>
-                            <td><?php echo $escapar($e['telefono'] ?? ''); ?></td>
-                            <td class="col-centro"><?php echo ($e['genero'] ?? '') === 'M' ? 'Masculino' : (($e['genero'] ?? '') === 'F' ? 'Femenino' : $escapar($e['genero'] ?? '')); ?></td>
-                            <td class="col-centro"><?php echo $escapar($e['edad'] ?? ''); ?></td>
-                            <td><?php echo $escapar($e['id_cargo_nombre'] ?? ''); ?></td>
-                            <td><?php echo $escapar($e['id_biblioteca_nombre'] ?? ''); ?></td>
-                            <td class="col-centro"><?php echo $escapar($formatearFecha($e['fecha_inicio_cargo'] ?? null)); ?></td>
-                            <td class="col-centro"><?php echo $escapar($formatearFecha($e['fecha_fin_cargo'] ?? null)); ?></td>
+                            <td><?php echo $escapar((isset($e['cedula']) ? $e['cedula'] : (''))); ?></td>
+                            <td><?php echo $escapar(trim(((isset($e['nombre']) ? $e['nombre'] : (''))) . ' ' . ((isset($e['apellido']) ? $e['apellido'] : (''))))); ?></td>
+                            <td><?php echo $escapar((isset($e['telefono']) ? $e['telefono'] : (''))); ?></td>
+                            <td class="col-centro"><?php echo ((isset($e['genero']) ? $e['genero'] : (''))) === 'M' ? 'Masculino' : (((isset($e['genero']) ? $e['genero'] : (''))) === 'F' ? 'Femenino' : $escapar((isset($e['genero']) ? $e['genero'] : ('')))); ?></td>
+                            <td class="col-centro"><?php echo $escapar((isset($e['edad']) ? $e['edad'] : (''))); ?></td>
+                            <td><?php echo $escapar((isset($e['id_cargo_nombre']) ? $e['id_cargo_nombre'] : (''))); ?></td>
+                            <td><?php echo $escapar((isset($e['id_biblioteca_nombre']) ? $e['id_biblioteca_nombre'] : (''))); ?></td>
+                            <td class="col-centro"><?php echo $escapar($formatearFecha((isset($e['fecha_inicio_cargo']) ? $e['fecha_inicio_cargo'] : (null)))); ?></td>
+                            <td class="col-centro"><?php echo $escapar($formatearFecha((isset($e['fecha_fin_cargo']) ? $e['fecha_fin_cargo'] : (null)))); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -155,7 +155,7 @@ try {
     $dompdf->render();
 
     enviarReportePdf($dompdf, 'reporte_empleados_' . $fechaActual->format('Ymd_His') . '.pdf');
-} catch (Throwable $error) {
+} catch (Exception $error) {
     error_log('Error al generar el reporte PDF de empleados: ' . $error->getMessage());
     responderReporte([
         'success' => false,

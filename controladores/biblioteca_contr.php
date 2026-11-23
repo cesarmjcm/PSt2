@@ -20,7 +20,7 @@ class BibliotecaController
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -52,11 +52,11 @@ class BibliotecaController
             return;
         }
 
-        $nombre = trim($_POST['nombre'] ?? '');
-        $id_parroquia = intval($_POST['id_parroquia'] ?? 0);
-        $correo = trim($_POST['correo'] ?? '');
-        $redes_sociales = trim($_POST['redes_sociales'] ?? '');
-        $direccion = trim($_POST['direccion'] ?? '');
+        $nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+        $id_parroquia = intval((isset($_POST['id_parroquia']) ? $_POST['id_parroquia'] : (0)));
+        $correo = trim((isset($_POST['correo']) ? $_POST['correo'] : ('')));
+        $redes_sociales = trim((isset($_POST['redes_sociales']) ? $_POST['redes_sociales'] : ('')));
+        $direccion = trim((isset($_POST['direccion']) ? $_POST['direccion'] : ('')));
         if ($nombre === '') {
             $this->error('Nombre es obligatorio.');
             return;
@@ -119,7 +119,7 @@ class BibliotecaController
             
             
             
-            $mysqlErrorCode = $e->errorInfo[1] ?? null;
+            $mysqlErrorCode = (isset($e->errorInfo[1]) ? $e->errorInfo[1] : (null));
             if ($mysqlErrorCode === 1062) {
                 $this->error('Ya existe una biblioteca con ese nombre en esta parroquia.');
                 return;
@@ -140,13 +140,13 @@ class BibliotecaController
         }
         guardian_requerirMaestro('biblioteca', 'json');
 
-        $id = intval($_POST['id'] ?? 0);
-$nombre = trim($_POST['nombre'] ?? '');
-$id_parroquia = intval($_POST['id_parroquia'] ?? 0);
-$correo = trim($_POST['correo'] ?? '');
-$redes_sociales = trim($_POST['redes_sociales'] ?? '');
-$direccion = trim($_POST['direccion'] ?? '');
-        if (!esAdministrador() && $id !== (int) (guardian_idBibliotecaSesion() ?? 0)) {
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
+$nombre = trim((isset($_POST['nombre']) ? $_POST['nombre'] : ('')));
+$id_parroquia = intval((isset($_POST['id_parroquia']) ? $_POST['id_parroquia'] : (0)));
+$correo = trim((isset($_POST['correo']) ? $_POST['correo'] : ('')));
+$redes_sociales = trim((isset($_POST['redes_sociales']) ? $_POST['redes_sociales'] : ('')));
+$direccion = trim((isset($_POST['direccion']) ? $_POST['direccion'] : ('')));
+        if (!esAdministrador() && $id !== (int) ((guardian_idBibliotecaSesion()))) {
             $this->error('No tienes permisos para modificar bibliotecas de otra unidad.');
             return;
         }
@@ -201,14 +201,14 @@ $direccion = trim($_POST['direccion'] ?? '');
                     $conex = Conexion::conectar();
                     registrar_bitacora(Conexion::conectar(), $_SESSION['user_id'], 'Editar', 'Biblioteca', "Biblioteca #$id actualizada: " . $nombre);
                 }
-                if ($id === (int) (guardian_idBibliotecaSesion() ?? 0)) {
+                if ($id === (int) ((guardian_idBibliotecaSesion()))) {
                     unset($_SESSION['user_profile']);
                 }
                 $this->success('Biblioteca actualizada correctamente.');
                 return;
             }
         } catch (PDOException $e) {
-            $mysqlErrorCode = $e->errorInfo[1] ?? null;
+            $mysqlErrorCode = (isset($e->errorInfo[1]) ? $e->errorInfo[1] : (null));
             if ($mysqlErrorCode === 1062) {
                 $this->error('Ya existe otra biblioteca con ese nombre en esta parroquia.');
                 return;
@@ -232,12 +232,12 @@ $direccion = trim($_POST['direccion'] ?? '');
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
         }
-        if (!esAdministrador() && $id !== (int) (guardian_idBibliotecaSesion() ?? 0)) {
+        if (!esAdministrador() && $id !== (int) ((guardian_idBibliotecaSesion()))) {
             $this->error('No tienes permisos para eliminar bibliotecas de otra unidad.');
             return;
         }
@@ -265,12 +265,12 @@ $direccion = trim($_POST['direccion'] ?? '');
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }

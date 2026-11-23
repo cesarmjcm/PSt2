@@ -31,7 +31,7 @@ class SolicitudController
 
     public function dispatch()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : (''));
 
         switch ($action) {
             case 'crear':
@@ -53,28 +53,28 @@ class SolicitudController
     }
 
     
-    private function esAdmin(): bool
+    private function esAdmin()
     {
-        return ($_SESSION['user_rol'] ?? '') === 'administrador';
+        return ((isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : (''))) === 'administrador';
     }
 
-    private function puedeEditar(): bool
+    private function puedeEditar()
     {
         return $this->esAdmin() || esCoordinador();
     }
 
-    private function obtenerSolicitud(int $id)
+    private function obtenerSolicitud($id)
     {
         return $this->model->obtenerSolicitudPorId(
             $id,
-            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0)
+            $this->esAdmin() ? null : (int) ((guardian_idBibliotecaSesion()))
         ) ?: null;
     }
 
     private function prepararAlcanceBiblioteca(array &$data)
     {
         if (!$this->esAdmin()) {
-            $data['id_biblioteca'] = (int) (guardian_idBibliotecaSesion() ?? 0);
+            $data['id_biblioteca'] = (int) ((guardian_idBibliotecaSesion()));
         }
         if ($data['id_biblioteca'] <= 0) {
             return 'Debe seleccionar una biblioteca válida.';
@@ -97,31 +97,31 @@ class SolicitudController
         return null;
     }
 
-    private function esCampoEnBlanco(string $valor): bool
+    private function esCampoEnBlanco($valor)
     {
         
         $sinEspacios = preg_replace('/[\s\x{00A0}\x{200B}]+/u', '', $valor);
         return $sinEspacios === null || $sinEspacios === '';
     }
 
-    private function collectInput(): array
+    private function collectInput()
     {
         return [
-            'id_institucion' => intval($_POST['id_institucion'] ?? 0),
-            'id_biblioteca' => intval($_POST['id_biblioteca'] ?? 0),
-            'id_empleado' => intval($_POST['id_empleado'] ?? 0),
-            'fecha_solicitud' => trim($_POST['fecha_solicitud'] ?? ''),
-            'hora_solicitud' => trim($_POST['hora_solicitud'] ?? ''),
-            'lugar' => trim($_POST['lugar'] ?? ''),
-            'nombre_actividad' => trim($_POST['nombre_actividad'] ?? ''),
-            'responsable' => trim($_POST['responsable'] ?? ''),
-            'participantes' => intval($_POST['participantes'] ?? 0),
-            'descripcion' => trim($_POST['descripcion'] ?? ''),
-            'estado' => strtolower(trim($_POST['estado'] ?? 'pendiente')),
+            'id_institucion' => intval((isset($_POST['id_institucion']) ? $_POST['id_institucion'] : (0))),
+            'id_biblioteca' => intval((isset($_POST['id_biblioteca']) ? $_POST['id_biblioteca'] : (0))),
+            'id_empleado' => intval((isset($_POST['id_empleado']) ? $_POST['id_empleado'] : (0))),
+            'fecha_solicitud' => trim((isset($_POST['fecha_solicitud']) ? $_POST['fecha_solicitud'] : (''))),
+            'hora_solicitud' => trim((isset($_POST['hora_solicitud']) ? $_POST['hora_solicitud'] : (''))),
+            'lugar' => trim((isset($_POST['lugar']) ? $_POST['lugar'] : (''))),
+            'nombre_actividad' => trim((isset($_POST['nombre_actividad']) ? $_POST['nombre_actividad'] : (''))),
+            'responsable' => trim((isset($_POST['responsable']) ? $_POST['responsable'] : (''))),
+            'participantes' => intval((isset($_POST['participantes']) ? $_POST['participantes'] : (0))),
+            'descripcion' => trim((isset($_POST['descripcion']) ? $_POST['descripcion'] : (''))),
+            'estado' => strtolower(trim((isset($_POST['estado']) ? $_POST['estado'] : ('pendiente')))),
         ];
     }
 
-    private function validarSolicitud(array $data): array
+    private function validarSolicitud(array $data)
     {
         $errors = [];
 
@@ -270,7 +270,7 @@ class SolicitudController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
@@ -294,8 +294,9 @@ class SolicitudController
             return;
         }
 
-        $estadoActual = strtolower(trim((string) ($actual['estado'] ?? 'pendiente')));
-        $permitidos = self::TRANSICIONES_ESTADO[$estadoActual] ?? [$estadoActual];
+        $estadoActual = strtolower(trim((string) ((isset($actual['estado']) ? $actual['estado'] : ('pendiente')))));
+        $transicionesEstado = self::TRANSICIONES_ESTADO;
+        $permitidos = isset($transicionesEstado[$estadoActual]) ? $transicionesEstado[$estadoActual] : [$estadoActual];
         if (!in_array($data['estado'], $permitidos, true)) {
             $this->error("No se puede cambiar una solicitud de {$estadoActual} a {$data['estado']}.");
             return;
@@ -347,7 +348,7 @@ class SolicitudController
             return;
         }
 
-        $id = intval($_POST['id'] ?? 0);
+        $id = intval((isset($_POST['id']) ? $_POST['id'] : (0)));
         if ($id <= 0) {
             $this->error('ID inválido.');
             return;
@@ -374,18 +375,18 @@ class SolicitudController
     private function listar()
     {
         $data = $this->model->mostrarSolicitudes(
-            $this->esAdmin() ? null : (int) (guardian_idBibliotecaSesion() ?? 0),
-            ($_GET['solo_aprobadas'] ?? '') === '1'
+            $this->esAdmin() ? null : (int) ((guardian_idBibliotecaSesion())),
+            ((isset($_GET['solo_aprobadas']) ? $_GET['solo_aprobadas'] : (''))) === '1'
         );
         $this->respond(['success' => true, 'data' => $data]);
     }
 
-    private function success(string $message, array $extra = [])
+    private function success($message, array $extra = [])
     {
         $this->respond(array_merge(['success' => true, 'message' => $message], $extra));
     }
 
-    private function error(string $message)
+    private function error($message)
     {
         $this->respond(['success' => false, 'message' => $message]);
     }

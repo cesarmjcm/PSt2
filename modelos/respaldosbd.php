@@ -40,7 +40,7 @@ class RespaldoBD
         }
 
         usort($archivos, function ($a, $b) {
-            return $b['fecha'] <=> $a['fecha'];
+            return strcmp($b['fecha'], $a['fecha']);
         });
 
         return $archivos;
@@ -81,6 +81,8 @@ class RespaldoBD
 
     public function importar($nombreArchivo)
     {
+        set_time_limit(0);
+
         if (!is_string($nombreArchivo) || !preg_match('/^[A-Za-z0-9_\-\.]+\.sql$/', $nombreArchivo)) {
             throw new Exception('Nombre de archivo no válido');
         }
@@ -110,7 +112,7 @@ class RespaldoBD
         }
     }
 
-    private function separarSentenciasSql(string $contenido): array
+    private function separarSentenciasSql($contenido)
     {
         $sentencias = [];
         $sentencia = '';

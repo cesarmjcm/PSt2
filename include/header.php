@@ -4,10 +4,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$perfilUsuario = $_SESSION['user_profile'] ?? null;
+$perfilUsuario = (isset($_SESSION['user_profile']) ? $_SESSION['user_profile'] : (null));
 if (
     !is_array($perfilUsuario)
-    || (int) ($perfilUsuario['user_id'] ?? 0) !== (int) ($_SESSION['user_id'] ?? 0)
+    || (int) ((isset($perfilUsuario['user_id']) ? $perfilUsuario['user_id'] : (0))) !== (int) ((isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (0)))
 ) {
     $perfilUsuario = null;
 }
@@ -20,18 +20,20 @@ if (!is_array($perfilUsuario) && !empty($_SESSION['user_id'])) {
 }
 $perfilUsuario = is_array($perfilUsuario) ? $perfilUsuario : [];
 
-$nombreUsuario = (string) ($_SESSION['user'] ?? 'Usuario');
-$nombreEmpleado = trim((string) ($perfilUsuario['empleado'] ?? ''));
-$nombreBiblioteca = trim((string) ($perfilUsuario['biblioteca'] ?? ''));
-$rolUsuario = [
+$nombreUsuario = (string) ((isset($_SESSION['user']) ? $_SESSION['user'] : ('Usuario')));
+$nombreEmpleado = trim((string) ((isset($perfilUsuario['empleado']) ? $perfilUsuario['empleado'] : (''))));
+$nombreBiblioteca = trim((string) ((isset($perfilUsuario['biblioteca']) ? $perfilUsuario['biblioteca'] : (''))));
+$etiquetasRoles = [
     'administrador' => 'Administrador',
     'coordinador' => 'Coordinador',
     'usuario' => 'Usuario',
-][$_SESSION['user_rol'] ?? 'usuario'] ?? 'Usuario';
-$escapar = static function (string $valor): string {
+];
+$rol = isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : 'usuario';
+$rolUsuario = isset($etiquetasRoles[$rol]) ? $etiquetasRoles[$rol] : 'Usuario';
+$escapar = static function ($valor) {
     return htmlspecialchars($valor, ENT_QUOTES, 'UTF-8');
 };
-$current = basename($_SERVER['PHP_SELF'] ?? '');
+$current = basename((isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : ('')));
 $inicioActive = in_array($current, ['main2.php', 'main.html'], true);
 $planActive = $current === 'index.php';
 $bitacoraActive = $current === 'bitacora.php';

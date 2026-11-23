@@ -23,7 +23,7 @@ public function mostrarBibliotecas($idBiblioteca = null) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-    public function obtenerBibliotecaPorId(int $id) {
+    public function obtenerBibliotecaPorId($id) {
         $sql = "SELECT * FROM biblioteca WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         $stmt->execute([$id]);
@@ -31,7 +31,7 @@ public function mostrarBibliotecas($idBiblioteca = null) {
     }
 
     
-    public function existeNombre(string $nombre, int $id_parroquia, int $idExcluir = null): bool {
+    public function existeNombre($nombre, $id_parroquia, $idExcluir = null) {
         $sql = "SELECT id FROM biblioteca WHERE LOWER(nombre) = LOWER(?) AND id_parroquia = ?";
         $params = [$nombre, $id_parroquia];
         if ($idExcluir !== null) {
@@ -44,19 +44,19 @@ public function mostrarBibliotecas($idBiblioteca = null) {
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function crearBiblioteca(string $nombre, int $id_parroquia, string $correo = '', string $redes_sociales = '', string $direccion = '') {
+    public function crearBiblioteca($nombre, $id_parroquia, $correo = '', $redes_sociales = '', $direccion = '') {
         $sql = "INSERT INTO biblioteca (nombre, id_parroquia, Correo, redes_sociales, Direccion) VALUES (?, ?, ?, ?, ?)";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $id_parroquia, $correo, $redes_sociales, $direccion]);
     }
 
-    public function actualizarBiblioteca(int $id, string $nombre, int $id_parroquia, string $correo = '', string $redes_sociales = '', string $direccion = '') {
+    public function actualizarBiblioteca($id, $nombre, $id_parroquia, $correo = '', $redes_sociales = '', $direccion = '') {
         $sql = "UPDATE biblioteca SET nombre = ?, id_parroquia = ?, Correo = ?, redes_sociales = ?, Direccion = ? WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$nombre, $id_parroquia, $correo, $redes_sociales, $direccion, $id]);
     }
 
-    public function eliminarBiblioteca(int $id) {
+    public function eliminarBiblioteca($id) {
         $sql = "DELETE FROM biblioteca WHERE id = ?";
         $stmt = Conexion::conectar()->prepare($sql);
         return $stmt->execute([$id]);

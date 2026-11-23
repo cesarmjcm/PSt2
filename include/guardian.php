@@ -35,7 +35,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 
 if (!defined('GUARDIAN_LOGIN_PATH')) {
-    $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+    $scriptPath = str_replace('\\', '/', (isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : ('')));
     $projectPath = dirname(dirname($scriptPath));
     define('GUARDIAN_LOGIN_PATH', rtrim($projectPath, '/') . '/src/login.php');
 }
@@ -46,9 +46,9 @@ if (!defined('GUARDIAN_TIEMPO_INACTIVIDAD_MIN')) {
 }
 
 
-function guardian_redirigirALogin(string $motivo = '')
+function guardian_redirigirALogin($motivo = '')
 {
-    $urlActual = $_SERVER['REQUEST_URI'] ?? null;
+    $urlActual = (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : (null));
 
     $idUsuario = !empty($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
     registrar_bitacora(
@@ -56,13 +56,14 @@ function guardian_redirigirALogin(string $motivo = '')
         $idUsuario,
         'Acceso Denegado',
         'Seguridad',
-        'Intento de acceso sin autenticación a: ' . ($urlActual ?? 'recurso desconocido')
+        'Intento de acceso sin autenticación a: ' . ((isset($urlActual) ? $urlActual : ('recurso desconocido')))
     );
 
   
     unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['id_empleado'], $_SESSION['id_biblioteca'], $_SESSION['ultima_actividad'], $_SESSION['creada_en']);
 
-    $esControlador = $urlActual && strpos(parse_url($urlActual, PHP_URL_PATH) ?? '', '/controladores/') !== false;
+    $rutaActual = $urlActual ? parse_url($urlActual, PHP_URL_PATH) : null;
+    $esControlador = $urlActual && strpos($rutaActual !== null ? $rutaActual : '', '/controladores/') !== false;
     if ($urlActual && !$esControlador) {
         $_SESSION['redirect_after_login'] = $urlActual;
     } else {
@@ -85,19 +86,19 @@ if (empty($_SESSION['user_id'])) {
 
 
 
-function esAdministrador(): bool
+function esAdministrador()
 {
-    $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
+    $rol = trim(strtolower((isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : (''))));
     return $rol === 'administrador';
 }
 
-function esCoordinador(): bool
+function esCoordinador()
 {
-    $rol = trim(strtolower($_SESSION['user_rol'] ?? ''));
+    $rol = trim(strtolower((isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : (''))));
     return $rol === 'coordinador';
 }
 
-function puedeEditarMaestro(string $maestro): bool
+function puedeEditarMaestro($maestro)
 {
     if (esAdministrador()) {
         return true;
@@ -114,11 +115,11 @@ function puedeEditarMaestro(string $maestro): bool
         ], true);
     }
 
-    $rol = trim(strtolower($_SESSION['user_rol'] ?? 'usuario'));
+    $rol = trim(strtolower((isset($_SESSION['user_rol']) ? $_SESSION['user_rol'] : ('usuario'))));
     return $rol === 'usuario' && $maestro === 'comuna';
 }
 
-function puedeVisualizarMaestro(string $maestro): bool
+function puedeVisualizarMaestro($maestro)
 {
     if (esAdministrador()) {
         return true;
@@ -141,14 +142,14 @@ function puedeVisualizarMaestro(string $maestro): bool
     ], true);
 }
 
-function guardian_requerirMaestro(string $maestro, string $modo = 'vista')
+function guardian_requerirMaestro($maestro, $modo = 'vista')
 {
     if (puedeEditarMaestro($maestro)) {
         return;
     }
 
     if (!empty($_SESSION['user_id'])) {
-        $recurso = $_SERVER['REQUEST_URI'] ?? ($_SERVER['SCRIPT_NAME'] ?? 'recurso desconocido');
+        $recurso = (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : (((isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : ('recurso desconocido')))));
         registrar_bitacora(
             Conexion::conectar(),
             $_SESSION['user_id'],
@@ -186,7 +187,7 @@ function guardian_idBibliotecaSesion()
         return $idBibliotecaResuelto;
     }
 
-    $idUsuario = (int) ($_SESSION['user_id'] ?? 0);
+    $idUsuario = (int) ((isset($_SESSION['user_id']) ? $_SESSION['user_id'] : (0)));
     if ($idUsuario <= 0) {
         return 0;
     }
@@ -199,7 +200,7 @@ function guardian_idBibliotecaSesion()
     );
     $stmt->execute([$idUsuario]);
     $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
-    $idBiblioteca = (int) ($empleado['id_biblioteca'] ?? 0);
+    $idBiblioteca = (int) ((isset($empleado['id_biblioteca']) ? $empleado['id_biblioteca'] : (0)));
     if ($idBiblioteca > 0) {
         $_SESSION['id_biblioteca'] = $idBiblioteca;
         $_SESSION['id_empleado'] = (int) $empleado['id'];
@@ -214,7 +215,7 @@ function guardian_idBibliotecaSesion()
 }
 
 
-function guardian_requerirAdmin(string $modo = 'vista')
+function guardian_requerirAdmin($modo = 'vista')
 {
     if (esAdministrador()) {
         return;
@@ -222,7 +223,7 @@ function guardian_requerirAdmin(string $modo = 'vista')
 
     if (!empty($_SESSION['user_id'])) {
         $conexBitacora = Conexion::conectar();
-        $recurso = $_SERVER['REQUEST_URI'] ?? ($_SERVER['SCRIPT_NAME'] ?? 'recurso desconocido');
+        $recurso = (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : (((isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : ('recurso desconocido')))));
         registrar_bitacora(
             $conexBitacora,
             $_SESSION['user_id'],

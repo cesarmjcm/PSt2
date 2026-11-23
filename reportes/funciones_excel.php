@@ -54,7 +54,7 @@ function valorColumnaExcel(array $fila, array $columna)
     return $valor;
 }
 
-function protegerValorCsvExcel($valor): string
+function protegerValorCsvExcel($valor)
 {
     $valor = (string) $valor;
     if (preg_match('/^[\t\r\n ]*[=+\-@]/', $valor)) {
@@ -101,7 +101,7 @@ function procesarReporteExcel(array $configuracion)
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');
 
-    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
+    if (((isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : (''))) !== 'GET') {
         header('Allow: GET');
         responderReporteExcel(['success' => false, 'message' => 'Método no permitido.'], 405);
     }
@@ -133,9 +133,9 @@ function procesarReporteExcel(array $configuracion)
         $filas = $filtrarBiblioteca
             ? $modelo->{$configuracion['metodo']}($idBiblioteca)
             : $modelo->{$configuracion['metodo']}();
-        $filas = filtrarFilasPorBusqueda($filas, trim((string) ($_GET['q'] ?? '')));
+        $filas = filtrarFilasPorBusqueda($filas, trim((string) ((isset($_GET['q']) ? $_GET['q'] : ('')))));
         generarReporteExcelCsv($configuracion['columnas'], $filas, $configuracion['nombre']);
-    } catch (Throwable $error) {
+    } catch (Exception $error) {
         error_log('Error al generar el reporte Excel ' . $configuracion['nombre'] . ': ' . $error->getMessage());
         responderReporteExcel([
             'success' => false,
